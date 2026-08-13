@@ -21,12 +21,18 @@ skills are non-functional without it. This repo closes that gap.
 apm install eristoddle/deep-research-agent --target claude
 ```
 
-Deploys to `.claude/agents/`:
+Deploys to:
 
 ```
-web-search-agent.md
-web-search-modules/{academic-papers,chinese-tech,general-web,github-debug,stackoverflow}.md
+.claude/agents/web-search-agent.md
+.claude/skills/web-search-modules/{academic-papers,chinese-tech,general-web,github-debug,stackoverflow}.md
 ```
+
+The modules live under `skills/` rather than `agents/` on purpose. APM flattens
+every `.md` beneath `agents/` into individual top-level agents when installing from
+a git source, which destroys the `web-search-modules/` directory and registers five
+bogus agents. A skill bundle deploys its directory intact, so the modules stay
+together and stay readable at a stable path.
 
 Pair it with the skills:
 
@@ -35,12 +41,16 @@ apm install Weizhena/Deep-Research-skills/skills/research-en/research --target c
 # ...and research-add-items, research-add-fields, research-deep, research-report
 ```
 
-## Change from upstream
+## Changes from upstream
 
-One line. Upstream's agent hardcodes its module directory as
-`~/.claude/agents/web-search-modules/`, which assumes a global install. APM deploys
-project-locally, so the reference now prefers `.claude/agents/web-search-modules/`
-and falls back to the global path. Everything else is verbatim.
+1. Upstream's agent hardcodes its module directory as
+   `~/.claude/agents/web-search-modules/`, which assumes the documented `cp` install
+   into the home directory. APM deploys project-locally, so the reference now prefers
+   `.claude/skills/web-search-modules/` and falls back to the global path.
+2. The modules moved from `agents/` to `skills/web-search-modules/` (see above), with
+   a `SKILL.md` added to describe the bundle.
+
+The module contents and the rest of the agent are verbatim.
 
 ## License
 
