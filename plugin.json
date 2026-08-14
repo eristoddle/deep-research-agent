@@ -1,6 +1,8 @@
 {
   "name": "deep-research-agent",
-  "version": "0.1.0",
-  "description": "web-search-agent plus its strategy modules, packaged so APM can deploy them alongside the Deep-Research skills",
-  "license": "MIT"
+  "version": "0.2.0",
+  "description": "Structured deep-research pipeline for Claude Code: the five /research skills plus the web-search-agent subagent and its strategy modules, packaged for APM with tool allowlists and search budgets",
+  "license": "MIT",
+  "author": "Stephan Miller",
+  "keywords": ["research", "web-search", "apm", "claude-code"]
 }
