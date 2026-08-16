@@ -25,6 +25,7 @@ Work down the families in order and stop at the first whose question is a yes. R
 | Software & debugging | Is something broken, erroring, failing to build, or version-specific? | `github-debug`, `stackoverflow` |
 | Literature | Does the answer live in a paper, preprint, or citation trail? | `academic-papers` |
 | AI ecosystem & market | Is it a fact about a shipped AI product — its scores, its versions, its price, or who competes with it? | `benchmarks`, `model-releases`, `pricing`, `vendor-landscape` |
+| Published-content landscape | Is the question what has already been *written* about this topic, and what those pages cover? | `competitor-content` |
 | General *(default)* | Nothing above fits — opinion, practice, comparison, product, news, or anything unclassified | `general-web` |
 
 Within **software & debugging**: `github-debug` when the artifact is a specific project (an error from a named library, a regression, a known bug); `stackoverflow` when the question is how to use a language or API correctly.

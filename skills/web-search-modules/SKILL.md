@@ -55,6 +55,8 @@ Modules that would earn their place, roughly in priority order:
 
 The AI ecosystem & market family (`benchmarks`, `model-releases`, `pricing`, `vendor-landscape`) landed together and covers most technology-product research. Extend that family rather than adding near-duplicates beside it.
 
+`competitor-content` is the first module whose family question is not about technology at all — it asks what has been *published* on a topic, which is the same question whether the topic is inference providers or garden design. It is the worked example for attaching a non-technical family.
+
 Non-technical families (health, law and policy, finance, history) attach the same way: a new family row in `ROUTING.md` with its own question. Nothing in the tech routing needs to change to make room for them.
 
 `chinese-tech.md` is worth keeping. A large share of open-weight model work and evaluation happens on Chinese platforms, and those results are often published there first and sometimes only there. It is a genuine coverage advantage, not dead weight — the mistake to avoid is letting it pull a project's *framing* toward Chinese models when that was not the question.

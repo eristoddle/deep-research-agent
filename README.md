@@ -2,7 +2,7 @@
 
 A structured, human-in-the-loop deep-research pipeline for Claude Code, packaged as a single APM-installable bundle.
 
-Contains the six `/research*` skills, the `web-search-agent` subagent that does the actual searching, and the nine search-strategy modules it routes between before it searches.
+Contains the six `/research*` skills, the `web-search-agent` subagent that does the actual searching, and the ten search-strategy modules it routes between before it searches.
 
 ## Credit
 
@@ -29,6 +29,7 @@ Deploys to:
 .claude/skills/web-search-modules/ROUTING.md
 .claude/skills/web-search-modules/{academic-papers,chinese-tech,general-web,github-debug,stackoverflow}.md
 .claude/skills/web-search-modules/{benchmarks,model-releases,pricing,vendor-landscape}.md
+.claude/skills/web-search-modules/competitor-content.md
 ```
 
 One dependency, no ordering constraints. Previously the skills and the agent had to be installed as six separate deps, and installing the skills without the agent produced a pipeline that failed at first use.
@@ -97,6 +98,8 @@ Capability upstream never had, added here.
 14. **Locally-created modules survive reinstalls.** Modules can live in `.claude/web-search-modules-local/`, which APM does not own. `ROUTING.md` reads that directory's router first and lets local entries win on a name conflict, so a project can add its own modules — a client's competitive set, a niche source list — without editing any packaged file and without losing them to the next `apm install`.
 
 15. **A bounded fetch fallback for blocked pages.** `WebFetch` returns 403s, bot challenges, and JS-only shells often enough to lose real sources. The agent may now retry **one** such URL through `crwl` (crawl4ai) if it is already installed — stdout only, output bounded with `head -c`, no `--deep-crawl`, no output-to-file, no install attempt, no second helper, no third try. It does not buy an extra fetch slot, since it is the same URL. The prompt also states why this is not a hole in the browser-automation ban: that ban is about driving a visible browser, and this is a one-shot headless fetch that prints text.
+
+16. **A `competitor-content` module, and the first non-technical family.** Research that has to say something competitors do not needs to know what competitors already said. This module samples what is published on a topic — an unrefined search of the reader's actual query, 3-5 top pages read for *outline* rather than prose, PAA and forum questions, query variants — and reports the union of subtopics plus the gap. It states its limits rather than filling them in: `WebSearch` returns a result list, not a SERP, so ranking position, search volume, and keyword difficulty are unavailable and must never be estimated. Where the caller is doing brief-level SEO work rather than per-item pipeline research, it names `ct-seo-research` as the better instrument instead of half-reproducing it. Its family question — *what has already been written about this?* — is the first that is not about technology at all, and is the worked example for attaching non-technical families.
 
 Everything else — the pipeline design, the five original modules, the outline/fields/results/report flow — is upstream's, substantially verbatim.
 
