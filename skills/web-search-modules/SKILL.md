@@ -16,13 +16,24 @@ This directory is a data bundle, not a workflow. It exists so the `web-search-ag
 
 `ROUTING.md` is the single source of truth for which modules exist. The agent's own prompt names no modules — it only knows to read the router — so the module list can grow without touching `agents/web-search-agent.md`.
 
+## Two places modules can live
+
+| Location | Owner | Use for |
+|---|---|---|
+| `skills/web-search-modules/` (this directory) | The package. **APM overwrites it on every install.** | General modules worth shipping to everyone. Edit here only in the `deep-research-agent` repo itself. |
+| `.claude/web-search-modules-local/` | The project. APM never touches it. | Project-specific modules — client work, one-off deep dives, a source list only this project cares about. |
+
+`ROUTING.md` reads the local router first, so a locally-created module needs no change to any packaged file to take effect. That is the point: a module you add to a project survives the next `apm install`, and a package upgrade never clobbers your work.
+
+`/research-add-module` builds either kind — it discovers the sources by searching for them rather than guessing, records how to query each one, registers the module, and verifies it actually beats `general-web` before keeping it.
+
 ## Adding a module
 
 Modules are plain reference files, not code. The agent loads at most one to three per task depending on depth, so each one should cover a coherent domain rather than a grab bag.
 
 1. **Write `<domain>.md`.** Follow the shape of the existing files:
    - A routing header: `**Family:**`, `**Use when:**`, `**Do not use for:**`, `**Siblings:**`. The anti-trigger matters as much as the trigger — it is what lets a mis-route correct itself at read time.
-   - A prioritized **source list**, noting what each source is actually good for.
+   - A prioritized **source list**, noting what each source is actually good for **and how to query it** — a `site:` query, a tested search-URL pattern, a stable index page to fetch directly, or a note that it blocks fetching. A name without an access method makes the agent rediscover the same thing every run.
    - **Query tactics** — the search patterns that work in that domain, not generic advice.
 
    Keep it under ~40 lines. It enters the agent's context whole on every routed task, so length is a real cost.
@@ -37,13 +48,12 @@ A module that describes *where else to look* rather than *what the question is a
 
 ## Wanted
 
-Modules that would earn their place, roughly in priority order. The first four form a coherent new family (AI ecosystem & market) and should land together:
+Modules that would earn their place, roughly in priority order:
 
-- **Benchmarks and leaderboards** — where evaluation results actually live: leaderboard sites, Hugging Face spaces and collections, Papers-with-Code-style trackers, model cards, eval harness repos. The existing modules all assume you are debugging or reading papers; none of them know how to find a live results page.
-- **Model releases and changelogs** — provider blogs, release notes, model card diffs, deprecation notices. Fast-moving and badly served by general search.
-- **Pricing and availability** — API pricing pages, rate limits, regional availability, aggregator comparisons.
-- **Vendor and competitive landscape** — product pages, docs, changelogs, review aggregators, and comparison pages for a named set of companies. The module for "who else is in this category and what do they claim".
 - **AI writing and prompting communities** — where practitioners compare model output: r/LocalLLaMA, r/WritingWithAI, Discord digests, practitioner blogs. Distinct from `general-web.md`, which is aimed at software best practices.
+- **Docs and API reference** — reading a product's own documentation as a primary source, as distinct from `vendor-landscape`'s reading of its marketing.
+
+The AI ecosystem & market family (`benchmarks`, `model-releases`, `pricing`, `vendor-landscape`) landed together and covers most technology-product research. Extend that family rather than adding near-duplicates beside it.
 
 Non-technical families (health, law and policy, finance, history) attach the same way: a new family row in `ROUTING.md` with its own question. Nothing in the tech routing needs to change to make room for them.
 

@@ -75,6 +75,8 @@ The router distinguishes three kinds of entry, and new modules must pick one:
 
 Module slots are set by depth: 1 at `quick`, 2 at `standard`, 3 at `deep`. Every module file carries a `Use when` / `Do not use for` / `Siblings` header so a mis-route corrects itself at read time.
 
+**Modules live in two places.** `skills/web-search-modules/` is package-owned and APM overwrites it on every install — only edit it in this repo. `.claude/web-search-modules-local/` is project-owned and APM never touches it; `ROUTING.md` step 0 reads its router first and local entries win on a name conflict. Never write a project's own module into an installed `.claude/skills/web-search-modules/`; the next install deletes it. `/research-add-module` builds either kind.
+
 **The agent cannot ask the user** — it is a subagent with no `AskUserQuestion`. On ambiguous routing it loads `general-web` plus its best guess and prints `Routed: X + Y (Z was a close second)`. Callers that *can* ask (`/research`, Step 2b) resolve routing up front and pin it to `execution.modules` in `outline.yaml`, which `/research-deep` passes to every item agent as `Modules:`.
 
 **The depth/budget table is duplicated too** — `agents/web-search-agent.md` and `skills/research-deep/SKILL.md`. Changing the numbers means changing both.
@@ -93,9 +95,13 @@ Precedence: explicit numbers in the task prompt > level named in the prompt > `e
 
 **The agent's `tools:` allowlist is load-bearing.** `WebSearch, WebFetch, Read, Write, Bash` plus explicit prohibitions on browser automation, downloads, and self-authored research scripts. Without it the agent inherits every host tool; under Copilot/VS Code that produced ~100 opened editor tabs in one run. Do not widen it casually.
 
+There is exactly one carve-out: a `WebFetch` that fails on a URL may be retried once via `crwl crawl "<url>" -o markdown | head -c 40000`, only if `crwl` is already installed. Every clause of that rule is doing work — already-failed, one retry, same fetch slot, stdout only, bounded output, no `--deep-crawl`, no `-O`, no install, no second helper. Loosen any one and it becomes general permission to script around blocks, which is the behavior the allowlist exists to stop. The prompt also explains why this is not browser automation (headless, one-shot, opens nothing) — keep that reasoning, or the agent refuses its own exception.
+
 **`validate_json.py` derives categories from the `fields.yaml` it is given**, falling back to `CATEGORY_MAPPING` for the original AI-coding-assistants topic. Keep it topic-agnostic — hardcoding categories re-breaks every other research topic.
 
 ## Authoring a search module
+
+Prefer `/research-add-module` over writing one by hand: it searches to discover which sources actually hold a domain's answers, tests how to query each one, and verifies the result beats `general-web` before keeping it. A hand-written source list is a guess, and guessed sources route the agent to plausible sites that turn out to be empty. Modules do not self-update by design — re-run the skill or edit by hand.
 
 Reference files, not code. Under ~40 lines: a one-line trigger description, a prioritized source list noting what each source is good for, and query tactics that actually work in that domain. Length is a real cost — the file enters the agent's context on every routed task, and the agent loads at most two per task, so each module must cover a coherent domain rather than a grab bag.
 

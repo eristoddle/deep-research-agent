@@ -2,7 +2,7 @@
 
 A structured, human-in-the-loop deep-research pipeline for Claude Code, packaged as a single APM-installable bundle.
 
-Contains the five `/research*` skills, the `web-search-agent` subagent that does the actual searching, and the five search-strategy modules the agent reads before it searches.
+Contains the six `/research*` skills, the `web-search-agent` subagent that does the actual searching, and the nine search-strategy modules it routes between before it searches.
 
 ## Credit
 
@@ -23,10 +23,12 @@ Deploys to:
 .claude/skills/research/{SKILL.md,validate_json.py}
 .claude/skills/research-add-items/SKILL.md
 .claude/skills/research-add-fields/SKILL.md
+.claude/skills/research-add-module/SKILL.md
 .claude/skills/research-deep/SKILL.md
 .claude/skills/research-report/SKILL.md
 .claude/skills/web-search-modules/ROUTING.md
 .claude/skills/web-search-modules/{academic-papers,chinese-tech,general-web,github-debug,stackoverflow}.md
+.claude/skills/web-search-modules/{benchmarks,model-releases,pricing,vendor-landscape}.md
 ```
 
 One dependency, no ordering constraints. Previously the skills and the agent had to be installed as six separate deps, and installing the skills without the agent produced a pipeline that failed at first use.
@@ -37,6 +39,7 @@ One dependency, no ordering constraints. Previously the skills and the agent had
 /research <topic>        # interactive: builds outline.yaml + fields.yaml
 /research-add-items      # amend the item list
 /research-add-fields     # amend the field list
+/research-add-module     # build a search module for a domain the existing ones miss
 /research-deep           # one agent per item -> one JSON per item in results/
 /research-report         # roll the JSON files up into report.md
 ```
@@ -85,7 +88,15 @@ Capability upstream never had, added here.
 
 10. **Routing propagates and can be pinned.** The agent has no `AskUserQuestion`, so on ambiguity it routes to its best guess and reports it (`Routed: X + Y (Z was a close second)`) instead of stalling or hedging by loading extra modules. `/research` asks up front and records the choice in `execution.modules` in `outline.yaml`, and `/research-deep` passes it to every item agent as a `Modules:` block — the same propagation the search budget gets.
 
-Everything else — the pipeline design, the module contents, the outline/fields/results/report flow — is upstream's, substantially verbatim.
+11. **Four new search modules: an AI ecosystem & market family.** Upstream's five modules assume you are debugging code or reading papers. None of them knows how to find a live leaderboard, a current model ID, a pricing page, or a competitive set — which is most of what technology-product research actually asks for. Added `benchmarks` (independent evaluators first, configuration and observation date mandatory, self-reported scores labeled as such), `model-releases` (docs and deprecation pages outrank announcement posts; model IDs, not marketing names), `pricing` (never quote a price from anything but the provider's own page, with unit, host, and date), and `vendor-landscape` (build the competitive set from vendors' own comparison pages; separate claim from evidence). They form one family in `ROUTING.md` with a disambiguation table, since they overlap deliberately.
+
+12. **`/research-add-module` — build a search module by discovering its sources.** A module is only as good as its source list, and a guessed source list routes the agent to plausible-sounding sites that turn out to be empty. This skill runs the discovery deliberately: draft the questions the module must answer, search them as plain `general-web` queries, tally which domains actually hold the answers, then work out and **test** how to query each one — a `site:` query, the site's own search URL, a stable index page to fetch directly, or a note that it blocks fetching. It registers the result, then verifies the module beats `general-web` on the original questions and offers to discard it if it does not.
+
+13. **Locally-created modules survive reinstalls.** Modules can live in `.claude/web-search-modules-local/`, which APM does not own. `ROUTING.md` reads that directory's router first and lets local entries win on a name conflict, so a project can add its own modules — a client's competitive set, a niche source list — without editing any packaged file and without losing them to the next `apm install`.
+
+14. **A bounded fetch fallback for blocked pages.** `WebFetch` returns 403s, bot challenges, and JS-only shells often enough to lose real sources. The agent may now retry **one** such URL through `crwl` (crawl4ai) if it is already installed — stdout only, output bounded with `head -c`, no `--deep-crawl`, no output-to-file, no install attempt, no second helper, no third try. It does not buy an extra fetch slot, since it is the same URL. The prompt also states why this is not a hole in the browser-automation ban: that ban is about driving a visible browser, and this is a one-shot headless fetch that prints text.
+
+Everything else — the pipeline design, the five original modules, the outline/fields/results/report flow — is upstream's, substantially verbatim.
 
 ## Notes
 

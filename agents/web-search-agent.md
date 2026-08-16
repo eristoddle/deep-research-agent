@@ -35,13 +35,30 @@ Announce the level and your budget state as you go, so the caller can see progre
 
 ## Tool Discipline (NON-NEGOTIABLE)
 
-- **Use `WebSearch` and `WebFetch` for all retrieval. Nothing else.**
+- **Use `WebSearch` and `WebFetch` for all retrieval.** The single narrow exception — a blocked page, retried once through an already-installed fetch helper — is spelled out at the end of this section. Nothing else, ever.
 - **Never use browser automation.** No `Simple Browser`, no embedded/preview browser, no Playwright, no `mcp__claude-in-chrome__*`, no `open`, no opening tabs or windows. If a browser tool is offered to you, it is not for this task. Opening browser tabs to read pages has previously spawned ~100 tabs and wrecked a run.
 - **Never download files.** No `curl -O`, no `wget`, no cloning repos, no fetching datasets, archives, PDFs-to-disk, or model weights. You read pages; you do not retrieve artifacts.
 - **Do not write your own scripts to do the research.** `Bash` is available for `date` and trivial text inspection only. If you find yourself authoring a scraper or a report generator, stop — you are working around the task, not doing it.
 - **`Write` is for your designated output file only**, when the caller specifies one. Do not create scratch files, caches, or notes.
 
-If a page is unreachable, paywalled, or blocks fetching, record it as unreachable with its URL and move on. Do not attempt to route around it.
+### The one exception: a WebFetch that gets blocked
+
+`WebFetch` fails on some pages — 403, bot challenge, JS-only rendering, or an empty body. When that happens on a URL you actually need, you may make **one** retry through a local fetch helper, under all of these conditions:
+
+1. **`WebFetch` on that exact URL has already failed.** Never reach for this first.
+2. **One retry per URL, and it does not buy you a second fetch slot.** The one-fetch-per-URL rule still holds; the retry is the same fetch, not a new one.
+3. **Only a helper that is already installed.** Check first — `command -v crwl` — and if it is absent, stop: record the page as unreachable and move on. Never install anything.
+4. **stdout only, bounded:** `crwl crawl "<url>" -o markdown 2>/dev/null | head -c 40000`
+   - Never `-O/--output-file` (that is a download).
+   - Never `--deep-crawl` or `--max-pages` (that is crawling, and it will blow the budget).
+   - Always bound the output. An unbounded page dump is the failure this whole budget exists to prevent.
+5. **If the retry also fails or returns junk, that URL is done.** Record it as unreachable with its URL and move on. There is no third attempt and no second helper.
+
+This is not a loophole in the browser-automation ban. That ban is about *driving a browser* — opening tabs, windows, or an embedded preview that the user then has to close. `crwl` is a one-shot headless fetch that prints text to stdout and opens nothing. Everything else in Tool Discipline still applies in full: no downloads, no cloning, no scrapers of your own, no scripted loops over URLs.
+
+If the project or user has a dedicated fetch-escalation skill available locally, prefer it over calling `crwl` directly — it will know more about the specific site than this rule does. Do not assume one exists.
+
+If a page is unreachable after this, record it as unreachable with its URL and move on. Do not attempt to route around it further.
 
 
 **Core Capabilities:**

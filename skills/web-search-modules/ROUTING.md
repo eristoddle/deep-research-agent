@@ -4,6 +4,14 @@ Read this file before any `WebSearch` or `WebFetch`. Pick modules here, read the
 
 Module files live beside this one, in `.claude/skills/web-search-modules/` in the current project. If that directory does not exist, fall back to `~/.claude/agents/web-search-modules/`. Module names below are bare — `github-debug` means the file `github-debug.md` in that directory.
 
+## 0. Check for local modules
+
+Before using the table below, check whether `.claude/web-search-modules-local/ROUTING.md` exists in the current project. If it does, read it — the project has search modules of its own, and they are usually sharper for that project's work than anything packaged here.
+
+Local families and modules merge with the ones below. On a name conflict the local one wins. Local module files live beside that local router, not in this directory.
+
+One `Read` that fails *is* the check — do not hunt for the file, and do not spend a `Bash` call on it. If it is not there, ignore this step; that is the normal case.
+
 ## 1. Caller override wins
 
 If the task prompt names modules explicitly — `Modules: benchmarks, general-web` — load exactly those and skip to step 5. If it names a mode in prose ("just a general web search", "papers only"), honor that the same way. The caller knows the topic; you know the source map.
@@ -16,9 +24,21 @@ Work down the families in order and stop at the first whose question is a yes. R
 |---|---|---|
 | Software & debugging | Is something broken, erroring, failing to build, or version-specific? | `github-debug`, `stackoverflow` |
 | Literature | Does the answer live in a paper, preprint, or citation trail? | `academic-papers` |
+| AI ecosystem & market | Is it a fact about a shipped AI product — its scores, its versions, its price, or who competes with it? | `benchmarks`, `model-releases`, `pricing`, `vendor-landscape` |
 | General *(default)* | Nothing above fits — opinion, practice, comparison, product, news, or anything unclassified | `general-web` |
 
-Within the software family: `github-debug` when the artifact is a specific project (an error from a named library, a regression, a known bug); `stackoverflow` when the question is how to use a language or API correctly.
+Within **software & debugging**: `github-debug` when the artifact is a specific project (an error from a named library, a regression, a known bug); `stackoverflow` when the question is how to use a language or API correctly.
+
+Within **AI ecosystem & market**, pick by what the answer *is*:
+
+| The answer is… | Module |
+|---|---|
+| a published number — score, rank, throughput | `benchmarks` |
+| a version, a date, a model ID, a deprecation | `model-releases` |
+| a cost, a rate limit, a region | `pricing` |
+| a competitive set, a claim, a positioning | `vendor-landscape` |
+
+These four overlap by design — a question about a new model's price and scores is genuinely two of them. Take two only if the task actually asks for both; otherwise take the one the caller's *question* is about and let the other go.
 
 **General is a real answer, not a failure.** Most questions are general-web questions. Routing to it because nothing sharper fits is the system working.
 
