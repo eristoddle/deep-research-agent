@@ -2,7 +2,10 @@
 
 > 从 web-search-agent.md 提取的学术论文搜索专用策略
 
-**触发场景**: 论文查找、学术研究、算法原理
+**Family:** Literature
+**Use when:** The answer lives in a paper, a preprint, or a citation trail — methods, algorithms, formal results, who published what and when.
+**Do not use for:** Practitioner opinion, product comparisons, or "does this actually work in production" (`general-web`).
+**Siblings:** `github-debug` — pair them when you need a paper and its reference implementation.
 
 ## 搜索源 (Academic Sources)
 - **Google Scholar** (scholar.google.com) - comprehensive academic search engine

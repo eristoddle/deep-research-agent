@@ -2,7 +2,10 @@
 
 > 从 web-search-agent.md 提取的中文技术社区专用策略
 
-**触发场景**: 中文技术问题、国内框架、中文社区解决方案
+**Type:** Modifier, not a topic module. Layer it on top of a topic module; it never replaces one, and at most one modifier is loaded per task.
+**Use when:** The subject is open-weight models, Chinese vendors or frameworks, or work likely published on Chinese platforms first — or English results came back thin on a topic where they plausibly should not have.
+**Do not use for:** Framing. This module widens *where you look*; it must not pull the answer's framing toward Chinese vendors when that was not the question.
+**Siblings:** Pairs with any topic module.
 
 ## 搜索源 (Chinese Technical Sites)
 - **CSDN** (csdn.net) - China's largest IT community with extensive technical articles and solutions

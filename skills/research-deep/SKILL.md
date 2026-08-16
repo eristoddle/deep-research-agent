@@ -42,6 +42,7 @@ Find `*/outline.yaml` file in current working directory, read items list, execut
 - `{fields_path}`: absolute path to {topic}/fields.yaml
 - `{output_path}`: absolute path to {output_dir}/{item_name_slug}.json (slugify item_name: replace spaces with _, remove special chars)
 - `{depth}` / `{searches}` / `{fetches}`: resolved from the depth table above.
+- `{modules}`: `execution.modules` from outline.yaml — a comma-separated module list pinned for this project. If absent, use the literal string `auto`.
 - `{validator_path}`: absolute path to `validate_json.py`. Resolve it in this order and use the first that exists — do NOT assume `~/.claude`, which APM never writes to:
   1. `<project_root>/.claude/skills/research/validate_json.py`  (APM project-local install — the normal case)
   2. `~/.claude/skills/research/validate_json.py`  (global install)
@@ -61,6 +62,11 @@ Read {fields_path} to get all field definitions
 Depth level: {depth}. Hard limits for this item: {searches} WebSearch calls, {fetches} WebFetch calls, one fetch per URL.
 Use WebSearch and WebFetch only. No browser automation, no downloads, no cloning, no self-written scripts.
 Stop when the fields are answered. Mark whatever is still open as [uncertain] rather than spending more budget on it.
+
+## Modules
+Modules: {modules}
+Read `web-search-modules/ROUTING.md` before any search. If Modules above is `auto`, route per ROUTING.md yourself;
+otherwise load exactly the modules named. Either way, state the modules you loaded in your output.
 
 ## Output Requirements
 1. Output JSON according to fields defined in fields.yaml
@@ -92,6 +98,11 @@ Read {project_dir}/fields.yaml to get all field definitions
 Depth level: standard. Hard limits for this item: 8 WebSearch calls, 12 WebFetch calls, one fetch per URL.
 Use WebSearch and WebFetch only. No browser automation, no downloads, no cloning, no self-written scripts.
 Stop when the fields are answered. Mark whatever is still open as [uncertain] rather than spending more budget on it.
+
+## Modules
+Modules: auto
+Read `web-search-modules/ROUTING.md` before any search. If Modules above is `auto`, route per ROUTING.md yourself;
+otherwise load exactly the modules named. Either way, state the modules you loaded in your output.
 
 ## Output Requirements
 1. Output JSON according to fields defined in fields.yaml

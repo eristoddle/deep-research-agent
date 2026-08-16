@@ -49,6 +49,10 @@ Based on the following initial framework, supplement latest items and recommende
 3. Continue searching for {topic} related items within {time_range} and supplement
 4. Supplement new fields
 
+## Modules
+Modules: auto
+Read `web-search-modules/ROUTING.md` before any search and route per that file. State the modules you loaded in your output.
+
 ## Output Requirements
 Return structured results directly (do not write files):
 
@@ -91,6 +95,10 @@ Based on the following initial framework, supplement latest items and recommende
 3. Continue searching for AI Coding History related items within since 2024 and supplement
 4. Supplement new fields
 
+## Modules
+Modules: auto
+Read `web-search-modules/ROUTING.md` before any search and route per that file. State the modules you loaded in your output.
+
 ## Output Requirements
 Return structured results directly (do not write files):
 
@@ -107,6 +115,16 @@ Return structured results directly (do not write files):
 - [Source2](url2)
 ```
 
+### Step 2b: Pin Search Modules (optional)
+Read `web-search-modules/ROUTING.md` and propose the module routing for this whole project — the same topic is about to be researched for every item, so routing once here beats every item agent re-deciding it.
+
+Use AskUserQuestion, offering:
+- **Auto** *(default)* — each item agent routes itself per ROUTING.md. Correct when items are heterogeneous.
+- **Your proposed routing** — name the modules and say in one line why, e.g. `benchmarks, general-web — every item is a model with published eval results`.
+- **General web only** — the user just wants a broad sweep.
+
+Only ask when the topic plausibly has a sharper home than `general-web`. Write the answer to `execution.modules` in outline.yaml; omit the key for Auto.
+
 ### Step 3: Ask User for Existing Fields
 Use AskUserQuestion to ask if user has existing field definition file, if so read and merge.
 
@@ -120,6 +138,7 @@ Merge {step1_output}, {step2_output} and user's existing fields, generate two fi
   - batch_size: Number of parallel agents (confirm with AskUserQuestion)
   - items_per_agent: Items per agent (confirm with AskUserQuestion)
   - output_dir: Results output directory (default: ./results)
+  - modules: Search modules pinned for this project, from Step 2b (omit the key entirely to let each agent route itself)
 
 **fields.yaml** (field definitions):
 - Field categories and definitions

@@ -2,7 +2,10 @@
 
 > 从 web-search-agent.md 提取的通用网页搜索策略
 
-**触发场景**: 通用信息、新闻、产品对比、最佳实践
+**Family:** General — this is the routing default.
+**Use when:** Nothing sharper fits, or the question is about practice, opinion, comparison, tradeoffs, products, or news. Also valid as the *second* module alongside almost any specialist: the specialist finds authoritative answers, this one finds what practitioners actually report.
+**Do not use for:** Nothing. There is no wrong time to reach for this one — only times when a specialist would be better *first*.
+**Siblings:** Any.
 
 ## 搜索源
 - **Reddit** (r/programming, r/webdev, r/javascript, and topic-specific subreddits) - real-world experiences

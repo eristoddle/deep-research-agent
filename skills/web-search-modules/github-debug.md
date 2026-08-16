@@ -2,7 +2,10 @@
 
 > 从 web-search-agent.md 提取的 GitHub/Debug 专用策略
 
-**触发场景**: 项目bug、error调试、issue查找、版本特定问题
+**Family:** Software & debugging
+**Use when:** Something is broken in a specific named project — an error message, a regression, a build failure, behavior that changed between versions.
+**Do not use for:** "How do I use X correctly" with nothing broken (`stackoverflow`), or choosing between projects (`general-web`).
+**Siblings:** `stackoverflow` — pair the two when the error is as likely a usage mistake as a bug.
 
 ## 搜索源
 - **GitHub Issues** (both open and closed) - excellent for known bugs and workarounds

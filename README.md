@@ -25,6 +25,7 @@ Deploys to:
 .claude/skills/research-add-fields/SKILL.md
 .claude/skills/research-deep/SKILL.md
 .claude/skills/research-report/SKILL.md
+.claude/skills/web-search-modules/ROUTING.md
 .claude/skills/web-search-modules/{academic-papers,chinese-tech,general-web,github-debug,stackoverflow}.md
 ```
 
@@ -47,13 +48,24 @@ One dependency, no ordering constraints. Previously the skills and the agent had
 ### Packaging
 
 1. **Single installable package.** APM only accepts a source whose root is a package (`SKILL.md`, `apm.yml` + `.apm/`, or `plugin.json`). Upstream ships its agent as a bare `agents/` directory with none of those, so `apm install Weizhena/Deep-Research-skills/agents` fails validation and the agent — which the skills require — cannot be installed as a dependency at all.
+
 2. **Modules live under `skills/`, not `agents/`.** APM flattens every `.md` beneath `agents/` into individual top-level agents when installing from a git source, which destroys the `web-search-modules/` directory and registers five bogus agents. A skill bundle deploys its directory intact.
 
 ### Fixes
 
+Upstream behavior that was broken and now works.
+
 3. **`web-search-agent` declares a `tools:` allowlist.** Upstream's agent has no `tools:` frontmatter, so it inherits every tool the host offers. Under Copilot/VS Code that includes the embedded browser and download tooling — an agent instructed to "systematically explore" ~25 source families reached for browser automation and opened roughly a hundred editor tabs in a single run, and separately wrote its own report-generator script rather than using `/research-report`. It is now restricted to `WebSearch, WebFetch, Read, Write, Bash`, with an explicit prohibition on browser automation, downloads, and self-authored research scripts.
 
-4. **The agent has a search budget, a stop condition, and a depth control.** Upstream instructs it to generate "5-10 query variations", "read beyond the first few results", and cover a merged list of ~25 source families, with no cap on searches, fetches, or link depth, and no definition of done. Runs went over an hour with no way to distinguish working from stuck. There is now a three-level depth setting, defaulting to `standard`:
+4. **`/research-deep` no longer hardcodes `~/.claude`.** Upstream's validation step invokes `python ~/.claude/skills/research/validate_json.py`. APM installs project-locally, so that file never exists and every agent's final validation step fails. The path is now resolved project-local first, global second, with an explicit instruction not to substitute a hand-written validator when neither is found.
+
+5. **`validate_json.py` is no longer domain-locked.** Its `CATEGORY_MAPPING` was hardcoded to the categories of the topic it was first written for (AI coding assistants), so on any other research topic it failed to descend into nested category objects and misreported coverage. It now derives categories from the `fields.yaml` it is given, falling back to the original mapping.
+
+### Additions
+
+Capability upstream never had, added here.
+
+6. **The agent has a search budget, a stop condition, and a depth control.** Upstream instructs it to generate "5-10 query variations", "read beyond the first few results", and cover a merged list of ~25 source families, with no cap on searches, fetches, or link depth, and no definition of done. Runs went over an hour with no way to distinguish working from stuck. There is now a three-level depth setting, defaulting to `standard`:
 
    | Level | Searches | Fetches | Link depth | Modules |
    |---|---|---|---|---|
@@ -65,13 +77,13 @@ One dependency, no ordering constraints. Previously the skills and the agent had
 
    Note this is unrelated to upstream's `detail_level` (`brief` / `moderate` / `detailed`) in `fields.yaml`, which controls how verbose each field's *answer* is, not how hard the agent searches. The two are independent — a `quick` run can still produce `detailed` fields, it just has less evidence behind them.
 
-5. **`/research-deep` no longer hardcodes `~/.claude`.** Upstream's validation step invokes `python ~/.claude/skills/research/validate_json.py`. APM installs project-locally, so that file never exists and every agent's final validation step fails. The path is now resolved project-local first, global second, with an explicit instruction not to substitute a hand-written validator when neither is found.
+7. **Per-item budgets propagate.** The `research-deep` prompt template passes the search budget and the tool prohibitions down to each item agent, so the constraints survive the handoff instead of applying only to the top-level agent.
 
-6. **`validate_json.py` is no longer domain-locked.** Its `CATEGORY_MAPPING` was hardcoded to the categories of the topic it was first written for (AI coding assistants), so on any other research topic it failed to descend into nested category objects and misreported coverage. It now derives categories from the `fields.yaml` it is given, falling back to the original mapping.
+8. **`/research-deep` reports progress.** Batch plans and cumulative per-batch progress are now mandatory, so a long run can be told apart from a hung one. Upstream disabled task output and printed nothing between batches.
 
-7. **`/research-deep` reports progress.** Batch plans and cumulative per-batch progress are now mandatory, so a long run can be told apart from a hung one. Upstream disabled task output and printed nothing between batches.
+9. **Module routing is a router file, not a list in the agent prompt.** Upstream hardcodes five `trigger -> read file` lines into the agent's system prompt, with no default when nothing matches, no anti-triggers, and the same table mirrored in a second file. That works at five modules and stops working as the library grows: overlapping triggers get resolved by silently dropping one, and every module costs system-prompt context on every task whether or not it is relevant. Routing now lives in `skills/web-search-modules/ROUTING.md` — the single source of truth — which the agent reads before any search. It groups modules into **families** with a yes/no discriminating question, makes `general-web` the **explicit default** (and a valid companion to any specialist), demotes `chinese-tech` to a **modifier** layered on top of a topic module rather than competing with one, and ties module slots to the depth level. Adding a module is now one file plus one row; the agent's prompt never changes. Every module carries a `Use when` / `Do not use for` / `Siblings` header so a mis-route corrects itself at read time.
 
-8. **Per-item budgets propagate.** The `research-deep` prompt template passes the search budget and the tool prohibitions down to each item agent, so the constraints survive the handoff instead of applying only to the top-level agent.
+10. **Routing propagates and can be pinned.** The agent has no `AskUserQuestion`, so on ambiguity it routes to its best guess and reports it (`Routed: X + Y (Z was a close second)`) instead of stalling or hedging by loading extra modules. `/research` asks up front and records the choice in `execution.modules` in `outline.yaml`, and `/research-deep` passes it to every item agent as a `Modules:` block — the same propagation the search budget gets.
 
 Everything else — the pipeline design, the module contents, the outline/fields/results/report flow — is upstream's, substantially verbatim.
 

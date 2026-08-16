@@ -1,0 +1,108 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## What this repo is
+
+An APM-installable bundle of prompts and data. There is no application here — every `.md` file is either a skill Claude Code invokes or a reference file an agent reads at runtime. The single piece of executable code is `skills/research/validate_json.py`.
+
+Consequences worth internalizing before editing anything:
+
+- **There is no build and no test suite.** Correctness is judged by whether the installed pipeline behaves, not by anything runnable in this checkout.
+- **Editing a file here is editing a prompt.** Wording, ordering, and emphasis are the implementation. A rewrite that reads better but drops a hard constraint is a regression.
+- The package originates in [Weizhena/Deep-Research-skills](https://github.com/Weizhena/Deep-Research-skills) (Lan Zheng, MIT). Attribution in `README.md` and `LICENSE` stays.
+
+## Verification
+
+```sh
+python3 -m py_compile skills/research/validate_json.py
+
+# Exercise the validator against a real pipeline output (nothing in this repo has fields.yaml/results)
+python3 skills/research/validate_json.py -f <project>/fields.yaml -j <project>/results/<item>.json
+python3 skills/research/validate_json.py -f <project>/fields.yaml -d <project>/results   # whole directory
+```
+
+End-to-end verification means installing into a consumer project and running the pipeline there. Consumers pin a commit SHA:
+
+```yaml
+# consumer apm.yml
+dependencies:
+  apm:
+  - eristoddle/deep-research-agent#<sha>
+```
+
+So a change is not live for a consumer until the pin is bumped and `apm install` re-run. `/Users/eristoddle/Dropbox/Writing/writing-model-research` is the live consumer; its `llm-writing-benchmark-landscape/` is a real completed run (outline, fields, results, report) and the best fixture for testing changes against.
+
+## Architecture
+
+Three layers, coupled by literal names and paths rather than imports:
+
+```
+/research, /research-deep …   skills/*/SKILL.md      user-invoked, orchestrate
+        │ Task(subagent_type: "web-search-agent")
+        ▼
+web-search-agent              agents/web-search-agent.md   does all retrieval
+        │ Read(.claude/skills/web-search-modules/<domain>.md)
+        ▼
+strategy modules              skills/web-search-modules/*.md   data only
+```
+
+**The skills launch the agent by name.** Installing the skills without the agent yields a pipeline that fails at first use — that is the entire reason this is one package rather than six.
+
+**Modules live under `skills/`, never `agents/`.** APM flattens every `.md` beneath `agents/` into separate top-level agents when installing from a git source, which would destroy the `web-search-modules/` directory and register five bogus agents.
+
+### Data contract of a research run
+
+```
+{topic_slug}/
+  outline.yaml    # items[] + execution{batch_size, items_per_agent, output_dir, depth, modules}
+  fields.yaml     # field categories, descriptions, detail_level (brief|moderate|detailed)
+  results/*.json  # one file per item; values marked [uncertain]; trailing uncertain[] array
+  report.md       # produced by a generate_report.py the report skill writes per project
+```
+
+`/research` builds the first two, `/research-deep` fans out one agent per item into `results/`, `/research-report` rolls them up. `detail_level` in `fields.yaml` controls answer verbosity; it is unrelated to the search-depth budget below.
+
+## Things that break quietly
+
+**Routing lives in exactly one file: `skills/web-search-modules/ROUTING.md`.** The agent's prompt names no modules — it only knows to read the router — so adding a module means writing `<domain>.md` and adding one row to `ROUTING.md`. Nothing else. Do not reintroduce a module list into `agents/web-search-agent.md` or `skills/web-search-modules/SKILL.md`; that duplication is what the router replaced.
+
+The router distinguishes three kinds of entry, and new modules must pick one:
+
+- **Topic modules**, grouped into *families* with a yes/no discriminating question. Pick one family, one module.
+- **`general-web` is the explicit default** and doubles as a valid second module alongside any specialist. Routing to it is a correct answer, not a fallback failure.
+- **Modifiers** (`chinese-tech`) are axes — language, region, recency — layered on a topic module. They never replace one and never consume a topic slot.
+
+Module slots are set by depth: 1 at `quick`, 2 at `standard`, 3 at `deep`. Every module file carries a `Use when` / `Do not use for` / `Siblings` header so a mis-route corrects itself at read time.
+
+**The agent cannot ask the user** — it is a subagent with no `AskUserQuestion`. On ambiguous routing it loads `general-web` plus its best guess and prints `Routed: X + Y (Z was a close second)`. Callers that *can* ask (`/research`, Step 2b) resolve routing up front and pin it to `execution.modules` in `outline.yaml`, which `/research-deep` passes to every item agent as `Modules:`.
+
+**The depth/budget table is duplicated too** — `agents/web-search-agent.md` and `skills/research-deep/SKILL.md`. Changing the numbers means changing both.
+
+| Level | Searches | Fetches | Link depth | Modules |
+|---|---|---|---|---|
+| `quick` | 3 | 4 | 1 | 1 |
+| `standard` *(default)* | 8 | 12 | 1 | 2 |
+| `deep` | 20 | 30 | 2 | 3 |
+
+Precedence: explicit numbers in the task prompt > level named in the prompt > `execution.depth` in `outline.yaml` > `standard`.
+
+**Prompt templates are marked `Hard Constraint` in `skills/research/SKILL.md` and `skills/research-deep/SKILL.md`** ("strictly reproduce, only replacing `{xxx}`"). The per-item budget, the tool prohibitions, and the `## Modules` routing block are injected *inside* those templates so the constraints survive the handoff to each item agent. Each template has a one-shot example directly below it — change one and you must change the other, or they teach contradictory formats. Restructuring a template drops them silently — the run still completes, just unbounded.
+
+**Never hardcode `~/.claude`.** APM installs project-locally. Both lookups resolve project-local first, global second: modules at `.claude/skills/web-search-modules/` then `~/.claude/agents/web-search-modules/`; the validator at `<project>/.claude/skills/research/validate_json.py` then `~/.claude/skills/research/validate_json.py`. When neither exists the skill must stop and say so rather than hand-write a substitute validator.
+
+**The agent's `tools:` allowlist is load-bearing.** `WebSearch, WebFetch, Read, Write, Bash` plus explicit prohibitions on browser automation, downloads, and self-authored research scripts. Without it the agent inherits every host tool; under Copilot/VS Code that produced ~100 opened editor tabs in one run. Do not widen it casually.
+
+**`validate_json.py` derives categories from the `fields.yaml` it is given**, falling back to `CATEGORY_MAPPING` for the original AI-coding-assistants topic. Keep it topic-agnostic — hardcoding categories re-breaks every other research topic.
+
+## Authoring a search module
+
+Reference files, not code. Under ~40 lines: a one-line trigger description, a prioritized source list noting what each source is good for, and query tactics that actually work in that domain. Length is a real cost — the file enters the agent's context on every routed task, and the agent loads at most two per task, so each module must cover a coherent domain rather than a grab bag.
+
+Every module needs the routing header (`Family` / `Use when` / `Do not use for` / `Siblings`), a prioritized source list, and query tactics specific to the domain. The five upstream modules retain Chinese section headers (`## 搜索源`, `## 查询策略`); new modules should be written in English. `skills/web-search-modules/SKILL.md` keeps a **Wanted** list of modules judged worth adding — check it before inventing a new domain.
+
+Non-technical families attach the same way as technical ones: one new family row with its own question. Nothing in the existing routing changes to make room for them.
+
+## README conventions
+
+`README.md` documents divergence from upstream under **Changes from upstream**, currently split into *Packaging* and *Fixes*. New capability (search modules, new pipeline features) belongs under an **Additions** heading rather than being filed as a fix — a fix repairs upstream behavior that was broken, an addition is behavior upstream never had. Keep the numbering continuous and the Credit section intact.
