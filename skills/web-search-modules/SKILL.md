@@ -46,17 +46,6 @@ Families should stay few and answerable by a yes/no question about the task. Whe
 
 A module that describes *where else to look* rather than *what the question is about* — a language, a region, a time window — is a **modifier**, and belongs in the modifier table in `ROUTING.md` instead of a family. Modifiers layer on top of a topic module and never replace one. `chinese-tech.md` is the worked example.
 
-## Wanted
+## Roadmap
 
-Modules that would earn their place, roughly in priority order:
-
-- **AI writing and prompting communities** — where practitioners compare model output: r/LocalLLaMA, r/WritingWithAI, Discord digests, practitioner blogs. Distinct from `general-web.md`, which is aimed at software best practices.
-- **Docs and API reference** — reading a product's own documentation as a primary source, as distinct from `vendor-landscape`'s reading of its marketing.
-
-The AI ecosystem & market family (`benchmarks`, `model-releases`, `pricing`, `vendor-landscape`) landed together and covers most technology-product research. Extend that family rather than adding near-duplicates beside it.
-
-`competitor-content` is the first module whose family question is not about technology at all — it asks what has been *published* on a topic, which is the same question whether the topic is inference providers or garden design. It is the worked example for attaching a non-technical family.
-
-Non-technical families (health, law and policy, finance, history) attach the same way: a new family row in `ROUTING.md` with its own question. Nothing in the tech routing needs to change to make room for them.
-
-`chinese-tech.md` is worth keeping. A large share of open-weight model work and evaluation happens on Chinese platforms, and those results are often published there first and sometimes only there. It is a genuine coverage advantage, not dead weight — the mistake to avoid is letting it pull a project's *framing* toward Chinese models when that was not the question.
+Which modules have been added since the fork, which are wanted next, why `chinese-tech` is kept, and what still needs retrofitting all live in `ROADMAP.md` at the root of the `deep-research-agent` repo — deliberately not in this file. A roadmap shipped inside a skill payload goes stale in every install that has it and is read as instruction by whatever loads it. Operational rules live here; intentions live there.

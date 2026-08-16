@@ -103,6 +103,10 @@ Capability upstream never had, added here.
 
 Everything else — the pipeline design, the five original modules, the outline/fields/results/report flow — is upstream's, substantially verbatim.
 
+## Roadmap
+
+[`ROADMAP.md`](ROADMAP.md) tracks which search modules have been added since the fork, which ones are wanted next, and what still needs retrofitting. It lives at the repo root rather than inside the skill payload on purpose: a roadmap shipped inside a skill deploys into every install, goes stale there, and gets read as instruction by whatever loads it.
+
 ## Notes
 
 Field counts matter more than they look. The pipeline researches every field for every item, so a 42-item outline with 96 fields is roughly 4,000 researched values and will not finish. Keep field lists to ~15-20 and prefer `items_per_agent: 1`, so each finished agent yields a complete file rather than an all-or-nothing batch.
