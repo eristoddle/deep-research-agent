@@ -137,6 +137,17 @@ def main():
     print(f"Field definition file: {fields_path}")
     all_fields, required_fields, field_categories, category_mapping = load_fields_yaml(fields_path)
     print(f"Total fields: {len(all_fields)} (required: {len(required_fields)}, optional: {len(all_fields) - len(required_fields)})")
+    if not all_fields:
+        # Zero parsed fields makes every JSON trivially 100%% covered, which reports
+        # PASS for work that was never checked. Fail loudly instead.
+        print(f"[ERROR] No fields parsed from {fields_path}. Expected a top-level 'field_categories:' list, e.g.\n"
+              "  field_categories:\n"
+              "    - category: Basic Info\n"
+              "      fields:\n"
+              "        - name: release_date\n"
+              "          required: true\n"
+              "Refusing to validate against an empty field set.")
+        sys.exit(2)
     json_files = (
         [Path(p) for p in args.json]
         if args.json

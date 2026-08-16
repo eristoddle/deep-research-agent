@@ -99,6 +99,8 @@ There is exactly one carve-out: a `WebFetch` that fails on a URL may be retried 
 
 **`validate_json.py` derives categories from the `fields.yaml` it is given**, falling back to `CATEGORY_MAPPING` for the original AI-coding-assistants topic. Keep it topic-agnostic — hardcoding categories re-breaks every other research topic.
 
+It expects a top-level `field_categories:` list (`- category: X` / `fields: - name: y`). Any other shape parses to zero fields, which used to make every JSON trivially 100% covered and report `[PASS]`; it now exits 2 instead. Do not relax that guard — `/research-deep` gates task completion on this exit code, so a false pass silently accepts unresearched output.
+
 ## Authoring a search module
 
 Prefer `/research-add-module` over writing one by hand: it searches to discover which sources actually hold a domain's answers, tests how to query each one, and verifies the result beats `general-web` before keeping it. A hand-written source list is a guess, and guessed sources route the agent to plausible sites that turn out to be empty. Modules do not self-update by design — re-run the skill or edit by hand.
