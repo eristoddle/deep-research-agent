@@ -12,6 +12,23 @@ Consequences worth internalizing before editing anything:
 - **Editing a file here is editing a prompt.** Wording, ordering, and emphasis are the implementation. A rewrite that reads better but drops a hard constraint is a regression.
 - The package originates in [Weizhena/Deep-Research-skills](https://github.com/Weizhena/Deep-Research-skills) (Lan Zheng, MIT). Attribution in `README.md` and `LICENSE` stays.
 
+## Development workflow — planning vs implementation
+
+Planning and implementation run in two layers by design.
+
+- **Planning (the main thread).** Question/answer and exploration, landing on decisions recorded in `PLAN.md`. Makes design calls, owns judgment about whether a module's routing or wording is right.
+- **Implementation (the `implementer` agent).** Once a decision is concrete enough to build, the planning thread writes the active task into `TASKS.md` and launches the `implementer` agent. It runs in its own context window (keeping planning context clean) and can run in the background while planning continues. On return, the planning thread reviews the diff. **The agent is defined at `.claude/agents/implementer.md`, deliberately not in `agents/`** — APM flattens every `.md` beneath `agents/` into a separate top-level agent on install, so an agent written there would install itself into every consumer project.
+
+`TASKS.md` is the handoff contract. The active task is a **serial queue of numbered pieces** — stack as few or as many as you like, which serves both **pacing** (queue a little, plan ahead while the agent grinds) and **unattended** (queue a lot and walk away). The default is synchronous: one agent works the queue top-to-bottom and reports once at the end; a blocked piece is skipped (not halted on) so the run finishes everything it legitimately can, and the agent **logs run-state into `TASKS.md` on every stop** (per-piece status + a ▶ Run state note) so a killed or forgotten session is recoverable from the file on disk. Standing "how we implement here" knowledge lives in the **agent definition**, not in every task. Only fully-specified, mechanical work is delegable; design decisions, open questions, and judgment calls stay in the planning thread.
+
+**Verification here is not a test suite — there isn't one.** Each task's Tests section lists the concrete checks that stand in for one. Because editing a file in this repo is editing a prompt, a change that reads better but drops a hard constraint is a regression that nothing will catch; that is what the per-task checks and the tight Out-of-scope sections exist to contain.
+
+**External task mirror — `~/Dropbox/Apps/remotely-save/Writing/10 Reference/10.06 Ideas/Software-Website-Business/🔎 Deep Research Agent.md`.** A second copy of this project's task list lives outside the repo, so items can be captured away from the machine and read back here. **Reconcile it before starting a queue and again after finishing one** — otherwise it drifts silently and gets forgotten, which is the failure this line exists to prevent. An item present on one side and missing from the other is **not** a decision to delete it: absence means "not yet mirrored," never "dropped." A mirrored item arrives as a *proposal* — it lands in the parking lot, never straight into the active queue. Nothing in `PLAN.md` or `TASKS.md` exists to serve the mirror; the mirror side owns the pointer and the reconciliation, and these docs stay standalone without it.
+
+`PLAN.md` is the **hot** decision record — keep it lean. Cooled material (old session logs, settled/superseded decisions, deferred ideas) is progressively disclosed into `docs/` with one-line pointers left behind. When `PLAN.md` grows heavy to read each session, invoke the **`living-plan`** skill — it detects what has cooled and relocates it, propose-then-confirm.
+
+Note that `ROADMAP.md` is **not** a task list — it is rationale, deliberately kept at the repo root rather than in the skill payload. Intentions live there; what is actually queued lives in `TASKS.md`.
+
 ## Verification
 
 ```sh
