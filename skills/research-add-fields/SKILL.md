@@ -13,7 +13,7 @@ allowed-tools: Bash, Read, Write, Glob, WebSearch, Task, AskUserQuestion
 ## Workflow
 
 ### Step 1: Auto-locate Fields File
-Find `*/fields.yaml` file in current working directory, auto-read existing fields definitions.
+Locate the run folder per `skills/research/LAYOUT.md`'s discovery rule, then read `fields.yaml` from inside it (no separate glob for `fields.yaml`).
 
 ### Step 2: Get Supplement Source
 Ask user to choose:
@@ -29,4 +29,4 @@ Ask user to choose:
 Append confirmed fields to fields.yaml, save file.
 
 ## Output
-Updated `{topic}/fields.yaml` file (in-place modification, requires user confirmation)
+Updated `{run_dir}/fields.yaml` file (in-place modification, requires user confirmation) — `{run_dir}` is the run folder located in Step 1, never a cwd-relative path

@@ -73,16 +73,20 @@ strategy modules              skills/web-search-modules/*.md   data only
 ### Data contract of a research run
 
 ```
-{topic_slug}/
-  outline.yaml    # items[] + execution{batch_size, items_per_agent, output_dir, depth, modules}
-  fields.yaml     # field categories, descriptions, detail_level (brief|moderate|detailed)
-  results/*.json  # one file per item; values marked [uncertain]; trailing uncertain[] array
-  report.md       # produced by a generate_report.py the report skill writes per project
+{root}/                # default `research/`, asked once, never configured — see LAYOUT.md
+  INDEX.md              # the branch record: Map + one section per run
+  {topic_slug}/          # a run folder — any directory containing outline.yaml
+    outline.yaml    # items[] + execution{batch_size, items_per_agent, output_dir, depth, modules}
+    fields.yaml     # field categories, descriptions, detail_level (brief|moderate|detailed)
+    results/*.json  # one file per item; values marked [uncertain]; trailing uncertain[] array
+    report.md       # produced by a generate_report.py the report skill writes per project
 ```
 
-`/research` builds the first two, `/research-deep` fans out one agent per item into `results/`, `/research-report` rolls them up. `detail_level` in `fields.yaml` controls answer verbosity; it is unrelated to the search-depth budget below.
+`/research` builds the first two (and the root + index stub), `/research-deep` fans out one agent per item into `results/`, `/research-report` rolls them up and fills the index summary. `detail_level` in `fields.yaml` controls answer verbosity; it is unrelated to the search-depth budget below.
 
 ## Things that break quietly
+
+**Layout and discovery live in exactly one file: `skills/research/LAYOUT.md`** — the same architecture as `ROUTING.md` being the single source of truth for module selection. `/research`, `/research-deep`, `/research-report`, `/research-add-items`, and `/research-add-fields` all defer their locate step to it instead of carrying their own copy of the discovery rule. It defines the research root, the `outline.yaml`-glob discovery rule, `INDEX.md`'s format, and which skill writes which part of an index entry. **`execution.output_dir` in `outline.yaml` is relative to the run folder, never the cwd** — state that explicitly wherever `output_dir` is read; it was ambiguous before LAYOUT.md and is the kind of thing that reads fine at the old depth and wrong the moment a run folder nests inside a root.
 
 **Routing lives in exactly one file: `skills/web-search-modules/ROUTING.md`.** The agent's prompt names no modules — it only knows to read the router — so adding a module means writing `<domain>.md` and adding one row to `ROUTING.md`. Nothing else. Do not reintroduce a module list into `agents/web-search-agent.md` or `skills/web-search-modules/SKILL.md`; that duplication is what the router replaced.
 

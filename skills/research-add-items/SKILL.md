@@ -13,7 +13,7 @@ allowed-tools: Bash, Read, Write, Glob, WebSearch, Task, AskUserQuestion
 ## Workflow
 
 ### Step 1: Auto-locate Outline
-Find `*/outline.yaml` file in current working directory, auto-read.
+Locate the run folder per `skills/research/LAYOUT.md`'s discovery rule, auto-read `outline.yaml`.
 
 ### Step 2: Get Supplement Sources in Parallel
 Simultaneously:
@@ -27,4 +27,4 @@ Simultaneously:
 - Save updated outline
 
 ## Output
-Updated `{topic}/outline.yaml` file (in-place modification)
+Updated `{run_dir}/outline.yaml` file (in-place modification) — `{run_dir}` is the run folder located in Step 1, never a cwd-relative path

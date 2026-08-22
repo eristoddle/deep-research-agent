@@ -1,7 +1,7 @@
 ---
 name: research
 user-invocable: true
-allowed-tools: Read, Write, Glob, WebSearch, Task, AskUserQuestion
+allowed-tools: Read, Write, Bash, Glob, WebSearch, Task, AskUserQuestion
 description: Conduct preliminary research on a topic and generate research outline. For academic research, benchmark research, technology selection, etc.
 ---
 
@@ -147,15 +147,23 @@ Merge {step1_output}, {step2_output} and user's existing fields, generate two fi
 - uncertain: Uncertain fields list (reserved field, auto-filled in deep phase)
 
 ### Step 5: Output and Confirm
-- Create directory: `./{topic_slug}/`
-- Save: `outline.yaml` and `fields.yaml`
+Locate the root and run the discovery glob per `skills/research/LAYOUT.md` before creating anything.
+
+- If no root exists **and** discovery finds no run folders at all, this is the first `/research` in this project: use `AskUserQuestion` to ask the root name once, default `research/`. If a root already exists, use it silently — never ask again.
+- If discovery finds run folders sitting at the cwd root (outside any root), offer to migrate them per LAYOUT.md's migration procedure: list exactly what would move, and move only on explicit confirmation, backfilling one `INDEX.md` entry per moved run from its `outline.yaml` and `report.md`. Declining leaves them in place; either way, continue with this run.
+- If `{root}/INDEX.md` already has run entries, ask whether this run descends from one of the open leads (a Map leaf with no `##` section yet). If so, record `Spawned from:` in the new entry and tick that lead's checkbox.
+- Create directory: `{root}/{topic_slug}/`
+- Save: `outline.yaml` and `fields.yaml` inside it
+- Append this run's stub entry to `{root}/INDEX.md` (creating the file if this root has no index yet) — purpose, date, status `outline`, `Spawned from:` if applicable, per LAYOUT.md's format
 - Show to user for confirmation
 
 ## Output Path
 ```
-{current_working_directory}/{topic_slug}/
-  ├── outline.yaml    # items list + execution config
-  └── fields.yaml     # field definitions
+{root}/
+  INDEX.md
+  {topic_slug}/
+    ├── outline.yaml    # items list + execution config
+    └── fields.yaml     # field definitions
 ```
 
 ## Follow-up Commands

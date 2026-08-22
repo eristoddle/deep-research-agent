@@ -13,7 +13,7 @@ allowed-tools: Read, Write, Glob, Bash, AskUserQuestion
 ## Workflow
 
 ### Step 1: Locate Results Directory
-Find `*/outline.yaml` in current working directory, read topic and output_dir config.
+Locate the run folder per `skills/research/LAYOUT.md`'s discovery rule, read topic and output_dir config. `{run_dir}` below is the absolute path to that folder — every path in this skill hangs off it, never off the cwd, which is one level up once runs live under a root.
 
 ### Step 2: Scan Optional Summary Fields
 Read all JSON results, extract fields suitable for TOC display (numeric, short metrics), e.g.:
@@ -29,14 +29,14 @@ Use AskUserQuestion to ask user:
 - Provide dynamic options list (based on actual fields in JSON)
 
 ### Step 3: Generate Python Conversion Script
-Generate `generate_report.py` in `{topic}/` directory, script requirements:
+Generate `generate_report.py` in `{run_dir}/`, script requirements:
 - Read all JSON from output_dir
 - Read fields.yaml to get field structure
 - Cover all field values from each JSON
 - Skip fields with values containing [uncertain]
 - Skip fields listed in uncertain array
 - Generate markdown report format: Table of contents (with anchor links + user-selected summary fields) + Detailed content (by field category)
-- Save to `{topic}/report.md`
+- Save to `{run_dir}/report.md`
 
 **TOC Format Requirements**:
 - Must include every item
@@ -86,8 +86,15 @@ Skip conditions:
 - Field value is None or empty string
 
 ### Step 4: Execute Script
-Run `python {topic}/generate_report.py`
+Run `python {run_dir}/generate_report.py`
+
+### Step 5: Update the Index
+Fill this run's entry in `{root}/INDEX.md` per `skills/research/LAYOUT.md`'s format and summary cap:
+- Copy the report's intro paragraphs and headline table into the entry's summary body, capped at ≤3 paragraphs and ≤12 table rows, then `… N more rows in report.md` — `report.md` itself is untouched and stays the full record
+- Flip this run's status from `researched` to `complete`
+- Use `AskUserQuestion` to ask which directions this run surfaced; write the answers as the entry's `**Leads**` checklist, and add each as a new `lead` leaf under this run in the `## Map`
 
 ## Output
-- `{topic}/generate_report.py` - Conversion script
-- `{topic}/report.md` - Summary report
+- `{run_dir}/generate_report.py` - Conversion script
+- `{run_dir}/report.md` - Summary report
+- `{root}/INDEX.md` - this run's entry filled in (summary, status, Leads); a legacy run with no root has no index, so this step is skipped silently

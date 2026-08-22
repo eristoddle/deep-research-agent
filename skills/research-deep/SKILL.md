@@ -2,15 +2,15 @@
 name: research-deep
 user-invocable: true
 description: Read research outline, launch independent agent for each item for deep research. Disable task output.
-allowed-tools: Bash, Read, Write, Glob, WebSearch, Task
+allowed-tools: Bash, Read, Write, Glob, WebSearch, Task, AskUserQuestion
 ---
 
 # Research Deep - Deep Research
 
 ## Trigger
-`/research-deep [quick|standard|deep]`
+`/research-deep [quick|standard|deep] [run-folder-name]`
 
-The optional argument sets the per-item search depth. It overrides `execution.depth` in outline.yaml, which in turn overrides the `standard` default. Resolve `{depth}`, `{searches}`, and `{fetches}` from this table before launching anything:
+Both arguments are optional and may appear in either order. `[quick|standard|deep]` sets the per-item search depth; it overrides `execution.depth` in outline.yaml, which in turn overrides the `standard` default. `[run-folder-name]` names the run folder directly, skipping disambiguation in Step 1. Resolve `{depth}`, `{searches}`, and `{fetches}` from this table before launching anything:
 
 | Level | Searches | Fetches | Link depth |
 |---|---|---|---|
@@ -22,14 +22,15 @@ State the resolved level before the first batch: `Depth: deep (20 searches / 30 
 
 ## Workflow
 
-### Step 1: Auto-locate Outline
-Find `*/outline.yaml` file in current working directory, read items list, execution config (including items_per_agent).
+### Step 1: Locate Outline
+Locate the run folder per `skills/research/LAYOUT.md`'s discovery rule. If the trigger named a run folder, use it directly and skip disambiguation; otherwise disambiguate per LAYOUT.md. Read items list, execution config (including items_per_agent).
 
 ### Step 2: Resume Check
 - Check completed JSON files in output_dir
 - Skip completed items
 
 ### Step 3: Batch Execution
+- Before the first batch, flip this run's status in `{root}/INDEX.md` from `outline` to `researching`, per LAYOUT.md. A legacy run with no root has no index — skip this silently.
 - Batch by batch_size (need user approval before next batch)
 - Each agent handles items_per_agent items
 - Launch web-search-agent (background parallel, disable task output)
@@ -38,8 +39,9 @@ Find `*/outline.yaml` file in current working directory, read items list, execut
 - `{topic}`: topic field from outline.yaml
 - `{item_name}`: item's name field
 - `{item_related_info}`: item's complete yaml content (name + category + description etc.)
-- `{output_dir}`: execution.output_dir from outline.yaml (default: ./results)
-- `{fields_path}`: absolute path to {topic}/fields.yaml
+- `{output_dir}`: execution.output_dir from outline.yaml (default: ./results), relative to the run folder, never the cwd — per LAYOUT.md
+- `{project_dir}`: absolute path to the run folder located in Step 1 (`{run_dir}` in LAYOUT.md). Everything below hangs off it, never off the cwd.
+- `{fields_path}`: absolute path to {project_dir}/fields.yaml
 - `{output_path}`: absolute path to {output_dir}/{item_name_slug}.json (slugify item_name: replace spaces with _, remove special chars)
 - `{depth}` / `{searches}` / `{fetches}`: resolved from the depth table above.
 - `{modules}`: `execution.modules` from outline.yaml — a comma-separated module list pinned for this project. If absent, use the literal string `auto`.
@@ -115,7 +117,7 @@ otherwise load exactly the modules named. Either way, state the modules you load
 
 ## Validation
 After completing JSON output, run validation script to ensure complete field coverage:
-python3 {project_dir}/../.claude/skills/research/validate_json.py -f {project_dir}/fields.yaml -j {project_dir}/results/GitHub_Copilot.json
+python3 {validator_path} -f {project_dir}/fields.yaml -j {project_dir}/results/GitHub_Copilot.json
 Task is complete only after validation passes.
 ```
 
@@ -128,10 +130,12 @@ Task is complete only after validation passes.
 **Progress is mandatory, not optional.** A run with no visible progress cannot be judged as stuck versus working, and will get killed. Never let a batch run silently.
 
 ### Step 5: Summary Report
-After all complete, output:
-- Completion count
-- Failed/uncertain marked items
-- Output directory
+After all complete:
+- Flip this run's status in `{root}/INDEX.md` from `researching` to `researched`, per LAYOUT.md — the items are done, the report is not. `/research-report` owns the later flip to `complete`. A legacy run with no root has no index — skip this silently.
+- Output:
+  - Completion count
+  - Failed/uncertain marked items
+  - Output directory
 
 ## Agent Config
 - Background execution: Yes
