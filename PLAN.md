@@ -2,7 +2,7 @@
 
 > Authoritative record of **decisions made** for deep-research-agent. Living document, built up across sessions. Read at the start of any planning/design conversation. **Append** decisions as they're made; don't rewrite.
 >
-> This is the **hot layer** — keep it lean. Cooled material lives in `docs/` (see below). When it grows heavy (default >15000 words), invoke the **`living-plan`** skill.
+> This is the **hot layer** — keep it lean. Cooled material lives in `docs/` (see below). When it grows heavy (default >15000 words), invoke the **`living-plan`** skill. That same skill's `grill` workflow is what **fills** the sections below — decisions don't have to trickle in one at a time from whatever a session happened to touch.
 
 ## Overview
 
@@ -42,7 +42,7 @@ This also means the module count is not a health metric. Ten well-accessed modul
 
 ## Open questions
 
-> Each is a heading (the question) + a link to its discussion in `docs/questions/`.
+> Each is a heading (the question) + a link to its discussion in `docs/questions/`. Thread files are append-only — a later grill adds a dated section rather than rewriting.
 
 ### Q1 — Should modules accumulate sources over time, and which kind can?
 
