@@ -70,6 +70,10 @@ Per file: before/after line count, the access method added to each source bullet
 
 ## ✅ Done (collapsed — full detail in the planning doc's session log)
 
+### `[runtime-portability]` Claude/Copilot portability retrofit — 2026-08-25
+
+All 5 pieces landed, none blocked. Added the proven `Web Research Writer` Copilot wrapper while preserving the canonical `web-search-agent`; orchestration now selects each by exact registered name and host, payload lookups prefer `.agents` with `.claude` fallbacks, and install/positioning docs cover explicit single-host targets and mixed-install recovery. Validator compilation, exact frontmatter allowlists, paired fallback search, host-rule search, and `git diff --check` all passed. `PLAN.md` **D6**.
+
 ### `[results-root]` Research results live under one root, with `INDEX.md` as the branch record — 2026-08-22
 
 All 6 pieces landed, none blocked. New `skills/research/LAYOUT.md` (60 lines) is the single source of truth for layout, discovery, `output_dir`'s base, the `INDEX.md` format, and the migration procedure; all five locate steps defer to it. `PLAN.md` **D3/D4/D5**.

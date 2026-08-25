@@ -1,8 +1,8 @@
 # deep-research-agent
 
-A structured, human-in-the-loop deep-research pipeline for Claude Code, packaged as a single APM-installable bundle.
+A structured, human-in-the-loop deep-research pipeline for Claude Code and GitHub Copilot, packaged as a single APM-installable bundle.
 
-Contains the six `/research*` skills, the `web-search-agent` subagent that does the actual searching, and the ten search-strategy modules it routes between before it searches.
+Contains six `/research*` skills, runtime-native research-agent entry points, and ten search-strategy modules used before searching.
 
 ## Credit
 
@@ -12,27 +12,50 @@ If you want the original, unmodified pipeline, install it from upstream directly
 
 ## Install
 
+Choose one host explicitly. For GitHub Copilot:
+
+```sh
+apm install eristoddle/deep-research-agent --target copilot
+```
+
+For Claude Code:
+
 ```sh
 apm install eristoddle/deep-research-agent --target claude
 ```
 
-Deploys to:
+The equivalent persistent pin belongs at the top level of `apm.yml`; use exactly one target:
+
+```yaml
+targets: [copilot] # or [claude]
+dependencies:
+   apm:
+      - eristoddle/deep-research-agent#<commit-sha>
+```
+
+Do not omit the target when both hosts are detectable, and do not pin both for the same checkout. Auto-detecting both deploys the canonical `web-search-agent` into both agent registries, where Copilot sees duplicate agent names.
+
+Current APM deploys agents under the selected host. Copilot uses the shared skills directory:
 
 ```
-.claude/agents/web-search-agent.md
-.claude/skills/research/{SKILL.md,validate_json.py}
-.claude/skills/research-add-items/SKILL.md
-.claude/skills/research-add-fields/SKILL.md
-.claude/skills/research-add-module/SKILL.md
-.claude/skills/research-deep/SKILL.md
-.claude/skills/research-report/SKILL.md
-.claude/skills/web-search-modules/ROUTING.md
-.claude/skills/web-search-modules/{academic-papers,chinese-tech,general-web,github-debug,stackoverflow}.md
-.claude/skills/web-search-modules/{benchmarks,model-releases,pricing,vendor-landscape}.md
-.claude/skills/web-search-modules/competitor-content.md
+.github/agents/{web-search-agent,web-research-writer}.agent.md  # Copilot
+.agents/skills/research/{SKILL.md,LAYOUT.md,validate_json.py}
+.agents/skills/research-{add-items,add-fields,add-module,deep,report}/SKILL.md
+.agents/skills/web-search-modules/{SKILL.md,ROUTING.md,<module>.md}
+```
+
+Claude keeps its native directories:
+
+```
+.claude/agents/{web-search-agent,web-research-writer}.md
+.claude/skills/research/{SKILL.md,LAYOUT.md,validate_json.py}
+.claude/skills/research-{add-items,add-fields,add-module,deep,report}/SKILL.md
+.claude/skills/web-search-modules/{SKILL.md,ROUTING.md,<module>.md}
 ```
 
 One dependency, no ordering constraints. Previously the skills and the agent had to be installed as six separate deps, and installing the skills without the agent produced a pipeline that failed at first use.
+
+For an existing mixed install, choose the host you actually use, remove only this package's two generated agent files from the inactive host directory, then rerun the matching explicit install command above with `--force`. Keep the selected host's skills directory: `.agents/skills/` for Copilot or `.claude/skills/` for Claude.
 
 ## Usage
 
@@ -45,7 +68,7 @@ One dependency, no ordering constraints. Previously the skills and the agent had
 /research-report         # roll the JSON files up into report.md
 ```
 
-`/research` and `/research-deep` launch `web-search-agent` by name via Task, so the skills do not work without the agent — which is the reason this bundle exists.
+`/research` and `/research-deep` select the host-native entry point: Copilot launches `Web Research Writer`; Claude launches `web-search-agent`. The skills do not work without the packaged agents, which is the reason this bundle exists.
 
 ## Changes from upstream
 
@@ -61,7 +84,7 @@ Upstream behavior that was broken and now works.
 
 3. **`web-search-agent` declares a `tools:` allowlist.** Upstream's agent has no `tools:` frontmatter, so it inherits every tool the host offers. Under Copilot/VS Code that includes the embedded browser and download tooling — an agent instructed to "systematically explore" ~25 source families reached for browser automation and opened roughly a hundred editor tabs in a single run, and separately wrote its own report-generator script rather than using `/research-report`. It is now restricted to `WebSearch, WebFetch, Read, Write, Bash`, with an explicit prohibition on browser automation, downloads, and self-authored research scripts.
 
-4. **`/research-deep` no longer hardcodes `~/.claude`.** Upstream's validation step invokes `python ~/.claude/skills/research/validate_json.py`. APM installs project-locally, so that file never exists and every agent's final validation step fails. The path is now resolved project-local first, global second, with an explicit instruction not to substitute a hand-written validator when neither is found.
+4. **`/research-deep` no longer hardcodes `~/.claude`.** Upstream's validation step invokes `python ~/.claude/skills/research/validate_json.py`. APM installs project-locally, so that file never exists and every agent's final validation step fails. The path is now resolved across project and user installs for both `.agents/skills/` and `.claude/skills/`, with an explicit instruction not to substitute a hand-written validator when none is found.
 
 5. **`validate_json.py` is no longer domain-locked.** Its `CATEGORY_MAPPING` was hardcoded to the categories of the topic it was first written for (AI coding assistants), so on any other research topic it failed to descend into nested category objects and misreported coverage. It now derives categories from the `fields.yaml` it is given, falling back to the original mapping.
 
@@ -95,13 +118,15 @@ Capability upstream never had, added here.
 
 13. **`/research-add-module` — build a search module by discovering its sources.** A module is only as good as its source list, and a guessed source list routes the agent to plausible-sounding sites that turn out to be empty. This skill runs the discovery deliberately: draft the questions the module must answer, search them as plain `general-web` queries, tally which domains actually hold the answers, then work out and **test** how to query each one — a `site:` query, the site's own search URL, a stable index page to fetch directly, or a note that it blocks fetching. It registers the result, then verifies the module beats `general-web` on the original questions and offers to discard it if it does not.
 
-14. **Locally-created modules survive reinstalls.** Modules can live in `.claude/web-search-modules-local/`, which APM does not own. `ROUTING.md` reads that directory's router first and lets local entries win on a name conflict, so a project can add its own modules — a client's competitive set, a niche source list — without editing any packaged file and without losing them to the next `apm install`.
+14. **Locally-created modules survive reinstalls.** Modules can live in `.agents/web-search-modules-local/`, which APM does not own. `ROUTING.md` prefers that directory, retains `.claude/web-search-modules-local/` as a legacy fallback, and lets local entries win on a name conflict, so a project can add its own modules — a client's competitive set, a niche source list — without editing any packaged file and without losing them to the next `apm install`.
 
 15. **A bounded fetch fallback for blocked pages.** `WebFetch` returns 403s, bot challenges, and JS-only shells often enough to lose real sources. The agent may now retry **one** such URL through `crwl` (crawl4ai) if it is already installed — stdout only, output bounded with `head -c`, no `--deep-crawl`, no output-to-file, no install attempt, no second helper, no third try. It does not buy an extra fetch slot, since it is the same URL. The prompt also states why this is not a hole in the browser-automation ban: that ban is about driving a visible browser, and this is a one-shot headless fetch that prints text.
 
 16. **A `competitor-content` module, and the first non-technical family.** Research that has to say something competitors do not needs to know what competitors already said. This module samples what is published on a topic — an unrefined search of the reader's actual query, 3-5 top pages read for *outline* rather than prose, PAA and forum questions, query variants — and reports the union of subtopics plus the gap. It states its limits rather than filling them in: `WebSearch` returns a result list, not a SERP, so ranking position, search volume, and keyword difficulty are unavailable and must never be estimated. Where the caller is doing brief-level SEO work rather than per-item pipeline research, it names `ct-seo-research` as the better instrument instead of half-reproducing it. Its family question — *what has already been written about this?* — is the first that is not about technology at all, and is the worked example for attaching non-technical families.
 
 17. **Research results live under one root, with `INDEX.md` as the branch record.** Run folders used to land at the project root, indistinguishable from hand-written directories in a repo where the user is also writing code. Every run now lives inside a single root (default `research/`, asked once and never written to a config file — discovery is structural: any directory containing `outline.yaml` is a run folder, found by globbing one and two levels deep). Research also doesn't run once — one run's findings point at the next — so `research/INDEX.md` records that tree: a `## Map` of nested bullets showing which run spawned which, then one section per run with its purpose, status, a capped copy of its report's summary, and a `**Leads**` checklist of the directions it opened. Layout and discovery live in exactly one file, `skills/research/LAYOUT.md`, read by every skill's locate step — the `ROUTING.md` pattern applied to results instead of modules. Existing root-level runs keep working with no changes required; `/research` finds them and **offers**, never forces, a migration into the new layout.
+
+18. **Claude and Copilot use runtime-native agent entry points.** Claude keeps the established `web-search-agent` with its exact `WebSearch, WebFetch, Read, Write, Bash` allowlist. Copilot launches the uniquely named `Web Research Writer` wrapper with `read, search, web, edit, execute`, then loads the canonical research prompt instead of duplicating it. Orchestration uses that exact registered name, packaged resources resolve through `.agents/skills/` before legacy `.claude/skills/`, and explicit one-host installs prevent duplicate canonical-agent registration.
 
 Everything else — the pipeline design, the five original modules, the outline/fields/results/report flow — is upstream's, substantially verbatim.
 

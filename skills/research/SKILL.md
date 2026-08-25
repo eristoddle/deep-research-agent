@@ -32,7 +32,9 @@ Use AskUserQuestion to ask for time range (e.g., last 6 months, since 2024, unli
 
 **Hard Constraint**: The following prompt must be strictly reproduced, only replacing variables in {xxx}, do not modify structure or wording.
 
-Launch 1 web-search-agent (background), **Prompt Template**:
+**Host selection rule:** In GitHub Copilot, launch `Web Research Writer`; in Claude Code, launch `web-search-agent`.
+
+Launch 1 host-selected agent (background), **Prompt Template**:
 ```python
 prompt = f"""## Task
 Research topic: {topic}

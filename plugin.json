@@ -1,8 +1,8 @@
 {
   "name": "deep-research-agent",
   "version": "0.2.0",
-  "description": "Structured deep-research pipeline for Claude Code: the five /research skills plus the web-search-agent subagent and its strategy modules, packaged for APM with tool allowlists and search budgets",
+  "description": "Structured deep-research pipeline for Claude and GitHub Copilot: six /research skills, runtime-native research agents, and strategy modules packaged for APM with tool allowlists and search budgets",
   "license": "MIT",
   "author": "Stephan Miller",
-  "keywords": ["research", "web-search", "apm", "claude-code"]
+  "keywords": ["research", "web-search", "apm", "claude", "copilot"]
 }

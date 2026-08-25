@@ -76,6 +76,15 @@ The summary body is **capped** — ≤3 paragraphs, ≤12 table rows, then a poi
 
 **Why not `CLAUDE.md`:** skills do not read it and APM does not install it. A contract the payload has to honor has to live in the payload.
 
+<!-- D6 — Runtime-specific agent wrappers, runtime-neutral resources -->
+### D6 — Keep one research prompt, add runtime-native agent entry points 🔒 foundational
+
+Decided 2026-08-25 after mining Copilot session `56cc0499-1dd1-4148-9027-059a235aac6b` from `tpo-copilot-desktop-research`. APM 0.16 deployed the same `web-search-agent` definition into both `.claude/agents/` and `.github/agents/`; Copilot registered the duplicate name, then launched the agent with zero tools because APM passes the Claude allowlist (`WebSearch, WebFetch, Read, Write, Bash`) verbatim while Copilot expects capability categories (`read, search, web, edit, execute`). A uniquely named Copilot-native wrapper using those categories completed all three research items.
+
+The existing `web-search-agent` name and prompt remain the Claude-compatible canonical implementation so current consumers do not break. Copilot gets the proven `Web Research Writer` wrapper, which loads and follows that canonical prompt but owns Copilot-native frontmatter. Orchestration skills select the entry point by exact registered name and host. Resource lookup is runtime-neutral: current shared `.agents/skills/` first, legacy `.claude/skills/` retained as fallback. Install docs require an explicit APM target so filesystem auto-detection cannot silently activate both harnesses.
+
+**Why not one universal agent file:** APM's current authoring contract deploys `model` and `tools` verbatim to both Copilot and Claude. Their tool names are not portable, and removing the allowlist would restore the failure that opened roughly 100 browser tabs. Two thin entry points preserve the boundary without duplicating the research method.
+
 ## Open questions
 
 > Each is a heading (the question) + a link to its discussion in `docs/questions/`. Thread files are append-only — a later grill adds a dated section rather than rewriting.
@@ -101,6 +110,10 @@ See [docs/questions/Q2-tested-access-method.md](docs/questions/Q2-tested-access-
 ## Session log
 
 > Most recent sessions inline; older sessions archived → see `docs/sessions/`.
+
+### Session 3 — 2026-08-25
+
+Mined the only non-empty Copilot session in `tpo-copilot-desktop-research` and traced the failed installed pipeline. The package was simultaneously active for Claude and Copilot, producing duplicate `web-search-agent` registrations; the Copilot child received no tools even though the Claude allowlist was present. A user-created `.github/agents/web-research-writer.agent.md` with Copilot-native tool categories succeeded. Decided D6 and queued the portability retrofit ahead of the untouched access-method task.
 
 ### Session 2 — 2026-08-22
 

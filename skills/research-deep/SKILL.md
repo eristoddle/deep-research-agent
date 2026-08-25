@@ -33,7 +33,8 @@ Locate the run folder per `skills/research/LAYOUT.md`'s discovery rule. If the t
 - Before the first batch, flip this run's status in `{root}/INDEX.md` from `outline` to `researching`, per LAYOUT.md. A legacy run with no root has no index — skip this silently.
 - Batch by batch_size (need user approval before next batch)
 - Each agent handles items_per_agent items
-- Launch web-search-agent (background parallel, disable task output)
+- **Host selection rule:** In GitHub Copilot, launch `Web Research Writer`; in Claude Code, launch `web-search-agent`.
+- Launch the host-selected agent (background parallel, disable task output)
 
 **Parameter Retrieval**:
 - `{topic}`: topic field from outline.yaml
@@ -45,10 +46,12 @@ Locate the run folder per `skills/research/LAYOUT.md`'s discovery rule. If the t
 - `{output_path}`: absolute path to {output_dir}/{item_name_slug}.json (slugify item_name: replace spaces with _, remove special chars)
 - `{depth}` / `{searches}` / `{fetches}`: resolved from the depth table above.
 - `{modules}`: `execution.modules` from outline.yaml — a comma-separated module list pinned for this project. If absent, use the literal string `auto`.
-- `{validator_path}`: absolute path to `validate_json.py`. Resolve it in this order and use the first that exists — do NOT assume `~/.claude`, which APM never writes to:
-  1. `<project_root>/.claude/skills/research/validate_json.py`  (APM project-local install — the normal case)
-  2. `~/.claude/skills/research/validate_json.py`  (global install)
-  If neither exists, tell the user the skill is not fully installed and stop; do not write a replacement validator.
+- `{validator_path}`: absolute path to `validate_json.py`. Resolve it in this order and use the first that exists:
+  1. `<project_root>/.agents/skills/research/validate_json.py`  (Copilot project-local install)
+  2. `<project_root>/.claude/skills/research/validate_json.py`  (Claude project-local install)
+  3. `~/.agents/skills/research/validate_json.py`  (Copilot user install)
+  4. `~/.claude/skills/research/validate_json.py`  (Claude user install)
+  If none exists, tell the user the skill is not fully installed and stop; do not write a replacement validator.
 
 **Hard Constraint**: The following prompt must be strictly reproduced, only replacing variables in {xxx}, do not modify structure or wording.
 

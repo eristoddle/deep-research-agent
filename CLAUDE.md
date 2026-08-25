@@ -1,10 +1,10 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance when working with this repository.
 
 ## What this repo is
 
-An APM-installable bundle of prompts and data. There is no application here — every `.md` file is either a skill Claude Code invokes or a reference file an agent reads at runtime. The single piece of executable code is `skills/research/validate_json.py`.
+An APM-installable bundle of prompts and data for Claude Code and GitHub Copilot. There is no application here — every `.md` file is either a skill or agent prompt a supported host invokes, or a reference file an agent reads at runtime. The single piece of executable code is `skills/research/validate_json.py`.
 
 Consequences worth internalizing before editing anything:
 
@@ -58,15 +58,16 @@ Three layers, coupled by literal names and paths rather than imports:
 
 ```
 /research, /research-deep …   skills/*/SKILL.md      user-invoked, orchestrate
-        │ Task(subagent_type: "web-search-agent")
+  │ host dispatch
         ▼
-web-search-agent              agents/web-search-agent.md   does all retrieval
-        │ Read(.claude/skills/web-search-modules/<domain>.md)
+web-search-agent (Claude)     agents/web-search-agent.md       canonical prompt
+Web Research Writer (Copilot) agents/web-research-writer.md    native wrapper
+  │ Read(<host skills>/web-search-modules/<domain>.md)
         ▼
 strategy modules              skills/web-search-modules/*.md   data only
 ```
 
-**The skills launch the agent by name.** Installing the skills without the agent yields a pipeline that fails at first use — that is the entire reason this is one package rather than six.
+**The skills launch a host-native agent by exact registered name.** Claude uses `web-search-agent`; Copilot uses `Web Research Writer`, whose short body loads the installed canonical prompt. Installing the skills without both packaged agents yields a pipeline that fails at first use — that is the entire reason this is one package rather than six. Do not rename `web-search-agent`; existing Claude consumers call it directly.
 
 **Modules live under `skills/`, never `agents/`.** APM flattens every `.md` beneath `agents/` into separate top-level agents when installing from a git source, which would destroy the `web-search-modules/` directory and register five bogus agents.
 
@@ -98,7 +99,7 @@ The router distinguishes three kinds of entry, and new modules must pick one:
 
 Module slots are set by depth: 1 at `quick`, 2 at `standard`, 3 at `deep`. Every module file carries a `Use when` / `Do not use for` / `Siblings` header so a mis-route corrects itself at read time.
 
-**Modules live in two places.** `skills/web-search-modules/` is package-owned and APM overwrites it on every install — only edit it in this repo. `.claude/web-search-modules-local/` is project-owned and APM never touches it; `ROUTING.md` step 0 reads its router first and local entries win on a name conflict. Never write a project's own module into an installed `.claude/skills/web-search-modules/`; the next install deletes it. `/research-add-module` builds either kind.
+**Modules live in two ownership classes.** `skills/web-search-modules/` is package-owned and APM overwrites its installed copy on every install — only edit it in this repo. `.agents/web-search-modules-local/` is the preferred project-owned location; legacy `.claude/web-search-modules-local/` remains a fallback. `ROUTING.md` step 0 reads the first local router it finds and local entries win on a name conflict. Never write a project's own module into installed `.agents/skills/web-search-modules/` or `.claude/skills/web-search-modules/`; the next install deletes it. `/research-add-module` builds either kind.
 
 **The agent cannot ask the user** — it is a subagent with no `AskUserQuestion`. On ambiguous routing it loads `general-web` plus its best guess and prints `Routed: X + Y (Z was a close second)`. Callers that *can* ask (`/research`, Step 2b) resolve routing up front and pin it to `execution.modules` in `outline.yaml`, which `/research-deep` passes to every item agent as `Modules:`.
 
@@ -114,9 +115,9 @@ Precedence: explicit numbers in the task prompt > level named in the prompt > `e
 
 **Prompt templates are marked `Hard Constraint` in `skills/research/SKILL.md` and `skills/research-deep/SKILL.md`** ("strictly reproduce, only replacing `{xxx}`"). The per-item budget, the tool prohibitions, and the `## Modules` routing block are injected *inside* those templates so the constraints survive the handoff to each item agent. Each template has a one-shot example directly below it — change one and you must change the other, or they teach contradictory formats. Restructuring a template drops them silently — the run still completes, just unbounded.
 
-**Never hardcode `~/.claude`.** APM installs project-locally. Both lookups resolve project-local first, global second: modules at `.claude/skills/web-search-modules/` then `~/.claude/agents/web-search-modules/`; the validator at `<project>/.claude/skills/research/validate_json.py` then `~/.claude/skills/research/validate_json.py`. When neither exists the skill must stop and say so rather than hand-write a substitute validator.
+**Never hardcode one host directory.** Packaged lookups use this order: project `.agents/skills/`, project `.claude/skills/`, user `~/.agents/skills/`, user `~/.claude/skills/`. When none exists the skill must stop and say so rather than hand-write a substitute validator or router.
 
-**The agent's `tools:` allowlist is load-bearing.** `WebSearch, WebFetch, Read, Write, Bash` plus explicit prohibitions on browser automation, downloads, and self-authored research scripts. Without it the agent inherits every host tool; under Copilot/VS Code that produced ~100 opened editor tabs in one run. Do not widen it casually.
+**Both agents' `tools:` allowlists are load-bearing and host-specific.** Claude's canonical agent uses exactly `WebSearch, WebFetch, Read, Write, Bash`; Copilot's wrapper uses exactly `read, search, web, edit, execute`. APM passes these values through rather than translating them. Without an effective allowlist the agent inherits every host tool; under Copilot/VS Code that produced ~100 opened editor tabs in one run. Do not widen either list casually or merge them into one supposedly universal list.
 
 There is exactly one carve-out: a `WebFetch` that fails on a URL may be retried once via `crwl crawl "<url>" -o markdown | head -c 40000`, only if `crwl` is already installed. Every clause of that rule is doing work — already-failed, one retry, same fetch slot, stdout only, bounded output, no `--deep-crawl`, no `-O`, no install, no second helper. Loosen any one and it becomes general permission to script around blocks, which is the behavior the allowlist exists to stop. The prompt also explains why this is not browser automation (headless, one-shot, opens nothing) — keep that reasoning, or the agent refuses its own exception.
 

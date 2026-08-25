@@ -21,7 +21,8 @@ This directory is a data bundle, not a workflow. It exists so the `web-search-ag
 | Location | Owner | Use for |
 |---|---|---|
 | `skills/web-search-modules/` (this directory) | The package. **APM overwrites it on every install.** | General modules worth shipping to everyone. Edit here only in the `deep-research-agent` repo itself. |
-| `.claude/web-search-modules-local/` | The project. APM never touches it. | Project-specific modules — client work, one-off deep dives, a source list only this project cares about. |
+| `.agents/web-search-modules-local/` | The project. APM never touches it. | Preferred location for project-specific modules — client work, one-off deep dives, a source list only this project cares about. |
+| `.claude/web-search-modules-local/` | The project. APM never touches it. | Legacy project-specific modules, read when the preferred `.agents` router is absent. |
 
 `ROUTING.md` reads the local router first, so a locally-created module needs no change to any packaged file to take effect. That is the point: a module you add to a project survives the next `apm install`, and a package upgrade never clobbers your work.
 

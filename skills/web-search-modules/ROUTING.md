@@ -2,15 +2,15 @@
 
 Read this file before any `WebSearch` or `WebFetch`. Pick modules here, read them, then search. Never search before reading at least one module.
 
-Module files live beside this one, in `.claude/skills/web-search-modules/` in the current project. If that directory does not exist, fall back to `~/.claude/agents/web-search-modules/`. Module names below are bare — `github-debug` means the file `github-debug.md` in that directory.
+Module files live beside this router. Resolve the packaged directory in order and use the first that exists: `.agents/skills/web-search-modules/` in the current project, `.claude/skills/web-search-modules/` in the current project, `~/.agents/skills/web-search-modules/`, then `~/.claude/skills/web-search-modules/`. Module names below are bare — `github-debug` means the file `github-debug.md` in that directory.
 
 ## 0. Check for local modules
 
-Before using the table below, check whether `.claude/web-search-modules-local/ROUTING.md` exists in the current project. If it does, read it — the project has search modules of its own, and they are usually sharper for that project's work than anything packaged here.
+Before using the table below, check `.agents/web-search-modules-local/ROUTING.md` in the current project, then the legacy `.claude/web-search-modules-local/ROUTING.md`. Read the first one that exists — the project has search modules of its own, and they are usually sharper for that project's work than anything packaged here.
 
 Local families and modules merge with the ones below. On a name conflict the local one wins. Local module files live beside that local router, not in this directory.
 
-One `Read` that fails *is* the check — do not hunt for the file, and do not spend a `Bash` call on it. If it is not there, ignore this step; that is the normal case.
+Each `Read` that fails *is* the check — do not hunt for the file, and do not spend a `Bash` call on it. If neither router is there, ignore this step; that is the normal case.
 
 ## 1. Caller override wins
 

@@ -28,10 +28,10 @@ Proceed only if you can name a question the current modules would route to `gene
 
 Use AskUserQuestion:
 
-- **Project-local** *(default)* — `.claude/web-search-modules-local/` in the current project. For client work, one-off deep dives, or anything whose source list is specific to this project. Read automatically by the router, and **not** owned by APM, so it survives `apm install`.
+- **Project-local** *(default)* — `.agents/web-search-modules-local/` in the current project. For client work, one-off deep dives, or anything whose source list is specific to this project. Read automatically by the router, and **not** owned by APM, so it survives `apm install`. The router still reads legacy modules from `.claude/web-search-modules-local/` when the preferred directory is absent.
 - **The package** — `skills/web-search-modules/` in the `deep-research-agent` repo itself. Only when you are working in that repo and the module is general enough to ship to everyone.
 
-**Never write a module into an APM-installed `.claude/skills/web-search-modules/`.** That directory is package-owned; the next `apm install` overwrites it and the module is gone.
+**Never write a module into an APM-installed `.agents/skills/web-search-modules/` or `.claude/skills/web-search-modules/`.** Those directories are package-owned; the next `apm install` overwrites them and the module is gone.
 
 ### Step 3: Discovery pass
 
@@ -67,7 +67,7 @@ Record only patterns you actually tested. An untested URL pattern in a module is
 
 Add a row to the router for the chosen destination.
 
-For a project-local module, that is `.claude/web-search-modules-local/ROUTING.md`. If it does not exist, create it with this shape:
+For a project-local module, that is `.agents/web-search-modules-local/ROUTING.md`. If it does not exist, create it with this shape:
 
 ```markdown
 # Local Modules

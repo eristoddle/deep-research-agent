@@ -2,9 +2,11 @@
 
 Single source of truth for where research lives and how skills find it — the same role `ROUTING.md` plays for module selection. Every skill's locate step reads this file instead of carrying its own copy of the rule.
 
-Resolve this file project-local first, global second — do NOT assume `~/.claude`:
-1. `<project_root>/.claude/skills/research/LAYOUT.md` (APM project-local install)
-2. `~/.claude/skills/research/LAYOUT.md` (global install)
+Resolve this file in order and use the first that exists:
+1. `<project_root>/.agents/skills/research/LAYOUT.md` (Copilot project-local install)
+2. `<project_root>/.claude/skills/research/LAYOUT.md` (Claude project-local install)
+3. `~/.agents/skills/research/LAYOUT.md` (Copilot user install)
+4. `~/.claude/skills/research/LAYOUT.md` (Claude user install)
 
 ## Definitions
 
