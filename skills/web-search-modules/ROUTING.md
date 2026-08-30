@@ -23,10 +23,13 @@ Work down the families in order and stop at the first whose question is a yes. R
 | Family | Ask yourself | Modules |
 |---|---|---|
 | Software & debugging | Is something broken, erroring, failing to build, or version-specific? | `github-debug`, `stackoverflow` |
+| Tooling & platform | Is the subject something you *install and run* — an agent CLI or IDE, an MCP server, a skill or plugin — rather than a model you call? | `agent-tooling` |
 | Literature | Does the answer live in a paper, preprint, or citation trail? | `academic-papers` |
-| AI ecosystem & market | Is it a fact about a shipped AI product — its scores, its versions, its price, or who competes with it? | `benchmarks`, `model-releases`, `pricing`, `vendor-landscape` |
+| AI ecosystem & market | Is it a fact about a *model or model provider* — its scores, its versions, its token price, or who competes with it? | `benchmarks`, `model-releases`, `pricing`, `vendor-landscape` |
 | Published-content landscape | Is the question what has already been *written* about this topic, and what those pages cover? | `competitor-content` |
 | General *(default)* | Nothing above fits — opinion, practice, comparison, product, news, or anything unclassified | `general-web` |
+
+Between **tooling & platform** and **AI ecosystem & market**: the split is the thing being asked about, not the company. "What did Anthropic charge for Opus 5" is `pricing`; "what changed in Claude Code 2.1" is `agent-tooling`. A tool's own subscription tiers are `agent-tooling`, because they are documented with the tool and not on the API pricing page.
 
 Within **software & debugging**: `github-debug` when the artifact is a specific project (an error from a named library, a regression, a known bug); `stackoverflow` when the question is how to use a language or API correctly.
 
