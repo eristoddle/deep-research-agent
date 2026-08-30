@@ -105,7 +105,7 @@ See [docs/questions/Q2-tested-access-method.md](docs/questions/Q2-tested-access-
 - **Rewrite `stackoverflow.md`** — 12 lines, two vague source bullets, zero query tactics; a rewrite, not a retrofit — [docs/parking-lot/stackoverflow-rewrite.md](docs/parking-lot/stackoverflow-rewrite.md)
 - **Non-technical families** (health, law and policy, finance) — attach when a project needs one; `competitor-content` is the worked example — [docs/parking-lot/non-technical-families.md](docs/parking-lot/non-technical-families.md)
 - **Wanted modules** (AI writing communities, docs-and-API-reference) — parked under D2 until real demand — [docs/parking-lot/wanted-modules.md](docs/parking-lot/wanted-modules.md)
-- **Verify the `crwl` fetch fallback** against a genuine 403 or JS-shell page — never fired in a live run — [docs/parking-lot/verify-crwl-fallback.md](docs/parking-lot/verify-crwl-fallback.md)
+- **Verify the `crwl` fetch fallback** — ✅ **tested 2026-08-29**: escalation runs clean and the `head -c` bound holds, but it does *not* recover a JS-shell page. Rule kept; prefer a JSON endpoint beside the HTML page instead — [docs/parking-lot/verify-crwl-fallback.md](docs/parking-lot/verify-crwl-fallback.md)
 
 ## Session log
 

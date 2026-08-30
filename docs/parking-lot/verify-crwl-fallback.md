@@ -1,5 +1,23 @@
 # Verify the `crwl` fetch fallback against a real block
 
+**Tested 2026-08-29. Mechanically sound; does not rescue a JS-shell page.**
+
+Two runs, both `exit 0` with empty stderr, so the escalation itself works and needs no change.
+
+| Unknown | Result |
+|---|---|
+| Does it trigger and run on a genuine block? | **Yes.** Ran clean against `https://forum.obsidian.md/search?q=...`, the standing JS-shell page. |
+| Does it recover the content? | **No — partial render only.** Returned 464 bytes: site chrome, and the line `16 results for syncthing conflict android`. Zero thread titles, zero `/t/{slug}/{id}` links. It renders enough JS to produce the result *count* but snapshots before the results themselves load. |
+| Does `head -c 40000` hold on a large page? | **Yes.** `platform.claude.com/docs/en/release-notes/overview` returned 116,328 bytes raw, clipped to exactly 40,000. |
+| Does the agent talk itself out of its own exception? | **Still open.** Behavioral, not mechanical — cannot be settled by running the command. |
+
+**What this means for the rule.** Keep it: it costs one retry, it is bounded, and it is confirmed not to error. But stop expecting it to be the answer for JS-heavy sites. For an async-rendering app it returns a plausible-looking fragment with the real content missing, which is worse than an obvious failure, because the fragment can be mistaken for a thin page.
+
+**The better first move, when a fetch comes back empty: look for a JSON endpoint beside the HTML page.** Discourse forums expose `search.json?q=`, which returned 16 structured results with `title`, `slug`, `id`, `posts_count`, and dates where both `WebFetch` and `crwl` failed. Cheaper than the retry and strictly better output. This is now recorded in the blog repo's local `obsidian` module.
+
+Original parked notes follow.
+
+---
 **Parked** 2026-08-21 — needed a genuine failing page to test against, which could not be manufactured on demand.
 
 **Unblocked 2026-08-29.** A standing, reproducible JS-shell page exists: `https://forum.obsidian.md/search?q=<terms>` renders a placeholder ("this is not the content you are looking for") to any `WebFetch`, every time. `crwl` is installed locally. Both missing preconditions are now met, so this is testable whenever someone wants to run it.

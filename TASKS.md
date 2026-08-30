@@ -27,14 +27,33 @@ Every source bullet in every module says **how to reach that source**, in the fo
 ### ▶ Run state (the agent keeps this current on every stop)
 _<not started · nothing done · nothing blocked · all 6 pieces remain · resume from #1>_
 
+## Size — where the time actually goes
+
+**~2 to 2.5 hours total.** Counted, not guessed: the ten modules carry **52 source bullets**, and they are not equal work.
+
+| Piece | Modules | Bullets | Size |
+|---|---|---|---|
+| 4 | `general-web`, `competitor-content` | 14 | `[S]` ~10 min — these get **no** URLs by design; one "none by design" note each |
+| 3 + 5 | `github-debug`, `academic-papers`, `chinese-tech`, `stackoverflow` | 18 | `[M]` ~25 min — a literal `site:` query appended per bullet; a query form, so nothing to verify |
+| 2 | `pricing`, `benchmarks`, `model-releases`, `vendor-landscape` | 20 | `[L]` ~90 min — **the entire cost of this task** |
+| 1 + 6 | `SKILL.md`, `ROADMAP.md` | — | `[S]` ~25 min combined |
+
+Piece 2 dominates because **one bullet is not one URL**. "The provider's own pricing page" is really Anthropic, OpenAI, Google, Mistral, DeepSeek, and xAI; "leaderboards" is another five or six. Twenty bullets expand into roughly **60–100 actual URLs**, and each one gets fetched to confirm it resolves *and* contains what the bullet claims. That is 30–50 minutes of pure network wait, plus reading each result, plus refitting bullets to stay under the 40-line cap rather than appending to it.
+
+### The one real decision
+
+**The verification is the cost, not the writing.** Drop "confirm every seed URL resolves" and the whole task is ~45 minutes instead of ~2.5 hours.
+
+The rule exists because a **guessed URL is worse than none** (PLAN.md D1): the agent trusts it and spends a fetch on a 404 instead of falling back to search. Recommendation is to keep it for piece 2 specifically, since provider pricing pages are exactly where a stale URL causes a wrong number to get published. If the budget has to give, drop verification on the *leaderboard* seeds in `benchmarks` before the *pricing* seeds.
+
 ## Design — numbered pieces (status: `[ ]` not started · `[x]` done · `[!]` blocked)
 
-- [ ] **1.** **Write the three-kind taxonomy into `skills/web-search-modules/SKILL.md`**, at/near line 36. The current sentence implies every source takes a URL. Add the distinction from D1 — fixed-site → literal `site:` query; parameterized → URL pattern + seed list; open-query → an explicit "none by design" note — and state that a **guessed URL is worse than none**, because the agent trusts it and spends a fetch on a 404 instead of falling back to search. This piece gates every other piece: it is what stops #4 from inventing sources.
-- [ ] **2.** **Parameterized batch** — `pricing.md`, `benchmarks.md`, `model-releases.md`, `vendor-landscape.md`. _(depends on #1)_ Each source bullet gains a URL **pattern** plus a short seed list of the vendors/leaderboards that actually recur. Verify every seed URL resolves and contains what the bullet claims. `pricing` and `benchmarks` first — ROADMAP ranks them highest because provider pricing pages and leaderboard URLs are stable and worth naming outright.
-- [ ] **3.** **Fixed-site batch** — `github-debug.md`, `academic-papers.md`, `chinese-tech.md`. _(depends on #1)_ Literal `site:` queries appended to existing bullets. `academic-papers` already carries bare domains (`arxiv.org`, `scholar.google.com`) but no query method — it is partially compliant, so add the method to the domains already there rather than restating them. It has 31 of 40 lines used: append inline, add no new lines.
-- [ ] **4.** **Open-query batch** — `general-web.md`, `competitor-content.md`. _(depends on #1)_ Write the explicit **"none by design"** note and one line on why. Do **not** invent a source list for either. `competitor-content` samples an unrefined reader-query search deliberately; a pinned source list would defeat the module.
-- [ ] **5.** **`stackoverflow.md` access methods only.** _(depends on #1)_ Add `site:stackoverflow.com` / Stack Exchange query methods to its two source bullets. **The rewrite is parked** — do not add query tactics, do not restructure it, do not lengthen it beyond the access methods. That work is a separate parking-lot item.
-- [ ] **6.** **Update `ROADMAP.md`.** _(depends on #2, #3, #4, #5)_ Retire the "Retrofit: access methods" section — replace it with a one-line record that it landed and what the three-kind rule is, pointing at `PLAN.md` D1. Leave every other roadmap section alone.
+- [ ] **1.** `[S]` **Write the three-kind taxonomy into `skills/web-search-modules/SKILL.md`**, at/near line 36. The current sentence implies every source takes a URL. Add the distinction from D1 — fixed-site → literal `site:` query; parameterized → URL pattern + seed list; open-query → an explicit "none by design" note — and state that a **guessed URL is worse than none**, because the agent trusts it and spends a fetch on a 404 instead of falling back to search. This piece gates every other piece: it is what stops #4 from inventing sources.
+- [ ] **2.** `[L]` **Parameterized batch** — `pricing.md`, `benchmarks.md`, `model-releases.md`, `vendor-landscape.md`. _(depends on #1)_ Each source bullet gains a URL **pattern** plus a short seed list of the vendors/leaderboards that actually recur. Verify every seed URL resolves and contains what the bullet claims. `pricing` and `benchmarks` first — ROADMAP ranks them highest because provider pricing pages and leaderboard URLs are stable and worth naming outright.
+- [ ] **3.** `[M]` **Fixed-site batch** — `github-debug.md`, `academic-papers.md`, `chinese-tech.md`. _(depends on #1)_ Literal `site:` queries appended to existing bullets. `academic-papers` already carries bare domains (`arxiv.org`, `scholar.google.com`) but no query method — it is partially compliant, so add the method to the domains already there rather than restating them. It has 31 of 40 lines used: append inline, add no new lines.
+- [ ] **4.** `[S]` **Open-query batch** — `general-web.md`, `competitor-content.md`. _(depends on #1)_ Write the explicit **"none by design"** note and one line on why. Do **not** invent a source list for either. `competitor-content` samples an unrefined reader-query search deliberately; a pinned source list would defeat the module.
+- [ ] **5.** `[S]` **`stackoverflow.md` access methods only.** _(depends on #1)_ Add `site:stackoverflow.com` / Stack Exchange query methods to its two source bullets. **The rewrite is parked** — do not add query tactics, do not restructure it, do not lengthen it beyond the access methods. That work is a separate parking-lot item.
+- [ ] **6.** `[S]` **Update `ROADMAP.md`.** _(depends on #2, #3, #4, #5)_ Retire the "Retrofit: access methods" section — replace it with a one-line record that it landed and what the three-kind rule is, pointing at `PLAN.md` D1. Leave every other roadmap section alone.
 
 ## Files
 
