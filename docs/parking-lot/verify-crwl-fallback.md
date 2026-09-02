@@ -1,6 +1,36 @@
 # Verify the `crwl` fetch fallback against a real block
 
-**Tested 2026-08-29. Mechanically sound; does not rescue a JS-shell page.**
+**Tested 2026-08-29 synthetically. Fired for the first time in live runs 2026-09-02: 7 retries, 6 recoveries.**
+
+## Live-fire evidence, 2026-09-02
+
+The standing unknown on this page — *"It has never fired in a live run"* — is now closed. Four `/research-deep` runs for an outside project (a Firecrawl cookbook in the `sm-static` blog repo) exercised the escalation seven times across three of the four runs:
+
+| Source | Failure | `crwl` result |
+|---|---|---|
+| `ropesgray.com` | 403 | **recovered** — became the highest-yield source in that run |
+| `fbm.com` | 403 | **recovered** |
+| `ico.org.uk` (×3) | 403 / failed | **recovered, all three** |
+| `autoriteitpersoonsgegevens.nl` | failed | **recovered** |
+| `news.ycombinator.com` (item 44973222) | 429 | **not recovered** — same rate limit |
+
+Every clause of the carve-out held: already-failed URL, one retry, same fetch slot, bounded output. No agent talked itself out of the exception — the last open behavioural unknown on this page, and it resolved in the rule's favour across three independent agents.
+
+## The refined rule
+
+Combining this with the 2026-08-29 synthetic test:
+
+| Failure mode | Does `crwl` rescue it? |
+|---|---|
+| 403 / bot user-agent block on a server-rendered page | **Yes** — 6/6 observed |
+| 429 rate limit | **No** — the limit applies to it too |
+| JS-shell async render | **No** — partial render, and the fragment is misleadingly plausible |
+
+**So the escalation earns its slot, and the 2026-08-29 conclusion should be narrowed rather than kept as written.** "Does not rescue a JS-shell page" was right but read as a general discouragement. The accurate version: it is *reliable* against the most common block — a server-rendered page refusing a bot user-agent — and useless against the two cases where the content is not in the HTML at all, or is rate-gated.
+
+That is a stronger case for keeping it than the original test produced, and it means the "check for a JSON endpoint first" advice below is a complement, not a replacement: the JSON endpoint is the better move for JS-shell sites specifically, which is exactly where `crwl` fails.
+
+## Prior conclusion, 2026-08-29 — superseded above, retained for the reasoning
 
 Two runs, both `exit 0` with empty stderr, so the escalation itself works and needs no change.
 
