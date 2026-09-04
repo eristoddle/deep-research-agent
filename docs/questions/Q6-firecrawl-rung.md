@@ -1,7 +1,7 @@
 # Q6 — Should firecrawl become a third fetch rung in the shipped agent?
 
-> **Status:** open
-> **Opened:** 2026-09-03 · **Last touched:** 2026-09-03
+> **Status:** ✅ Answered by `PLAN.md` D16 on 2026-09-04
+> **Opened:** 2026-09-03 · **Last touched:** 2026-09-04
 
 ## The question
 
@@ -35,7 +35,7 @@ cost and a new exception to the current tool discipline.
 
 ## Blocked on
 
-- Nothing external. This is a product and tool-discipline decision.
+- Nothing. The decision is made; the next step is a mechanical integration and an opted-in environment test.
 
 ## Related
 

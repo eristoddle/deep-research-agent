@@ -130,6 +130,8 @@ Decided 2026-09-03. **D2's trigger is met** and the module is approved in shape.
 
 **Family is undecided.** It may extend Published-content landscape — `competitor-content` is its mirror image (what has been *published* vs. what is being *asked*) — or open its own row. Per `wanted-modules`, test the discriminating question before assuming the family.
 
+**Resolved 2026-09-04.** `demand-signals` opens its own family: *Is the question which problems, desires, or frustrations recur in people's own words across independent venues?* This is distinct from Published-content landscape's question — *what has already been written about the topic, and what do those pages cover?* — so combining them would make routing less accurate. Reddit listings may be one source when the package reader is available, but never the family definition or its only evidence.
+
 One design constraint worth carrying: **full threads are the wrong unit.** Repetition across places is a listing/search-level signal — many titles, cheaply. Full bodies matter only for verbatim vocabulary, a narrower second pass. At `standard`'s 12 fetches, spending them on whole threads buys depth where this needs breadth.
 
 <!-- D10 — Fetch-outcome ledger -->
@@ -144,6 +146,8 @@ Origin is `fetch-anything`'s handler registry, **inverted**. There, a ledger rec
 **Why this can ship where [harvest-from-runs](docs/parking-lot/harvest-from-runs.md) is stuck:** access outcomes are binary and observed; source *quality* needs judgment, which is exactly [Q1](docs/questions/Q1-source-accumulation.md)'s blocker. Same "accumulate observed evidence from runs" shape, different payload, and only one of them needs a human in the loop.
 
 **Amended 2026-09-04 by D15.** The approved Reddit reader is a named source method, not a generic fetch rung. It does not change this ledger's failures-only purpose or make Firecrawl outcomes actionable to the generic agent.
+
+**Deferred with a revisit pin, 2026-09-04.** Do not build an automatic ledger yet. `unreachable[]` and the report section now preserve the evidence needed to decide whether one pays for itself. Reopen Q4 only when two completed reports from the same consumer project record the same `source` + `reason` failure tuple; until then, manual maintenance of module and site access methods is cheaper than another accumulating store.
 
 <!-- D11 — Unreachable is a separate channel from unanswered -->
 ### D11 — "Unreachable" is a separate output channel from "unanswered" 🔨
@@ -245,7 +249,18 @@ Decided 2026-09-04. The concern is not scripting. A deterministic script that ex
 
 `skills/research/reddit_feed.py` is the third case: it is a reusable reader for Reddit's public Atom listings, not a per-run convenience script. The research agent may invoke an **approved existing** helper by its resolved package path; this is distinct from authoring arbitrary scripts while researching. The eventual invocation rule must keep its existing boundaries explicit: a named helper and documented arguments, stdout only with a bounded result, no downloads or browser automation, and each network request counted against the item's fetch budget.
 
+For the Reddit helper, a `429` retry is another network request and consumes another fetch slot. Its invocation must cap retry attempts at the item's remaining fetch budget rather than allowing the helper's backoff to overspend it.
+
 **Why this distinction matters:** the old "do not write your own scripts" sentence was guarding against an agent improvising crawlers, report generators, and caches to evade retrieval limits. It does not prohibit a maintained helper whose purpose, inputs, and bounds are already reviewed. The general rule stays: generated one-off scripts live with their run; reusable helpers earn a durable home only through actual repeat use.
+
+<!-- D16 — Firecrawl is an optional shipped fallback -->
+### D16 — Firecrawl is an optional third fetch rung 🔨
+
+Decided 2026-09-04. The shipped ladder is `WebFetch` -> `crwl` -> Firecrawl for the same URL, climbing only after the prior rung fails. A dedicated project fetch-escalation skill still takes precedence when available; the bundled ladder is the ready-to-use fallback that avoids reworking an active research project just because a consumer did not install that separate skill beforehand.
+
+Firecrawl is optional and paid. The agent never installs it. A consumer opts in by configuring `FIRECRAWL_API_KEY` and making the Firecrawl CLI available; when either is absent, the agent records the URL as unreachable after the available rungs rather than prompting, installing, or spending money. When Firecrawl runs, the agent states that it used the paid rung and treats that call as the current URL's bounded fallback, never a route into crawling or browser automation.
+
+This supersedes Q6's decision question. The remaining work is mechanical: replace the existing two-rung prompt contract and README's stale "never automatic" wording, establish the exact bounded CLI invocation, and test the behavior in an environment with an opted-in key.
 
 ## Open questions
 
@@ -255,7 +270,7 @@ Decided 2026-09-04. The concern is not scripting. A deterministic script that ex
 
 See [docs/questions/Q1-source-accumulation.md](docs/questions/Q1-source-accumulation.md).
 
-### Q2 — What makes an access method "tested"?
+### Q2 — What makes an access method "tested"? — ✅ resolved 2026-09-04
 
 See [docs/questions/Q2-tested-access-method.md](docs/questions/Q2-tested-access-method.md).
 
@@ -263,7 +278,7 @@ See [docs/questions/Q2-tested-access-method.md](docs/questions/Q2-tested-access-
 
 Every *scraper* route failed at a permission gate — the harness blocks the domain for `WebFetch`, firecrawl refuses it by vendor policy, and the OAuth API's signup could not be completed. **The feeds were never tested, and they are open.** `skills/research/reddit_feed.py` reads them with the stdlib: no account, no key, no dependency. It needed no new permission, because `Bash` was already in the allowlist and the `crwl` carve-out was always a *rule*, not a permission. Listings are also the right unit for D9. See [docs/questions/Q3-reddit-reachability.md](docs/questions/Q3-reddit-reachability.md).
 
-### Q4 — Where does the fetch-outcome ledger live, and who may write it?
+### Q4 — Where does the fetch-outcome ledger live, and who may write it? — deferred; reopen on D10's repeat-failure pin
 
 D10 settles the ledger's shape, not its mechanics: location (the `apm install` overwrite problem), the `Write` carve-out an item agent would need, and expiry. See [docs/questions/Q4-ledger-mechanics.md](docs/questions/Q4-ledger-mechanics.md).
 
@@ -271,7 +286,7 @@ D10 settles the ledger's shape, not its mechanics: location (the `apm install` o
 
 Modules are organized by topic. Sites recur across them and each one has its own querying quirks, which are currently rediscovered every run. See [docs/questions/Q5-site-references.md](docs/questions/Q5-site-references.md).
 
-### Q6 — Should firecrawl become a third fetch rung in the shipped agent?
+### Q6 — Should firecrawl become a third fetch rung in the shipped agent? — ✅ resolved by D16
 
 Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-search-agent` is a separate and larger question, because it is paid and the carve-out is deliberately narrow. See [docs/questions/Q6-firecrawl-rung.md](docs/questions/Q6-firecrawl-rung.md).
 

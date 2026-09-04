@@ -16,9 +16,49 @@
 
 ---
 
-# ⏭ NEXT ACTIVE TASK — none queued
+# ⏭ NEXT ACTIVE TASK — D15/D16: Approved helper and Firecrawl integration
 
-No implementation task is queued. The next work is planning: resolve the Reddit-feed runtime-access contract (D8/Q6), then settle `demand-signals` routing (D9) before queueing its build.
+**Goal:** Make the existing Reddit Atom-feed reader and optional Firecrawl fallback available to item agents without weakening the bounded-research contract.
+
+**Why:** D15 approves reusable, reviewed helpers as a token-efficient part of research and requires their network activity to remain budgeted. D16 makes Firecrawl a ready, optional paid fallback so an opted-in consumer does not have to modify the package mid-project. The current prompts still prohibit every script, describe only two fetch rungs, and tell agents that Reddit is unreachable even though `reddit_feed.py` works.
+
+**Reversible if:** A live opted-in Firecrawl check shows the documented CLI behavior or cost model is materially different; keep the Reddit helper integration and revise only the Firecrawl piece.
+
+**Design:**
+
+1. [ ] Update `skills/research/reddit_feed.py`, `agents/web-search-agent.md`, and the hard-constrained template plus one-shot example in `skills/research-deep/SKILL.md` to allow only the approved package helper. Add a positive `--max-attempts` CLI option to `reddit_feed.py`, defaulting to its existing five attempts. The agent command must use `--json --limit 25 --max-attempts <remaining-fetch-budget>` and bounded stdout (`head -c 40000`). A `429` retry is a separate network request and consumes a fetch slot; do not begin another attempt when no slots remain. Redefine prompt wording consistently so the fetch budget covers every network retrieval attempt, not just native `WebFetch` calls, while retaining one logical fetch sequence per URL. Agents may not author arbitrary scripts, invoke an unlisted helper, download artifacts, or use browser automation.
+
+2. [ ] Extend the same canonical agent prompt and `research-deep` template/example with the optional Firecrawl third rung. After `WebFetch` and the existing one `crwl` retry fail on the same URL, run Firecrawl only when both `command -v firecrawl` succeeds and `FIRECRAWL_API_KEY` is configured; otherwise record the URL as unreachable and continue. The configured key is the consumer's opt-in; no install, interactive prompt, or extra per-run confirmation. Treat the paid scrape as one bounded retrieval attempt, state in the item output that the paid rung ran, and never crawl multiple URLs. Firecrawl must write only to an item-specific temporary Markdown path beside that item's JSON output, read no more than 40,000 bytes, then delete that temporary file. A dedicated project fetch-escalation skill remains preferred when available. Update README setup/behavior so it accurately says Firecrawl is an optional configured fallback rather than "never automatic"; retain the paid disclosure and affiliate disclosure.
+
+3. [ ] Update `skills/web-search-modules/sites/reddit.md`, `general-web.md`, `competitor-content.md`, and `vendor-landscape.md` to replace their stale Reddit-unreachable directive with the approved listing-reader method. Each module bullet remains self-sufficient and cites `sites/reddit.md`; it must say that the Atom reader yields listings, not full post bodies, and name its own non-Reddit companion sources so the breadth rule remains intact. The site file becomes the detailed source of the reader's limits: only public Atom feeds, no `old.reddit.com`, and title/permalink/date/subreddit listing results. Do not create a Reddit modifier or the `demand-signals` module in this task.
+
+**Files:**
+- `skills/research/reddit_feed.py`
+- `agents/web-search-agent.md`
+- `skills/research-deep/SKILL.md`
+- `README.md`
+- `skills/web-search-modules/sites/reddit.md`
+- `skills/web-search-modules/general-web.md`
+- `skills/web-search-modules/competitor-content.md`
+- `skills/web-search-modules/vendor-landscape.md`
+- `TASKS.md` (piece status and run state only)
+
+**Tests:**
+1. Run `python3 -m py_compile skills/research/reddit_feed.py skills/research/validate_json.py` and `python3 skills/research/reddit_feed.py --help`; confirm `--max-attempts` is documented.
+2. Compare `skills/research-deep/SKILL.md`'s prompt template and one-shot example after variable substitution. Their Search Budget and helper/escalation instructions must match exactly.
+3. Run a normal public-listing command with `--json --limit 25 --max-attempts 1`; verify it emits only post entries and no more than 25. Run it again with an intentionally nonpositive `--max-attempts` and verify it exits as bad arguments without a network request.
+4. On an opted-in machine only, run Firecrawl against a known reachable control page and verify its temporary item-specific file is bounded-read then removed. Confirm the agent's missing-key path skips Firecrawl and records the URL unreachable; never supply a key through chat or commit one.
+5. Run `rg -n 'reddit_feed|max-attempts|Firecrawl|FIRECRAWL_API_KEY|unreachable from this toolchain' agents/web-search-agent.md skills/research-deep/SKILL.md README.md skills/web-search-modules/{general-web,competitor-content,vendor-landscape}.md skills/web-search-modules/sites/reddit.md` and confirm no stale Reddit-unreachable directive remains.
+6. Run `git diff --check`.
+
+**Out of scope:**
+- Building or routing the `demand-signals` module, a Reddit modifier, a fetch-outcome ledger, or project-local reusable helpers.
+- Changing agent tool allowlists, Firecrawl's package/CLI dependency, package installation behavior, `fetch-anything`, or any source unrelated to Reddit.
+- Any live research run beyond the focused helper and Firecrawl checks listed above.
+
+**Report back:** List each completed or blocked piece, all files changed, every test result, the actual Firecrawl CLI behavior observed in the opted-in environment, and whether any instruction had to differ between Claude and Copilot. Update every piece status and the run-state note before stopping.
+
+> ▶ Run state: queued 2026-09-04. Planned only; do not launch in this session. Resume from piece 1 in the later implementation/testing session.
 
 ---
 

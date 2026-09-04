@@ -1,6 +1,6 @@
 # Q2 — What makes an access method "tested"?
 
-**Status:** open. Raised 2026-08-21. **Gates the retrofit's cost.**
+**Status:** ✅ Answered 2026-09-04. Raised 2026-08-21.
 
 ## The question
 
@@ -59,3 +59,13 @@ Note also that D8 sharpens the spec's fourth access-method form ("a note that it
 into a **directive** that must name a substitute. That changes the answer to this page's third
 "what would need deciding" item: a URL that fails verification is not simply omitted or marked
 blocked — it must be replaced with what to use instead.
+
+### 2026-09-04 — resolved
+
+The bar is candidate standard **(2)**: an access URL is tested only when it resolves and contains
+what its source bullet claims. This catches a redirect to generic marketing as well as a dead link.
+
+Do not add a date to every module bullet. A dated site reachability verdict or a later repeat-failure
+record is enough when staleness matters; ordinary source bullets keep their line budget. If a tested
+URL later fails, the module changes to the D8 directive form with an actionable substitute rather
+than silently retaining a broken link.

@@ -1,7 +1,7 @@
 # Q4 — Where does the fetch-outcome ledger live, and who is allowed to write it?
 
 > **Status:** open
-> **Opened:** 2026-09-03 · **Last touched:** 2026-09-03
+> **Opened:** 2026-09-03 · **Last touched:** 2026-09-04
 
 ## The question
 
@@ -61,6 +61,17 @@ close as a side effect rather than needing its own answer.
 
 Not promoted to a decision — it depends on where the ledger lands (mechanic 1 above), since a
 per-project ledger cannot carry dates for a package-shipped module's sources.
+
+### 2026-09-04 — deferred with a concrete revisit trigger
+
+Do not build the ledger before it has demonstrated a repeated job. D11's `unreachable[]` records
+and the final report's `## Unreachable sources` section now retain the necessary evidence without
+adding a cache or a new write exception.
+
+Reopen this question only when two completed reports in the same consumer project contain the same
+`source` + `reason` failure tuple. That is the threshold at which manual maintenance of a module or
+site-file directive has demonstrably started repeating; then decide location, writer, and expiry
+against real evidence rather than a hypothetical store.
 
 ## Blocked on
 
