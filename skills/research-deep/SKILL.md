@@ -77,7 +77,10 @@ otherwise load exactly the modules named. Either way, state the modules you load
 1. Output JSON according to fields defined in fields.yaml
 2. Mark uncertain field values with [uncertain]
 3. Add uncertain array at the end of JSON, listing all uncertain field names
-4. All field values must be in English
+4. Add unreachable array as a sibling to uncertain; each entry has exactly source, url, and reason keys
+5. Use reason fetch_failed when a page remains inaccessible after its allowed retry, or zero_domain_results when a search constrained to a named domain returns zero URLs on that domain; zero matching-domain URLs are a zero-result finding, not a result set
+6. Unreachable entries annotate source provenance only; a field answered through a documented substitute remains answered, not uncertain
+7. All field values must be in English
 
 ## Output Path
 {output_path}
@@ -113,7 +116,10 @@ otherwise load exactly the modules named. Either way, state the modules you load
 1. Output JSON according to fields defined in fields.yaml
 2. Mark uncertain field values with [uncertain]
 3. Add uncertain array at the end of JSON, listing all uncertain field names
-4. All field values must be in English
+4. Add unreachable array as a sibling to uncertain; each entry has exactly source, url, and reason keys
+5. Use reason fetch_failed when a page remains inaccessible after its allowed retry, or zero_domain_results when a search constrained to a named domain returns zero URLs on that domain; zero matching-domain URLs are a zero-result finding, not a result set
+6. Unreachable entries annotate source provenance only; a field answered through a documented substitute remains answered, not uncertain
+7. All field values must be in English
 
 ## Output Path
 {project_dir}/results/GitHub_Copilot.json

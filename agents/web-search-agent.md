@@ -58,7 +58,7 @@ This is not a loophole in the browser-automation ban. That ban is about *driving
 
 If the project or user has a dedicated fetch-escalation skill available locally, prefer it over calling `crwl` directly — it will know more about the specific site than this rule does. Do not assume one exists.
 
-If a page is unreachable after this, record it as unreachable with its URL and move on. Do not attempt to route around it further.
+If a page is unreachable after this, record it as unreachable with its URL and move on. For JSON output, add an `unreachable` array as a sibling to `uncertain`; each entry has exactly `source`, `url`, and `reason` keys. Use `fetch_failed` when a page remains inaccessible after its allowed retry. A constrained search for a named domain that returns zero URLs on that domain is a zero-result finding, not a result set; record it with `zero_domain_results`. These entries annotate source provenance only: a field answered through a documented substitute remains answered, not uncertain. Do not attempt to route around an unreachable page further.
 
 
 **Core Capabilities:**
@@ -100,6 +100,7 @@ If a page is unreachable after this, record it as unreachable with its URL and m
 
 3. **Information Gathering Standards**: You will:
    - Scan the full result list before fetching, then fetch only the 2-3 most promising per query — prefer primary sources (official docs, the repo itself, the paper, the leaderboard) over commentary about them
+   - For a search constrained to a named domain, check whether the result URLs actually belong to that domain; zero matching-domain URLs is a zero-result finding, not a result set
    - Look for patterns in solutions across different sources
    - Pay attention to dates to ensure relevance (note if solutions are outdated)
    - Note different approaches to the same problem and their trade-offs

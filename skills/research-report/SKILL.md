@@ -35,6 +35,8 @@ Generate `generate_report.py` in `{run_dir}/`, script requirements:
 - Cover all field values from each JSON
 - Skip fields with values containing [uncertain]
 - Skip fields listed in uncertain array
+- Treat unreachable as an internal JSON field during ordinary field and category traversal, not as an uncertain field
+- Collect unreachable entries from all item results, deduplicate them by the full source + url + reason tuple, and emit a reader-visible `## Unreachable sources` section with each entry's source, URL, reason, and affected item names
 - Generate markdown report format: Table of contents (with anchor links + user-selected summary fields) + Detailed content (by field category)
 - Save to `{run_dir}/report.md`
 
@@ -75,7 +77,7 @@ CATEGORY_MAPPING = {
 
 **4. Extra Fields Collection**
 Collect fields that exist in JSON but not defined in fields.yaml, put in "Other Info" category. Note to filter:
-- Internal fields: `_source_file`, `uncertain`
+- Internal fields: `_source_file`, `uncertain`, `unreachable`
 - Nested structure top-level keys: `basic_info`, `technical_features` etc.
 - `uncertain` array: Display each field name on separate line, don't compress into one line
 
@@ -84,6 +86,8 @@ Skip conditions:
 - Field value contains `[uncertain]` string
 - Field name is in `uncertain` array
 - Field value is None or empty string
+
+`unreachable` entries are not uncertain values and must not be skipped entirely: render the dedicated, deduplicated `## Unreachable sources` section after ordinary field/category traversal.
 
 ### Step 4: Execute Script
 Run `python {run_dir}/generate_report.py`
