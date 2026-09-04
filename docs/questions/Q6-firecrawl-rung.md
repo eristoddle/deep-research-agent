@@ -26,11 +26,16 @@ Raised when the user pointed out this is a public package: *"remember this is al
 
 **The case against that:** a consumer who *has* firecrawl and *wants* to spend on it gets nothing, and `ACCESS.md`'s verdict is then wrong for them specifically — their toolchain can reach what ours cannot. The existing prompt already gestures at this: *"If the project or user has a dedicated fetch-escalation skill available locally, prefer it over calling `crwl` directly."* That sentence may already be the extension point, in which case no new rung is needed at all — `fetch-anything` is exactly such a skill, and it owns the firecrawl ladder including the Reddit handler.
 
-**Not answerable until Q3 runs.** If firecrawl does not reach Reddit either, the question loses most of its motivation.
+### 2026-09-04 — Q3 no longer blocks this
+
+Q3 found a public-feed path for Reddit and D15 permits the approved `reddit_feed.py` helper
+to use it. Firecrawl therefore has no Reddit-access motivation: the question is solely whether
+a paid, consumer-facing third fetch rung adds enough value on *other* sites to justify its
+cost and a new exception to the current tool discipline.
 
 ## Blocked on
 
-- [Q3](Q3-reddit-reachability.md) — run the firecrawl test first. Everything here is cheaper to decide with that result in hand.
+- Nothing external. This is a product and tool-discipline decision.
 
 ## Related
 

@@ -123,6 +123,18 @@ The user's call, and it was the right one: *every* failure had been somebody's p
 
 **Still open (small):** whether the module invokes this directly, and the wording of the tool-discipline rule that permits it — the same class of question as [Q6](Q6-firecrawl-rung.md). The access problem is solved; what remains is prompt wording.
 
+### 2026-09-04 — execution policy resolved
+
+The agent may invoke `reddit_feed.py` as an approved package helper. It is reviewed,
+versioned, reusable across consumer projects, and performs deterministic listing extraction
+more cheaply than asking a model to parse the same feed. This is not permission to generate
+arbitrary scripts during research: a one-off helper belongs in its own run folder, while a
+project-specific reusable helper earns a project-owned location only once there is a real
+repeat use. See `PLAN.md` **D15**.
+
+The remaining implementation detail is to state the reader's exact bounded invocation and
+fetch accounting in the agent prompt. That is a build task, not an unresolved access question.
+
 ## Blocked on
 
 - Nothing. Answered.

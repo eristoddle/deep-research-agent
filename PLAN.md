@@ -226,6 +226,21 @@ GitHub at 4 still proves the point: the raw `CHANGELOG.md` pattern and the check
 
 **`ACCESS.md` gives up its site-keyed entries.** Reddit's section becomes `sites/reddit.md`'s `Reachable:` line. `ACCESS.md` keeps only what has no site to live in — "JS-shell pages," and the note on how far the JSON-endpoint trick generalizes.
 
+<!-- D15 — Scripts belong to their reuse scope -->
+### D15 — Scripts belong to their reuse scope; approved scripts are part of research 🔨
+
+Decided 2026-09-04. The concern is not scripting. A deterministic script that extracts or normalizes a known source avoids spending model tokens on work code can perform more cheaply and consistently. The constraint is **lifetime and ownership**, so throwaway helpers do not accumulate in a global area.
+
+| Reuse | Location | Rule |
+|---|---|---|
+| One run | That run's `{run_dir}` | A task may create it only at its designated path. It is output for that research process, not package infrastructure. |
+| One consumer project | A project-owned location, named only when a real repeated use earns one | Do not create an empty global helper directory speculatively. It survives package updates because the project owns it. |
+| Multiple package consumers | The package payload | A reviewed, versioned helper is installed with the skill and may be invoked as part of the research method. |
+
+`skills/research/reddit_feed.py` is the third case: it is a reusable reader for Reddit's public Atom listings, not a per-run convenience script. The research agent may invoke an **approved existing** helper by its resolved package path; this is distinct from authoring arbitrary scripts while researching. The eventual invocation rule must keep its existing boundaries explicit: a named helper and documented arguments, stdout only with a bounded result, no downloads or browser automation, and each network request counted against the item's fetch budget.
+
+**Why this distinction matters:** the old "do not write your own scripts" sentence was guarding against an agent improvising crawlers, report generators, and caches to evade retrieval limits. It does not prohibit a maintained helper whose purpose, inputs, and bounds are already reviewed. The general rule stays: generated one-off scripts live with their run; reusable helpers earn a durable home only through actual repeat use.
+
 ## Open questions
 
 > Each is a heading (the question) + a link to its discussion in `docs/questions/`. Thread files are append-only — a later grill adds a dated section rather than rewriting.
