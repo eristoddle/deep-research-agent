@@ -113,6 +113,8 @@ Decided 2026-09-03. Two parts, both about the **access** layer and neither about
 
 **Deferred — the venue half.** If a Reddit venue layer is ever built it is a **modifier** (the `chinese-tech` precedent: an axis layered on a topic module, never consuming a topic slot), not a topic module, which would compete with `pricing`/`general-web` and lose. It is worth little while [Q3](docs/questions/Q3-reddit-reachability.md) is open.
 
+**Amended 2026-09-04 by Q3/D15.** Reddit's public Atom feeds are reachable through the approved package helper, so Reddit is no longer an example of the fourth access-method form. That form still applies when a source is genuinely unreachable; its directive remains valid. A future implementation task must replace the stale Reddit substitute directives with its bounded feed-reader method. The venue conclusion is unchanged: a Reddit-specific layer, if it earns one, is a modifier rather than a topic module.
+
 <!-- D9 — demand-signals module -->
 ### D9 — `demand-signals`: build the research stage, without Reddit 🔨
 
@@ -121,6 +123,8 @@ Decided 2026-09-03. **D2's trigger is met** and the module is approved in shape.
 **Scope** is Day 1–3 of the source article (`10.05 Web Clips/I Gave AI 30 Days…`): *find a problem people repeatedly describe, in their own words, across unrelated places.* Not the product, funnel, or content stages — this repo does the research stage.
 
 **Reddit-free by construction** — and as of Q3's resolution the same day, by *necessity* rather than by choice, so this scoping will not need revisiting: niche forums (Discourse/XenForo expose JSON — confirmed on the Obsidian forum), People-Also-Ask, search suggestions, review sites, Amazon Q&A. The article's own requirement is *the same problem appearing in different places* — that is breadth, so no single venue is load-bearing, and building around the blocked one is a scoping choice rather than a compromise.
+
+**Amended 2026-09-04 by Q3/D15.** Reddit listings are now an available source through `reddit_feed.py`, not a forbidden or mandatory dependency. The breadth rule stands: it may contribute one listing-level signal alongside unrelated venues, never consume the module's research budget or define the module around one platform.
 
 **Why D2 is satisfied rather than waived:** explicit demand, plus two prior runs of exactly this shape (`obstacle-corpus-inverted`, `vocabulary-ladder-price-monitoring`) that came back under-sampled, plus `/research-add-module`'s discovery step having effectively already run — its finding is that the marquee source is a wall. A module written now is *tested*, not guessed, which is the whole point of D2.
 
@@ -138,6 +142,8 @@ Origin is `fetch-anything`'s handler registry, **inverted**. There, a ledger rec
 **So the actionable class is the one the idea called "nothing worked."** Don't retry, don't trust a search that quietly returns other domains, here is the substitute. That makes the ledger the **enforcement mechanism for D7** and the **content source for D8's directives**, rather than a rung-router.
 
 **Why this can ship where [harvest-from-runs](docs/parking-lot/harvest-from-runs.md) is stuck:** access outcomes are binary and observed; source *quality* needs judgment, which is exactly [Q1](docs/questions/Q1-source-accumulation.md)'s blocker. Same "accumulate observed evidence from runs" shape, different payload, and only one of them needs a human in the loop.
+
+**Amended 2026-09-04 by D15.** The approved Reddit reader is a named source method, not a generic fetch rung. It does not change this ledger's failures-only purpose or make Firecrawl outcomes actionable to the generic agent.
 
 <!-- D11 — Unreachable is a separate channel from unanswered -->
 ### D11 — "Unreachable" is a separate output channel from "unanswered" 🔨
@@ -261,7 +267,7 @@ Every *scraper* route failed at a permission gate — the harness blocks the dom
 
 D10 settles the ledger's shape, not its mechanics: location (the `apm install` overwrite problem), the `Write` carve-out an item agent would need, and expiry. See [docs/questions/Q4-ledger-mechanics.md](docs/questions/Q4-ledger-mechanics.md).
 
-### Q5 — Should sites be their own structure, referenced by topic modules?
+### Q5 — Should sites be their own structure, referenced by topic modules? — ✅ resolved by D14
 
 Modules are organized by topic. Sites recur across them and each one has its own querying quirks, which are currently rediscovered every run. See [docs/questions/Q5-site-references.md](docs/questions/Q5-site-references.md).
 

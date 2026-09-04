@@ -1,6 +1,6 @@
 # Q5 — Should sites be their own structure, referenced by topic modules?
 
-> **Status:** open
+> **Status:** ✅ Resolved by `PLAN.md` D14. Reopen only if a real run shows that the module's inline access method is insufficient.
 > **Opened:** 2026-09-03 · **Last touched:** 2026-09-03
 
 ## The question
@@ -62,8 +62,7 @@ GitHub at 6 is what turned the question. The method that actually works on it �
 
 ## Blocked on
 
-- The user's own thinking — explicitly deferred, not stalled on anything external.
-- The user's own thinking — explicitly deferred, not stalled on anything external.
+- Nothing. D14 established the recurrence and overflow triggers; runtime loading remains explicitly deferred until a real run proves the inline method insufficient.
 
 ## Related
 

@@ -79,7 +79,7 @@ strategy modules              skills/web-search-modules/*.md   data only
   {topic_slug}/          # a run folder — any directory containing outline.yaml
     outline.yaml    # items[] + execution{batch_size, items_per_agent, output_dir, depth, modules}
     fields.yaml     # field categories, descriptions, detail_level (brief|moderate|detailed)
-    results/*.json  # one file per item; values marked [uncertain]; trailing uncertain[] array
+    results/*.json  # one file per item; values marked [uncertain]; trailing uncertain[] and unreachable[] arrays
     report.md       # produced by a generate_report.py the report skill writes per project
 ```
 
