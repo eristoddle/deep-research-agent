@@ -16,46 +16,19 @@
 
 ---
 
-# ⏭ NEXT ACTIVE TASK — D11: Unreachable provenance output
+# ⏭ NEXT ACTIVE TASK — none queued
 
-**Goal:** Make a failed named source visible in `results/*.json` and in the final report without conflating it with an unanswered field.
-
-**Why:** D11 in `PLAN.md` found that the agent is repeatedly told to "record" unreachable pages without an output destination, while the report's `uncertain[]` instructions contradict themselves. A search constrained to a named domain can also silently return only other domains; that is a failure of the named source, not a successful result set.
-
-**Reversible if:** —
-
-**Design:**
-
-1. [x] Update `agents/web-search-agent.md` to make the output destination explicit whenever a named source is unreachable. For JSON output, add an `unreachable` array as a sibling to `uncertain`; each entry is an object with exactly `source`, `url`, and `reason` keys. `reason` is `fetch_failed` for a page that remains inaccessible after its allowed retry, or `zero_domain_results` when a search constrained to a named domain returns no URLs on that domain. Add the mechanical detection rule: constrained searches with zero matching-domain URLs are zero-result findings, not a result set. Entries annotate source provenance and never cause a field answered through a documented substitute to become uncertain. Preserve the existing fetch-helper constraints and every unrelated sentence.
-
-2. [x] Update the hard-constrained prompt template and one-shot example in `skills/research-deep/SKILL.md` in lockstep. Its output requirements must require the same `unreachable[]` schema, the two reasons, and the non-blocking provenance rule alongside the existing `uncertain[]` requirements. Keep every unrelated line and template section unchanged.
-
-3. [x] Update `skills/research-report/SKILL.md` so generated `generate_report.py` treats `unreachable` as an internal JSON field for ordinary field/category traversal, but emits a dedicated, reader-visible `## Unreachable sources` section. Deduplicate entries across item results by the full `source` + `url` + `reason` tuple; display the source, URL, reason, and affected item names. Continue skipping unanswered values and `uncertain[]`; do not treat `unreachable[]` entries as uncertain fields or omit their new section.
-
-**Files:**
-- `agents/web-search-agent.md`
-- `skills/research-deep/SKILL.md`
-- `skills/research-report/SKILL.md`
-- `TASKS.md` (piece status and run state only)
-
-**Tests:**
-1. Run `rg -n 'zero_domain_results|fetch_failed|unreachable' agents/web-search-agent.md skills/research-deep/SKILL.md skills/research-report/SKILL.md` and confirm the detection rule, two reasons, and report section are all specified.
-2. Compare the `skills/research-deep/SKILL.md` prompt template with its one-shot example to confirm their output-requirements blocks match after substituting variables.
-3. Confirm `skills/research-report/SKILL.md` explicitly skips `uncertain[]` values while requiring a visible, deduplicated `## Unreachable sources` section; it must not instruct the script to skip `unreachable[]` entirely.
-4. Run `python3 -m py_compile skills/research/validate_json.py` and `git diff --check`.
-
-**Out of scope:**
-- Changes to `skills/research/validate_json.py`, module access methods, `ACCESS.md`, or site files.
-- Any fetch-rung, tool-allowlist, Firecrawl, `crwl`, or fetch-outcome-ledger changes.
-- README, routing, or external task mirror changes beyond this pre-run reconciliation.
-
-**Report back:** List each completed or blocked piece; files changed; each test result; and any wording ambiguity that required a design choice rather than implementation. Update every piece status and the run-state note before stopping.
-
-> ▶ Run state: done 2026-09-04. Pieces 1-3 completed; no blocks. All specified checks passed. No resume needed.
+No implementation task is queued. The next work is planning: resolve the Reddit-feed runtime-access contract (D8/Q6), then settle `demand-signals` routing (D9) before queueing its build.
 
 ---
 
 ## ✅ Done (collapsed — full detail in the planning doc's session log)
+
+### `[unreachable-output]` Separate unreachable-source provenance from unanswered fields — 2026-09-04
+
+All 3 pieces landed, none blocked. `results/*.json` can now carry an `unreachable[]` array whose entries are `{source, url, reason}`. The canonical agent and `/research-deep` handoff treat `fetch_failed` and `zero_domain_results` as provenance annotations, never as a reason to mark a field answered through a documented substitute as uncertain. `/research-report` now directs generated reports to deduplicate those entries by source, URL, and reason, then render a reader-visible `## Unreachable sources` section with affected items. The deep-research template and its one-shot example remain in lockstep. `PLAN.md` **D11**.
+
+Verified: required contract search, template/example comparison, report semantics, `python3 -m py_compile skills/research/validate_json.py`, and `git diff --check` all passed.
 
 ### `[site-files]` A referenced site layer, earned by recurrence — 2026-09-03
 

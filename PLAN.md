@@ -269,6 +269,11 @@ Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-sea
 
 > Most recent sessions inline; older sessions archived → see `docs/sessions/`.
 
+### Session 6 — 2026-09-04
+
+- **D11 shipped** — `unreachable[]` is now a structured per-item provenance channel, separate from unanswered `uncertain[]`. Each entry is `{source, url, reason}`, with `fetch_failed` for an inaccessible page and `zero_domain_results` for a named-domain search that returned no matching-domain URLs. The report contract deduplicates entries and renders a visible `## Unreachable sources` section with affected items, while fields answered through a documented substitute remain answered.
+- The canonical research-agent prompt and `/research-deep` hard-constrained prompt template now carry the same detection and output rules; its one-shot example was changed in lockstep. Validator compilation, targeted contract checks, and `git diff --check` passed.
+
 ### Session 5 — 2026-09-03
 
 Two implementer queues shipped and a two-round grill, interleaved. Opened by reviewing the returned access-method retrofit, which is what surfaced the session's real finding.
