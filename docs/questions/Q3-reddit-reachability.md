@@ -1,6 +1,6 @@
 # Q3 — Is Reddit reachable at all, and from where?
 
-> **Status:** open
+> **Status:** ✅ **ANSWERED — Reddit is reachable.** `skills/research/reddit_feed.py` reads the public Atom feeds. Built and tested 2026-09-03
 > **Opened:** 2026-09-03 · **Last touched:** 2026-09-03
 
 ## The question
@@ -64,9 +64,68 @@ Two errors in the entry above, both mine, both recorded here rather than edited 
 
 **What flips if firecrawl reaches Reddit** — the revert set, so it does not have to be rediscovered. Every bullet resting on this verdict is tagged `[ACCESS:reddit]` per D12(a); `grep -rl "ACCESS:reddit"` prints the current list. As of this writing that is `skills/web-search-modules/{general-web,competitor-content,vendor-landscape}.md` plus the Reddit section of `skills/web-search-modules/ACCESS.md`. A positive result also reopens D8's deferred venue half (a Reddit *modifier*, never a topic module) and changes what `demand-signals` (D9) can be built on, since that module is currently Reddit-free by construction rather than by preference.
 
+### 2026-09-03 — resolved: tested here, and firecrawl refuses Reddit outright
+
+Run on this machine, second IP, current harness build.
+
+| Route | Result |
+|---|---|
+| `curl` + browser UA → `.json` | **302** to the login wall (was 403 on the other machine — same family) |
+| `crwl` (the carve-out) | **174-byte login page** (was 238 bytes) |
+| `firecrawl scrape` — `old.reddit.com` listing | **refused**: *"We apologize for the inconvenience but we do not support this site."* |
+| `firecrawl scrape` — `www.reddit.com` listing | same refusal |
+| `firecrawl scrape` — `old.reddit.com/r/…/top/` | same refusal |
+| `firecrawl scrape` — `news.ycombinator.com` (control) | **succeeded**, 15KB |
+
+**The IP hypothesis is dead.** Two machines, two IPs, the same wall. The rows that were labelled IP-scoped in the original entry are not.
+
+**And firecrawl's failure is a different kind entirely.** It is not a block, a rate limit, or a challenge — it is a vendor policy refusal naming the site, returned identically for every URL shape, while a control scrape on another domain worked fine. **A proxy pool cannot route around a scraper's own decision not to serve a domain.** That was the one mechanism left that could have changed the answer, which is what makes this resolved rather than merely re-tested.
+
+**What this settles elsewhere:** D9's `demand-signals` module is Reddit-free **by necessity, not by choice** — that scoping decision is now confirmed rather than provisional, and it will not need revisiting. [Q6](Q6-firecrawl-rung.md) loses its Reddit motivation entirely, though firecrawl remains capable on other sites. The revert list below stays accurate but is unlikely to ever be used.
+
+### 2026-09-03 — reopened: the feeds were never tested, and one of them works
+
+**The previous entry's "there is no route left to try" was wrong.** Every route tested to that point was a *scraper* aimed at HTML. Reddit's Atom feeds were never tried. One works.
+
+| Route | Result |
+|---|---|
+| `curl` → `www.reddit.com/r/<sub>/.rss` | **HTTP 200, 73,649 bytes, real current post titles** (feed `<updated>` matched the test date) |
+| `curl` → `www.reddit.com/r/<sub>/search.rss?q=…` | **429** — rate limited, *not* refused. Untested with backoff. |
+| `curl` → `old.reddit.com/r/<sub>/.rss` | 302. Consistent with the user's report that `old.reddit.com` is degrading generally; stop treating it as the preferred host. |
+| `WebFetch` → the working `.rss` URL | *"Claude Code is unable to fetch from www.reddit.com"* — a **harness** refusal, not Reddit's |
+| `crwl` → the working `.rss` URL | `'NoneType' object has no attribute 'raw_markdown'` — a **format** failure on XML, not a block. Possibly a flag away. |
+
+**So the wall is not Reddit's.** Reddit serves this content to an ordinary client with no auth. The two tools the agent is allowed to use cannot take it: one is blocked by the harness at the domain level, the other cannot parse XML.
+
+**Why this matters more than "a workaround exists":** the feed returns **listings** — many post titles, cheaply, in one request. D9 states outright that listings are the correct unit for demand signals and that full threads are the wrong one. This is not a degraded substitute for the blocked route; it is closer to what the module actually wants than scraping threads would have been.
+
+**Open, and now the real question:** what mechanism reaches it. A `curl` of a known feed URL is one-shot, stdout, bounded, opens nothing, and needs no auth — the same shape as the existing `crwl` carve-out and arguably narrower, since it is a fixed URL pattern rather than an arbitrary page. Whether that becomes a second carve-out, an extension of the existing one, or something the user builds separately is undecided. See [Q6](Q6-firecrawl-rung.md), which is the same class of question.
+
+**Not yet tested:** `search.rss` with spacing to clear the 429, per-subreddit `.rss` sort variants (`/top/.rss`, `/new/.rss`), and the multi-subreddit form (`/r/a+b+c/.rss`).
+
+**The official OAuth API is NOT a candidate — struck on first-hand evidence.** It was suggested here as "the supported path"; the user has already tried to sign up for it and could not get a token at all. Their words: *"it seemed broken as fuck… I've dealt with issues on websites before and figured out workarounds and all this. I gave up trying to sign up."* That is someone who routes around broken signup flows for a living failing to complete this one. Do not re-propose it without new evidence that the registration flow works — it has already cost one attempt.
+
+**Which promotes the feed from fallback to primary.** The `.rss` route's real advantage is not that it happens to work, it is that **there is nothing to sign up for**: no account, no client ID, no token to expire, revoke, or re-authorize, and no terms tier to fall out of. Every other route considered — firecrawl, the OAuth API — failed at a *vendor gate* rather than at a technical wall. The feed has no gate.
+
+### 2026-09-03 — answered: we wrote the tool
+
+The user's call, and it was the right one: *every* failure had been somebody's permission gate, so the answer was to stop asking permission and write the reader. `skills/research/reddit_feed.py` — stdlib only, no dependencies, no account, no key.
+
+**No new permission was needed.** `web-search-agent`'s allowlist is `WebSearch, WebFetch, Read, Write, Bash`. It already has `Bash`. The `crwl` carve-out was never a permission — it is a *rule* about what may run through a permission the agent already holds. A bounded script is the same shape.
+
+**Verified working:** subreddit listings (`r/SideProject`), merged multi-subreddit feeds (`r/Entrepreneur+smallbusiness+freelance` — one request, several communities), and site-wide search. Output is title + permalink + date + subreddit, text or `--json`.
+
+**Three things the testing caught that a naive version would have shipped broken:**
+
+- **The rate limit is cumulative by IP, not per-request.** A burst of feeds trips a 429 even though each one alone is fine. It clears with patient backoff — the script retries 5 times starting at 5s and doubling. A 429 is a rate limit, never a refusal.
+- **`sort=new` on a site-wide search returns near-random posts.** Only `relevance` respects the query, so search defaults to it regardless of the listing default.
+- **Reddit's search mixes matching *subreddits* in with matching *posts*.** Unfiltered, a search for "is there a tool that" returned `r/Tools` and `r/todayilearned` — 200 OK, plausible-looking, not results. Only post permalinks carry `/comments/`, which is the filter. **This is D7's silent substitution appearing inside our own tool**, and it would have been invisible without reading the output.
+
+**Still open (small):** whether the module invokes this directly, and the wording of the tool-discipline rule that permits it — the same class of question as [Q6](Q6-firecrawl-rung.md). The access problem is solved; what remains is prompt wording.
+
 ## Blocked on
 
-- **Nothing.** See the 2026-09-03 correction below — both previously recorded blockers were wrong.
+- Nothing. Answered.
 
 ## Related
 

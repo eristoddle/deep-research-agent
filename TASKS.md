@@ -16,6 +16,16 @@
 
 ---
 
+# ⏭ NEXT ACTIVE TASK — none queued
+
+The queue is empty. Candidates sitting closest to buildable, in `PLAN.md`:
+
+- **D11** — give "unreachable" its own output channel (`unreachable[]` in `results/*.json`, a report section, and the detection rule for silent substitution). Decided in full; touches `agents/web-search-agent.md` and the two `research-deep` prompt templates, whose one-shot examples must change in lockstep.
+- **D13** — landed for `crwl`/firecrawl/`fetch-anything` in `README.md` this session; nothing else outstanding.
+- **Q3** — the firecrawl re-test. Runnable on this machine now; the revert list is already written beside the procedure.
+
+---
+
 ## ✅ Done (collapsed — full detail in the planning doc's session log)
 
 ### `[site-files]` A referenced site layer, earned by recurrence — 2026-09-03
