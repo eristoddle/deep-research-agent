@@ -47,3 +47,58 @@ Access-method-shaped, which means it may belong inside the active retrofit rathe
 2. Is a Reddit module justified under D2, or is this two source bullets in existing modules?
 3. Does the search-layer refusal reproduce, or was it transient? Worth one cheap check before building on it — the evidence is four runs on two days, all with the same tooling.
 4. Would routing fetches through the blog repo's `fetch-anything` skill (which already owns a defuddle → crawl4ai → firecrawl ladder plus per-domain handlers including Reddit) be a cheaper answer than reimplementing handlers here? It centralises domain knowledge but crosses a repo boundary and may not survive the agent's fetch-budget accounting.
+
+---
+
+## 2026-09-03 — retested; the proposed fix is falsified for Reddit
+
+Grill round 1. This page's four open questions are now partly answered, and its **central
+proposal does not survive contact with Reddit.**
+
+**Q3 above ("does the refusal reproduce, or was it transient?") — it reproduces, and it is worse
+than recorded here.** This page logged it as `400 — not accessible to our user agent`. What a
+`site:reddit.com` search actually returned was ten clean, plausible results from *other domains*
+(Etsy community, SBA, slideshare) and no error at all. That is **silent substitution**, not a
+refusal: the run looks like it succeeded. It also explains the fallback logged above —
+`vocabulary-ladder-price-monitoring` "falling back to eBay/Amazon/Shopify community forums" was
+very likely not the agent's judgment, it is what the search tool handed it.
+
+This is what became `PLAN.md` **D7**.
+
+**The "JSON endpoint first" fix is falsified for Reddit.** This page proposed it as the answer,
+carried over from the Discourse win in `verify-crwl-fallback.md`, on the reasoning that "Reddit
+exposes JSON on essentially every view." The endpoint exists; it is not reachable:
+
+- `WebFetch` on `www.reddit.com` **and** `old.reddit.com` → `Claude Code is unable to fetch from
+  <host>`. A harness-level refusal, not a Reddit 403 — so the URL form is irrelevant.
+- `curl` + browser User-Agent → `.json` → `403`.
+- `crwl` on `old.reddit.com` → login wall, 238 bytes.
+
+The heuristic remains correct for Discourse and other server-rendered forums. It is **not** the
+general rule this page reads as. Narrow it.
+
+**Scope this evidence, do not universalize it.** All of the above is one machine, one IP, one
+harness build, on one day. Two rows are IP-scoped (the `curl` 403, the `crwl` login wall) and one
+is harness-scoped (the `WebFetch` refusal names Claude Code, not Reddit). **Firecrawl was never
+tested** — the one rung with a proxy pool, and the rung `fetch-anything`'s Reddit handler reaches
+for precisely because Reddit rate-limits by IP. The re-test procedure now lives in
+[Q3](../questions/Q3-reddit-reachability.md); treat that as the deliverable rather than the table.
+
+### Disposition of this page's four open questions
+
+1. **Fifth access-method kind for API/JSON-replaced sources?** — **No.** Reddit is not
+   API-replaced, so that was never the gap. The existing fourth form is instead sharpened from a
+   passive note into a directive that names a substitute. → `PLAN.md` **D8**.
+2. **Reddit module under D2?** — **Deferred**, and for a better reason than D2. A venue layer is
+   worth little while the venue may be unreachable; it waits on [Q3](../questions/Q3-reddit-reachability.md).
+   The routing shape, if it is ever built, is a **modifier** (the `chinese-tech` precedent), not a
+   topic module.
+3. **Does it reproduce?** — **Yes**, silently. Answered above.
+4. **Route fetches through `fetch-anything`?** — **Still open.** Its Reddit handler's three rungs
+   are each outside this agent's tool discipline: `.json` (confirmed dead), crawl4ai's *Python
+   API* (more than the `crwl` CLI carve-out permits, and banned as agent-authored scripting), and
+   firecrawl (paid, "no second helper"). Carried into [Q3](../questions/Q3-reddit-reachability.md)
+   and [Q4](../questions/Q4-ledger-mechanics.md).
+
+**Still parked**, but no longer for lack of evidence — the demand-signals work (`PLAN.md` **D9**)
+was deliberately scoped to not need Reddit, which is what unblocks progress without resolving this.

@@ -38,3 +38,24 @@ Note the precedent: `pricing.md` **already requires an observation date for ever
 
 - PLAN.md **D1** (the line budget corollary)
 - `TASKS.md` active task, Tests section — currently encodes standard (2)
+
+---
+
+### 2026-09-03 — the staleness half may close elsewhere
+
+Grill round 1. This page's *follow-on nobody has answered* — "a URL verified today can rot, and
+nothing records when an access method was last confirmed" — listed three options and rejected
+per-source dating as too expensive against the ~40-line module cap.
+
+**`PLAN.md` D10 (the fetch-outcome ledger) may dissolve that cost.** A ledger is a dated
+observation store living *outside* the module line budget, so dates there are free. If it ships,
+this follow-on may close as a side effect rather than needing its own answer.
+
+Not decided — it depends on where the ledger lands, since a per-project ledger cannot carry dates
+for a package-shipped module's sources. Tracked as mechanic 1 in
+[Q4](Q4-ledger-mechanics.md).
+
+Note also that D8 sharpens the spec's fourth access-method form ("a note that it blocks fetching")
+into a **directive** that must name a substitute. That changes the answer to this page's third
+"what would need deciding" item: a URL that fails verification is not simply omitted or marked
+blocked — it must be replaced with what to use instead.

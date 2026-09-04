@@ -85,6 +85,58 @@ The existing `web-search-agent` name and prompt remain the Claude-compatible can
 
 **Why not one universal agent file:** APM's current authoring contract deploys `model` and `tools` verbatim to both Copilot and Claude. Their tool names are not portable, and removing the allowlist would restore the failure that opened roughly 100 browser tabs. Two thin entry points preserve the boundary without duplicating the research method.
 
+<!-- D7 — No silent substitution -->
+### D7 — No silent substitution 🔒 foundational
+
+Decided 2026-09-03. **When a named source cannot be reached, the run says so. It never proceeds silently on whatever the tool returned instead.**
+
+**Why:** a `site:reddit.com` search returned ten clean, plausible results from *other domains* (Etsy community, SBA, slideshare) and **no error at all**. That is not a refusal, it is a substitution — and a run that names Reddit as its primary source while reporting success on Etsy forums is worse than a run that fails, because the failure is invisible to whoever reads the report. It retroactively explains `vocabulary-ladder-price-monitoring` "falling back to eBay/Amazon/Shopify community forums": that was very likely not the agent's judgment, it is what the search tool handed it.
+
+Three places it binds:
+
+- **A search that returns zero results from a named domain is a finding**, not an empty set. Report it.
+- **`results/*.json` and the report must distinguish "no answer exists" from "the source was unreachable."** The `uncertain[]` array is already the mechanism; this is what it is for.
+- **A module that names a source it cannot reach is a bug in the module** — which is what D8 fixes.
+
+This is about *behavior*, not about Reddit. It holds for any source, and it holds regardless of how [Q3](docs/questions/Q3-reddit-reachability.md) resolves.
+
+<!-- D8 — Access methods in one shared file; the fourth form is a directive -->
+### D8 — Access methods live in one shared file, and the fourth form is a directive 🔨
+
+Decided 2026-09-03. Two parts, both about the **access** layer and neither about routing.
+
+**(a) One shared file.** Reddit is named as a source in `general-web`, `competitor-content`, and `vendor-landscape` with zero access methods between them. Whatever gets learned about reaching a venue lands in **one** file that modules cite by name — the same architecture as `ROUTING.md` for routing and `LAYOUT.md` for layout. Deliberately *not* a new router entry: how to reach a source is not a routing question, and the router has exactly three kinds of entry today.
+
+**(b) The spec's fourth form becomes a directive.** `SKILL.md` allows "a note that it blocks fetching." That is passive — it tells the agent to give up, which under D7 beats substituting but still ends the line of inquiry. Sharpen it to name **the block and the substitute**: "unreachable from this toolchain — use niche forums and PAA for the same signal." **No fifth kind.** The parked doc proposed one for API/JSON-replaced sources; Reddit is not API-replaced, so that was never the gap.
+
+**Deferred — the venue half.** If a Reddit venue layer is ever built it is a **modifier** (the `chinese-tech` precedent: an axis layered on a topic module, never consuming a topic slot), not a topic module, which would compete with `pricing`/`general-web` and lose. It is worth little while [Q3](docs/questions/Q3-reddit-reachability.md) is open.
+
+<!-- D9 — demand-signals module -->
+### D9 — `demand-signals`: build the research stage, without Reddit 🔨
+
+Decided 2026-09-03. **D2's trigger is met** and the module is approved in shape. Not queued this session.
+
+**Scope** is Day 1–3 of the source article (`10.05 Web Clips/I Gave AI 30 Days…`): *find a problem people repeatedly describe, in their own words, across unrelated places.* Not the product, funnel, or content stages — this repo does the research stage.
+
+**Reddit-free by construction:** niche forums (Discourse/XenForo expose JSON — confirmed on the Obsidian forum), People-Also-Ask, search suggestions, review sites, Amazon Q&A. The article's own requirement is *the same problem appearing in different places* — that is breadth, so no single venue is load-bearing, and building around the blocked one is a scoping choice rather than a compromise.
+
+**Why D2 is satisfied rather than waived:** explicit demand, plus two prior runs of exactly this shape (`obstacle-corpus-inverted`, `vocabulary-ladder-price-monitoring`) that came back under-sampled, plus `/research-add-module`'s discovery step having effectively already run — its finding is that the marquee source is a wall. A module written now is *tested*, not guessed, which is the whole point of D2.
+
+**Family is undecided.** It may extend Published-content landscape — `competitor-content` is its mirror image (what has been *published* vs. what is being *asked*) — or open its own row. Per `wanted-modules`, test the discriminating question before assuming the family.
+
+One design constraint worth carrying: **full threads are the wrong unit.** Repetition across places is a listing/search-level signal — many titles, cheaply. Full bodies matter only for verbatim vocabulary, a narrower second pass. At `standard`'s 12 fetches, spending them on whole threads buys depth where this needs breadth.
+
+<!-- D10 — Fetch-outcome ledger -->
+### D10 — Fetch-outcome ledger: failures-only, a negative cache 🔨
+
+Decided 2026-09-03 in shape; mechanics deferred to [Q4](docs/questions/Q4-ledger-mechanics.md). Not queued this session.
+
+Origin is `fetch-anything`'s handler registry, **inverted**. There, a ledger records which rung won so the ladder is not re-climbed — which works because three rungs exist. Here, `web-search-agent`'s ladder is two rungs (`WebFetch` → `crwl`) with no crawl4ai-Python and no firecrawl, so a row saying *"firecrawl worked for reddit.com"* is advice this agent cannot act on.
+
+**So the actionable class is the one the idea called "nothing worked."** Don't retry, don't trust a search that quietly returns other domains, here is the substitute. That makes the ledger the **enforcement mechanism for D7** and the **content source for D8's directives**, rather than a rung-router.
+
+**Why this can ship where [harvest-from-runs](docs/parking-lot/harvest-from-runs.md) is stuck:** access outcomes are binary and observed; source *quality* needs judgment, which is exactly [Q1](docs/questions/Q1-source-accumulation.md)'s blocker. Same "accumulate observed evidence from runs" shape, different payload, and only one of them needs a human in the loop.
+
 ## Open questions
 
 > Each is a heading (the question) + a link to its discussion in `docs/questions/`. Thread files are append-only — a later grill adds a dated section rather than rewriting.
@@ -96,6 +148,14 @@ See [docs/questions/Q1-source-accumulation.md](docs/questions/Q1-source-accumula
 ### Q2 — What makes an access method "tested"?
 
 See [docs/questions/Q2-tested-access-method.md](docs/questions/Q2-tested-access-method.md).
+
+### Q3 — Is Reddit reachable at all, and from where?
+
+Every route inside the agent's tool discipline failed on one machine, 2026-09-03. **Firecrawl untested** — the one rung with a proxy pool. See [docs/questions/Q3-reddit-reachability.md](docs/questions/Q3-reddit-reachability.md), which carries the re-test procedure rather than the conclusion.
+
+### Q4 — Where does the fetch-outcome ledger live, and who may write it?
+
+D10 settles the ledger's shape, not its mechanics: location (the `apm install` overwrite problem), the `Write` carve-out an item agent would need, and expiry. See [docs/questions/Q4-ledger-mechanics.md](docs/questions/Q4-ledger-mechanics.md).
 
 ## Parking lot
 
@@ -110,6 +170,19 @@ See [docs/questions/Q2-tested-access-method.md](docs/questions/Q2-tested-access-
 ## Session log
 
 > Most recent sessions inline; older sessions archived → see `docs/sessions/`.
+
+### Session 4 — 2026-09-03
+
+Planning only, no code. Opened on whether the pipeline can support the research process in a web-clip article (*I Gave AI 30 Days…*), whose Day 1–3 is: find a problem people repeatedly describe in their own words across unrelated places. That process leans on Reddit, so the session tested whether Reddit is reachable at all.
+
+- **It is not, from this machine** — all five routes inside the agent's tool discipline failed, and the search layer fails **silently**, returning ten plausible results from other domains with no error. That produced **D7 (no silent substitution)**, the session's one 🔒 decision, and it is about behavior rather than about Reddit.
+- The parked `search-layer-refusals` doc proposed "look for a JSON endpoint beside the HTML page" as the fix. **Falsified for Reddit** — the endpoint exists and is unreachable. The heuristic stays correct for Discourse; it is not general. Amended in place.
+- **D8** splits venue from access — the two things "topic vs source" was conflating. Access moves to one shared file (the `ROUTING.md`/`LAYOUT.md` pattern), the router is untouched, and the spec's fourth access-method form is sharpened from a passive note into a directive naming a substitute. A Reddit *modifier* (the `chinese-tech` shape) is the right venue answer if one is ever needed, and waits on Q3.
+- **D9** unparks a `demand-signals` module — D2's trigger met by explicit demand plus two prior under-sampled runs — scoped to the research stage and built Reddit-free.
+- **D10** takes the session's new idea, a per-domain fetch-outcome ledger modeled on `fetch-anything`'s handler registry, and **inverts it**: this agent has two rungs and no firecrawl, so "which rung won" is unactionable and "nothing worked" is the whole value. It becomes D7's enforcement mechanism and D8's content source.
+- Correction taken mid-round: the evidence is **one machine, one IP, one harness build**, and this plan is destined for a different computer. Firecrawl was never tested. **Q3** therefore carries the re-test procedure, not the conclusion.
+
+Nothing queued to `TASKS.md` — the access-method retrofit remains the active task, untouched.
 
 ### Session 3 — 2026-08-25
 
