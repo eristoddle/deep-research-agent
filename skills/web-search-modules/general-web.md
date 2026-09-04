@@ -11,14 +11,14 @@
 
 **None by design.** This module's value is its breadth — the answer is wherever the query actually lands, and pinning a fixed source list would narrow it back into a topic module. Query tactics below are the access method.
 
-- **Reddit** (r/programming, r/webdev, r/javascript, and topic-specific subreddits) - real-world experiences. Unreachable from this toolchain — use niche forums, Hacker News, and search-suggestion autocomplete for the same signal instead. See `ACCESS.md`. `[ACCESS:reddit]`
+- **Reddit** (r/programming, r/webdev, r/javascript, and topic-specific subreddits) - real-world experiences. Unreachable from this toolchain — use niche forums, Hacker News, and search-suggestion autocomplete for the same signal instead. See `sites/reddit.md`.
 - **Official documentation** and changelogs - authoritative information
 - **Blog posts** and tutorials - detailed explanations
-- **Hacker News** discussions - high-quality technical discourse
-- **Dev.to** (dev.to) - developer community with high-quality technical articles
+- **Hacker News** discussions - high-quality technical discourse. See `sites/hacker-news.md`.
+- **Dev.to** (dev.to) - developer community with high-quality technical articles. See `sites/devto.md`.
 - **Medium** (medium.com) - technical blog platform with in-depth articles
 - **Discord** - official discussion channels for many open source projects
-- **X/Twitter** - technical announcements and discussions from developers and maintainers
+- **X/Twitter** - technical announcements and discussions from developers and maintainers. See `sites/twitter-x.md`.
 
 ## 查询策略 (1.2 Best Practices & Comparative Research)
 - Look for official recommendations first

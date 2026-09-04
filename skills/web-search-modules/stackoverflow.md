@@ -8,5 +8,5 @@
 **Siblings:** `github-debug` — pair them when a usage question may turn out to be a bug.
 
 ## 搜索源
-- **Stack Overflow** and other Stack Exchange sites - technical Q&A. Query `site:stackoverflow.com <error or question>`, or `site:<site>.stackexchange.com <terms>` for a specific Stack Exchange site.
+- **Stack Overflow** and other Stack Exchange sites - technical Q&A. Query `site:stackoverflow.com <error or question>`, or `site:<site>.stackexchange.com <terms>` for a specific Stack Exchange site. See `sites/stackoverflow.md`.
 - **Technical forums** and discussion boards - community wisdom. Query `site:<forum domain> <terms>` once a relevant forum surfaces in general results.

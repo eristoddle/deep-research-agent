@@ -40,6 +40,26 @@ That result separates two motivations that were being treated as one:
 
 Still open, still the user's call; the counting just moved where the weight sits.
 
+### 2026-09-03 — recounted, then promoted to D14
+
+**The count above was wrong, and wrong in the direction that mattered.** It matched *domain strings* (`reddit.com`), but modules name sites in prose — `**Reddit**`, `Hacker News`, `Stack Overflow`. Counting by name instead of by domain gives **9 sites in more than one module**, not 6:
+
+| Site | Modules |
+|---|---|
+| GitHub | 6 |
+| Stack Overflow / Stack Exchange | 3 |
+| Reddit | 3 |
+| Hugging Face | 3 |
+| OpenRouter · Hacker News · `dev.to` · Artificial Analysis · Twitter/X | 2 each |
+
+GitHub at 6 is what turned the question. The method that actually works on it — the raw `CHANGELOG.md` URL, checking the last commit date before trusting a repo — is written in `agent-tooling.md` and in no other module, while five others name GitHub with no method at all. That is not a hypothetical duplication cost; it is five modules currently shipping a worse answer than one of their siblings already has.
+
+**The user's rule, which is what made this decidable:** a site earns a file when a *second* module names it. Recurrence is the threshold, so nothing is written speculatively and the set only grows when the payload itself demonstrates the need — D2's logic one level down.
+
+**The user also collapsed the tagging question into this one.** A module has to reference its site file anyway, and *that reference is the tag*: `grep -rl "sites/reddit.md"` produces the same revert list a `[ACCESS:reddit]` marker would, with no second syntax to keep in sync. The markers added earlier the same session were removed.
+
+**→ promoted to D14.** What stays open is narrow: whether a site file is ever loaded at runtime. D14 says no for now — the module bullet keeps its own self-sufficient access method, so nothing needs loading — and that gets revisited only if a real run shows the inline bullet was not enough.
+
 ## Blocked on
 
 - The user's own thinking — explicitly deferred, not stalled on anything external.

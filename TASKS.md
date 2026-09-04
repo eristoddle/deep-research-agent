@@ -16,95 +16,93 @@
 
 ---
 
-# ⏭ NEXT ACTIVE TASK — Access-method retrofit across all ten search modules
+# ⏭ NEXT ACTIVE TASK — Build the nine site files
 
 ## Goal
 
-Every source bullet in every module says **how to reach that source**, in the form appropriate to its module's kind (PLAN.md D1), and a source that *cannot* be reached says so and names what to use instead (PLAN.md D8). Done means: a reader of any module can query its sources without first searching to find out where they live, no bullet names a URL that has not been confirmed to resolve, and no bullet names an unreachable source without a substitute.
+The nine sites that more than one module names each get one small file at `skills/web-search-modules/sites/<slug>.md`, holding the querying method that is currently either duplicated across modules or written well in exactly one of them and missing from the rest. Done means: a maintainer editing how we query GitHub edits one file, not six; every module bullet naming one of the nine cites its site file by path; and no module bullet has become dependent on that file to function.
 
 ## Why (pointer)
 
-`PLAN.md` **D1 🔒** — the spec at `skills/web-search-modules/SKILL.md:36` has required an access method since before these modules were written, and `site:` currently appears **zero** times across the ten in scope. Spec and payload disagree. The cost is concrete: a `standard` run gets 8 searches and 12 fetches total, so searches spent rediscovering *where* a named source lives are searches not spent on the question — and rediscovery is non-deterministic, which is how a price ends up quoted from a blog copy instead of the provider's page.
+`PLAN.md` **D14**. GitHub is named by **six** modules, and the method that actually works — fetching `https://raw.githubusercontent.com/<org>/<repo>/main/CHANGELOG.md` instead of a changelog aggregator, checking the last commit date before trusting a repo — exists in `agent-tooling.md` and nowhere else. Five modules point at GitHub with no method at all. That is the shape this fixes.
 
-`PLAN.md` **D8** sharpens the fourth form of access method. The spec currently allows "a note that it blocks fetching," which is passive — it tells the agent to give up. Under **D7** giving up already beats the real failure mode (silently proceeding on whatever the search tool substituted), but it still ends the line of inquiry. The fourth form becomes a **directive naming the block and the substitute**, and what is known about reaching a venue lands in one shared file rather than being restated in each module that names it.
+**The citation is the tag** (D12(a), amended). A module referencing `sites/reddit.md` is what makes `grep -rl "sites/reddit.md"` produce the revert list when Reddit's status changes. There is no separate marker: **delete the `[ACCESS:reddit]` tags** currently in `general-web.md`, `competitor-content.md`, `vendor-landscape.md`, and `ACCESS.md` — the path citation replaces them.
 
-**The worked example is already in the repo.** `skills/web-search-modules/agent-tooling.md` was built access-method-first through `/research-add-module` and is excluded from this retrofit (`ROADMAP.md:24`) precisely because it is the reference shape. Read it before touching anything else. It demonstrates all three kinds in one file: `Verified working: <url>, <url>` seed lists, an explicit "do not reach it via `site:` search — fetch the URL directly" instruction, and blocked/wrong sources named alongside what to use instead (the impostor-domain and SEO-skip-list tactics). Match that shape rather than inventing one.
+**Reversible if:** [Q3](docs/questions/Q3-reddit-reachability.md) flips Reddit to reachable — that changes one line in `sites/reddit.md` and nothing else, which is the point. [Q5](docs/questions/Q5-site-references.md) and [Q6](docs/questions/Q6-firecrawl-rung.md) are open but do not reverse this work.
 
 ### ▶ Run state (the agent keeps this current on every stop)
-_<done · all 7 pieces landed, none blocked · four checks in Tests section all pass (py_compile, URL verification with unresolved URLs reported below, all modules + ACCESS.md under 40 lines, reddit grep clean) · nothing remains>_
+_<done · all 5 pieces landed, none blocked · nothing remains · see implementer report for the github/stackoverflow/twitter-x citation-count discrepancy against D14's counts>_
 
-## Size — where the time actually goes
+## Size
 
-**~2.5 to 3 hours total.** Counted, not guessed: the ten modules carry **52 source bullets**, and they are not equal work.
+**~50 minutes.** This is **consolidation, not research.** Every method you write already exists somewhere in this repo — in a module bullet, in `ACCESS.md`, or in `agent-tooling.md`, and the URLs in them were verified in the previous task. **Do not search. Do not fetch. Do not verify URLs.** If a site file would need a method nobody has written down yet, write what is known and leave the gap explicit rather than inventing one.
 
-| Piece | Modules | Bullets | Size |
-|---|---|---|---|
-| 5 | `general-web`, `competitor-content` | 14 | `[S]` ~10 min — these get **no** URLs by design; one "none by design" note each |
-| 4 + 6 | `github-debug`, `academic-papers`, `chinese-tech`, `stackoverflow` | 18 | `[M]` ~25 min — a literal `site:` query appended per bullet; a query form, so nothing to verify |
-| 3 | `pricing`, `benchmarks`, `model-releases`, `vendor-landscape` | 20 | `[L]` ~90 min — **the entire cost of this task** |
-| 1 + 2 + 7 | `SKILL.md`, `ACCESS.md`, `ROADMAP.md` | — | `[S]` ~45 min combined |
+## The format — all nine files use it exactly
 
-Piece 3 dominates because **one bullet is not one URL**. "The provider's own pricing page" is really Anthropic, OpenAI, Google, Mistral, DeepSeek, and xAI; "leaderboards" is another five or six. Twenty bullets expand into roughly **60–100 actual URLs**, and each one gets fetched to confirm it resolves *and* contains what the bullet claims. That is 30–50 minutes of pure network wait, plus reading each result, plus refitting bullets to stay under the 40-line cap rather than appending to it.
+```markdown
+# <Site name> — <domain>
 
-### The one real decision
+**Used by:** <comma-separated module names that reference this file>
+**Reachable:** yes | no — <substitute, if no> · <date, only when a verdict was actually tested>
 
-**The verification is the cost, not the writing.** Drop "confirm every seed URL resolves" and the whole task is ~45 minutes instead of ~3 hours.
+## Query
+- <the access method: `site:` query, URL pattern, or JSON endpoint>
 
-The rule exists because a **guessed URL is worse than none** (PLAN.md D1): the agent trusts it and spends a fetch on a 404 instead of falling back to search. Recommendation is to keep it for piece 3 specifically, since provider pricing pages are exactly where a stale URL causes a wrong number to get published. If the budget has to give, drop verification on the *leaderboard* seeds in `benchmarks` before the *pricing* seeds.
+## Worth knowing
+- <2-5 bullets: what works, what wastes budget. Omit the section entirely rather than padding it.>
+```
+
+**Hard cap 20 lines per site file.** These are small on purpose. `Reachable:` carries a date **only** where a verdict was actually tested — Reddit and nothing else. For the other eight write `**Reachable:** yes` with no date; do not invent test results.
+
+`Used by:` is a hint, verified by `grep`, not a contract. List the modules you actually edited in piece 3.
 
 ## Design — numbered pieces (status: `[ ]` not started · `[x]` done · `[!]` blocked)
 
-- [x] **1.** `[S]` **Write the three-kind taxonomy and the fourth-form directive into `skills/web-search-modules/SKILL.md`**, at/near line 36. The current sentence implies every source takes a URL. Two changes, both to that bullet: (a) add the distinction from D1 — fixed-site → literal `site:` query; parameterized → URL pattern + seed list; open-query → an explicit "none by design" note — and state that a **guessed URL is worse than none**, because the agent trusts it and spends a fetch on a 404 instead of falling back to search. (b) Per D8, rewrite the existing fourth form: "a note that it blocks fetching" becomes a **directive that names the block *and* the substitute** — the shape is "unreachable from this toolchain — use X for the same signal," not "this site blocks fetching." A passive note ends the line of inquiry; a directive redirects it. This piece gates every other piece: it is what stops #5 from inventing sources.
-- [x] **2.** `[S]` **Create `skills/web-search-modules/ACCESS.md`** — the one shared file D8(a) calls for, the same architecture as `ROUTING.md` for routing and `LAYOUT.md` for layout. _(depends on #1)_ **This is a data file, not a router entry** — do not add it to `ROUTING.md`, do not give it a family, and do not touch routing in any way; how to reach a source is not a routing question. Shape: one section per venue, each carrying **what fails**, **what was tried**, **the substitute**, and **the date + a one-line caveat naming the evidence's scope**. Seed it with exactly three entries, all already observed and recorded — do not research new ones, do not speculate:
-  - **Reddit** — every route inside the agent's tool discipline failed 2026-09-03; the search layer fails *silently*, returning plausible results from other domains with no error. Substitute: niche forums, People-Also-Ask, search suggestions. Caveat: **one machine, one IP, one harness build; firecrawl untested** — cite [Q3](docs/questions/Q3-reddit-reachability.md) and do not state it as settled.
-  - **JS-shell pages** — the `crwl` fallback escalates cleanly and the `head -c` bound holds, but it does *not* recover a page whose content arrives via JS. Substitute: prefer a JSON endpoint beside the HTML page. Cite `docs/parking-lot/verify-crwl-fallback.md`.
-  - **"JSON endpoint beside the HTML page" is not general** — it holds for Discourse (confirmed on the Obsidian forum) and is falsified for Reddit, where the endpoint exists and is unreachable. Cite `docs/parking-lot/search-layer-refusals.md`.
-
-  Add one line to `SKILL.md` pointing at it, next to the piece-1 edit. Keep the whole file under ~40 lines — it is read the same way a module is. **Hand-authored only:** D10's runtime-accumulated ledger is a different thing whose mechanics are still open ([Q4](docs/questions/Q4-ledger-mechanics.md)); nothing in this piece writes at runtime, and no skill or agent prompt gains a `Write` permission.
-- [x] **3.** `[L]` **Parameterized batch** — `pricing.md`, `benchmarks.md`, `model-releases.md`, `vendor-landscape.md`. _(depends on #1, #2)_ Each source bullet gains a URL **pattern** plus a short seed list of the vendors/leaderboards that actually recur — the `Verified working:` shape from `agent-tooling.md`. Verify every seed URL resolves and contains what the bullet claims. `pricing` and `benchmarks` first — ROADMAP ranks them highest because provider pricing pages and leaderboard URLs are stable and worth naming outright. `vendor-landscape` names Reddit as a source: give it the D8 directive form and cite `ACCESS.md` rather than restating the finding inline.
-- [x] **4.** `[M]` **Fixed-site batch** — `github-debug.md`, `academic-papers.md`, `chinese-tech.md`. _(depends on #1, #2)_ Literal `site:` queries appended to existing bullets. `academic-papers` already carries bare domains (`arxiv.org`, `scholar.google.com`) but no query method — it is partially compliant, so add the method to the domains already there rather than restating them. It has 31 of 40 lines used: append inline, add no new lines.
-- [x] **5.** `[S]` **Open-query batch** — `general-web.md`, `competitor-content.md`. _(depends on #1, #2)_ Write the explicit **"none by design"** note and one line on why. Do **not** invent a source list for either. `competitor-content` samples an unrefined reader-query search deliberately; a pinned source list would defeat the module. Both name Reddit: that bullet gets the D8 directive form citing `ACCESS.md` — which is the one case where an open-query module does carry an access method, because "unreachable, use X instead" is exactly what the agent needs and is not a source list.
-- [x] **6.** `[S]` **`stackoverflow.md` access methods only.** _(depends on #1, #2)_ Add `site:stackoverflow.com` / Stack Exchange query methods to its two source bullets. **The rewrite is parked** — do not add query tactics, do not restructure it, do not lengthen it beyond the access methods. That work is a separate parking-lot item.
-- [x] **7.** `[S]` **Update `ROADMAP.md`.** _(depends on #3, #4, #5, #6)_ Retire the "Retrofit: access methods" section — replace it with a one-line record that it landed, what the three-kind rule is, and that the fourth form is now a directive backed by `ACCESS.md`, pointing at `PLAN.md` D1 and D8. Leave every other roadmap section alone, including the `agent-tooling` paragraph that names it the reference shape.
+- [x] **1.** `[S]` **Create `skills/web-search-modules/sites/` and write the four multi-module files**: `github.md` (6 modules), `stackoverflow.md` (3 — name it `stackoverflow.md`; it is a *site* file and is unrelated to the topic module of the same name, which stays where it is), `reddit.md` (3), `huggingface.md` (3). Source the content from what already exists: GitHub's method from `agent-tooling.md`, Reddit's verdict and substitute from `ACCESS.md`'s Reddit section, the rest from the bullets in the modules that name them.
+- [x] **2.** `[S]` **Write the five two-module files**: `openrouter.md`, `hacker-news.md`, `devto.md`, `artificial-analysis.md`, `twitter-x.md`. _(depends on #1 for the established format)_ Same rule — consolidate what the modules already say. `twitter-x.md` will be thin; that is a correct outcome, not a reason to pad it.
+- [x] **3.** `[M]` **Add the path citation to every module bullet that names one of the nine.** _(depends on #1, #2)_ The bullet keeps its own self-sufficient one-line access method and gains `See \`sites/<slug>.md\`.` **The bullet must still work if nobody opens the site file** — do not move the access method out of the bullet and into the file. Line counts stay under 40; `academic-papers.md` is at 31 and `general-web.md` at 33, so append inline.
+- [x] **4.** `[S]` **Strip the `[ACCESS:reddit]` markers** from `general-web.md`, `competitor-content.md`, `vendor-landscape.md`, and `ACCESS.md`. _(depends on #3)_ The path citation added in #3 replaces them entirely.
+- [x] **5.** `[S]` **Move Reddit out of `ACCESS.md`.** _(depends on #1)_ Its verdict and substitute become `sites/reddit.md`'s `Reachable:` line. Replace the section with a one-line pointer. `ACCESS.md` keeps "JS-shell pages" and the JSON-endpoint scope note, which have no site to live in. Update its header paragraph so it describes what it actually still holds.
 
 ## Files
 
-- `skills/web-search-modules/SKILL.md` — pieces 1, 2
-- `skills/web-search-modules/ACCESS.md` — piece 2 (new file)
-- `skills/web-search-modules/{pricing,benchmarks,model-releases,vendor-landscape}.md` — piece 3
-- `skills/web-search-modules/{github-debug,academic-papers,chinese-tech}.md` — piece 4
-- `skills/web-search-modules/{general-web,competitor-content}.md` — piece 5
-- `skills/web-search-modules/stackoverflow.md` — piece 6
-- `ROADMAP.md` — piece 7
-- `skills/web-search-modules/agent-tooling.md` — **read-only reference shape. Do not edit it.**
+- `skills/web-search-modules/sites/*.md` — pieces 1, 2 (new directory, 9 new files)
+- `skills/web-search-modules/*.md` — pieces 3, 4 (citations; bullets otherwise untouched)
+- `skills/web-search-modules/ACCESS.md` — pieces 4, 5
 
 ## Tests (add; keep the suite green)
 
-There is no test suite — correctness here is judged by four checks, all of which must hold when the queue finishes:
-
-1. `python3 -m py_compile skills/research/validate_json.py` still passes (it should be untouched; this catches an accidental edit).
-2. **Every URL you write resolves and contains what the bullet claims.** Fetch it. A URL you could not verify does not go in the file — say so in the report instead. This is the whole point of the task.
-3. **`wc -l` on every module stays under 40**, `ACCESS.md` included. Append access methods to existing bullets; do not add new lines. Report the before/after line count for each file you touch.
-4. **`grep -n "reddit" skills/web-search-modules/*.md`** — every remaining hit sits in a bullet that names a substitute and cites `ACCESS.md`. A bare mention of Reddit with no directive is the exact failure D7 and D8 exist to close.
+1. `python3 -m py_compile skills/research/validate_json.py` still passes (should be untouched).
+2. **Every site file is ≤20 lines** and every module stays **<40**. Report before/after for each module touched.
+3. **`grep -rl "sites/reddit.md" skills/`** returns every module that names Reddit — this is the revert-list mechanism working. Same spot-check for `sites/github.md`.
+4. **`grep -rn "ACCESS:reddit" skills/` returns nothing.**
+5. **Every module bullet you edited still names its own access method.** Read them back: a bullet reduced to only a pointer is a regression, not a simplification.
 
 ## Out of scope (do NOT do)
 
-- **Do not add a new module.** PLAN.md D2 — no new modules until a real project needs one. `ACCESS.md` is a shared data file, not a module: no routing header, no `ROUTING.md` row.
-- **Do not touch `ROUTING.md`**, its families, or any routing header. No module changes family here.
-- **Do not edit `agent-tooling.md`.** It is out of scope by ROADMAP decision and is the reference shape; changing it moves the target.
-- **Do not build D10's fetch-outcome ledger.** Q4 is open — location, the `Write` carve-out, and expiry are all undecided. `ACCESS.md` is hand-authored and nothing writes to it at runtime.
-- **Do not re-test Reddit reachability.** Q3 carries the re-test procedure and it is a planning-thread call on different hardware. Record what is already known, with its caveat, and move on.
-- **Do not rewrite `stackoverflow.md`'s tactics** — access methods only (piece 6).
-- **Do not create any file under `agents/`.** `agents/` is shipped APM payload; a stray `.md` there is flattened into a top-level agent in every consumer install.
-- **Do not "improve" prose** in a module you're otherwise editing. Wording is the implementation; a nicer sentence that drops a constraint is a regression.
+- **Do not search, fetch, or verify any URL.** Consolidation only. A method nobody has written down stays unwritten — say so in the report.
+- **Do not wire site files into any agent or skill prompt.** D14: nothing loads them at runtime. No `Read` instruction, no mention in `ROUTING.md`, `SKILL.md`, or `agents/`.
+- **Do not touch `ROUTING.md`** or any routing header. No module changes family, and site files are not routed to.
+- **Do not rewrite the `stackoverflow.md` *module*.** That rewrite is still parked. `sites/stackoverflow.md` is a different file; creating it does not unpark the other.
+- **Do not create a site file for a site named by only one module.** The threshold is two. Nine files, no tenth.
+- **Do not create any file under `agents/`.**
+- **Do not "improve" prose** in a module you are otherwise editing.
 - Do not commit.
 
 ## Report back
 
-Per file: before/after line count, the access method added to each source bullet, and — separately — **every URL you could not verify**, with what happened when you fetched it. List blocked pieces with reasons. Do not bury an unverified URL in a summary; it is the one result that changes what the planning thread does next.
----
-
+Per site file: its line count and where its content came from. Per module: before/after line count and the citation added. Then, separately: **any site file that came out thin because the method was never written down anywhere** — that is the list that tells the planning thread what still needs discovering.
 ## ✅ Done (collapsed — full detail in the planning doc's session log)
+
+### `[access-methods]` Access-method retrofit across the ten pre-`agent-tooling` modules — 2026-09-03
+
+All 7 pieces landed, none blocked. Every source bullet in the ten modules now carries an access method in the form its kind calls for — literal `site:` queries for fixed-site modules, URL patterns plus verified seed lists for parameterized ones, an explicit "none by design" note for the two open-query ones. `SKILL.md` gained the three-kind taxonomy and the sharpened fourth form (a directive naming the block *and* the substitute, not a passive note). New `skills/web-search-modules/ACCESS.md` holds the venue-reachability findings. `PLAN.md` **D1/D8**.
+
+Verified in the planning thread: validator compiles, all modules under the 40-line cap, every Reddit mention carries a substitute. Three things the review surfaced:
+
+- **The `reddit` grep in the task's own Tests was case-sensitive** and silently skipped `competitor-content.md`, whose bullet says "Reddit" and never "reddit". A test that passes by not looking. The module was correct.
+- **Two URLs went in without content verification** — `cloud.google.com/vertex-ai/pricing` (too large for the fetch summarizer) and `ycombinator.com/companies` (client-rendered SPA). Both are the right page on the right domain; neither is a guess. Recorded rather than silently accepted.
+- **The Azure pricing bullet named a block with no substitute** — exactly the passive form the task had just replaced. Fixed to point at the calculator or the Bedrock/Vertex listing.
 
 ### `[runtime-portability]` Claude/Copilot portability retrofit — 2026-08-25
 

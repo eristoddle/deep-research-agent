@@ -57,6 +57,39 @@ One dependency, no ordering constraints. Previously the skills and the agent had
 
 For an existing mixed install, choose the host you actually use, remove only this package's two generated agent files from the inactive host directory, then rerun the matching explicit install command above with `--force`. Keep the selected host's skills directory: `.agents/skills/` for Copilot or `.claude/skills/` for Claude.
 
+## Optional: better fetching for blocked pages
+
+The pipeline works with no setup. These two are optional, and the agent checks for them rather than requiring them — if neither is present, a page that blocks fetching is simply recorded as unreachable and the run continues.
+
+**The agent never installs anything itself.** That is a deliberate limit on what it may do, which is exactly why setup is documented here instead: without it, the fallback below can silently never fire and there is nothing to tell you why.
+
+### crawl4ai (`crwl`) — free
+
+When `WebFetch` gets a 403, a bot challenge, or an empty body, the agent may retry that one URL through `crwl`. One retry, same fetch budget, output bounded, no crawling. It recovers a fair number of pages that plainly refuse `WebFetch`.
+
+```sh
+pip install crawl4ai && crawl4ai-setup
+```
+
+Nothing else is needed — the agent looks for `crwl` on `PATH` and uses it if it is there.
+
+It does **not** recover a page whose content is rendered by client-side JavaScript; it snapshots before that content loads. For those, a JSON endpoint beside the HTML page is usually the better route, which is the kind of thing recorded in `skills/web-search-modules/ACCESS.md`.
+
+### Firecrawl — paid, and never automatic
+
+Firecrawl is the rung above `crwl`: a hosted API with a proxy pool, which is what makes it the one option likely to get past a block that is based on your IP address rather than your user agent.
+
+**It costs money, so nothing in this package calls it on your behalf.** It is not wired into the agent, and installing it does not change how a research run behaves. It is here because it is the tool that answers "is this site actually unreachable, or just unreachable from my machine?" — a question worth being able to settle when a source you need keeps failing.
+
+Sign up: **[firecrawl.link/stephan-miller](https://firecrawl.link/stephan-miller)** *(affiliate link — it costs you nothing extra and supports this project; [firecrawl.dev](https://firecrawl.dev) is the plain one if you would rather.)*
+
+```sh
+npm install -g @mendable/firecrawl-cli
+export FIRECRAWL_API_KEY=fc-...        # fish: set -Ux FIRECRAWL_API_KEY fc-...
+```
+
+Use it yourself when you want to check a stubborn source. If you have a local fetch-escalation skill installed, the agent prefers that over calling any of this directly, since such a skill knows more about specific sites than a general rule can.
+
 ## Usage
 
 ```

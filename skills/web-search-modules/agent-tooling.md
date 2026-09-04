@@ -8,11 +8,11 @@
 ## Sources
 
 - **The tool's own docs site, fetched directly by URL.** The authoritative answer for config formats, directory layouts, and permission models. Do not reach it via `site:` search — see the impostor-domain tactic below. Verified working: `https://cursor.com/docs/skills`, `https://opencode.ai/docs/config/`, `https://code.claude.com/docs/en/changelog`.
-- **The raw `CHANGELOG.md` on GitHub**, not a changelog site. `https://raw.githubusercontent.com/<org>/<repo>/main/CHANGELOG.md` returns the real per-version list with no rendering layer. Verified on `anthropics/claude-code`. This is the single best source for "what changed between versions" and it beats every changelog aggregator.
+- **The raw `CHANGELOG.md` on GitHub**, not a changelog site. `https://raw.githubusercontent.com/<org>/<repo>/main/CHANGELOG.md` returns the real per-version list with no rendering layer. Verified on `anthropics/claude-code`. This is the single best source for "what changed between versions" and it beats every changelog aggregator. See `sites/github.md`.
 - **`agentskills.io`** — the vendor-neutral spec for the `SKILL.md` format, and the answer to any portability question. **Fetch the `.md` variants**, not the HTML: `https://agentskills.io/specification.md` and `https://agentskills.io/clients.md`. The bare HTML pages return raw MDX with a multi-thousand-line embedded client array. `https://agentskills.io/llms.txt` is the link index. `clients.md` is the highest-value page in this module: it maps ~45 agent tools to their own canonical skills-doc URL, which is how you find a tool's real docs domain without searching.
 - **The project's GitHub repo** — for anything the docs omit: actual config schema, open Discussions, and whether the thing is maintained. Check the last commit date before trusting any tool doc.
 - **`mcpservers.org`** — browsable registry for MCP servers and agent skills, entries linked to source repos. Use it to enumerate what exists; then verify each candidate at its repo.
-- **`dev.to`** — the one community source that consistently outperformed here, specifically for *undocumented* failure modes (hook exit-code semantics, case-sensitive matchers, hooks that silently no-op in headless mode). Weak for facts, strong for gotchas.
+- **`dev.to`** — the one community source that consistently outperformed here, specifically for *undocumented* failure modes (hook exit-code semantics, case-sensitive matchers, hooks that silently no-op in headless mode). Weak for facts, strong for gotchas. See `sites/devto.md`.
 
 ## Query tactics
 

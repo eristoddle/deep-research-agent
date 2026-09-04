@@ -170,7 +170,11 @@ Decided 2026-09-03, from a live example. The access-method retrofit typed the se
 
 Three parts:
 
-**(a) Tag anything provisional so a search finds it.** Every bullet resting on a venue's access verdict carries a marker — `[ACCESS:reddit]` — so `grep -rl "ACCESS:reddit"` prints the exact revert list. The alternative considered was removing the substitute from the modules entirely and making them point at `ACCESS.md`, which makes rollback a one-file edit but costs 33 lines of context on every routed task and only works if the agent is instructed to open that file. Not worth it: the substitute has to be inline for the agent to act on it, so the fix is to make the copies *findable*, not to eliminate them.
+**(a) The citation is the tag.** Anything resting on a finding that can expire must **cite the file that holds it**, by path. That reference is what makes it findable — `grep -rl "sites/reddit.md"` prints the exact revert list — so there is no separate marker syntax to invent, remember, or keep in sync with the thing it marks.
+
+A first pass used a distinct `[ACCESS:reddit]` marker alongside the citation. The user's correction retired it the same session: a module has to reference the site file anyway, and *that reference already is the tag*. Two mechanisms where one does the job is the duplication this decision exists to stop, so the marker was removed rather than kept "just in case."
+
+The substitute still has to appear **inline** in the module bullet — one line, self-sufficient — because the agent must be able to act without opening a second file mid-run. So the goal is not to eliminate the restatement but to make every restatement point at its source.
 
 **(b) `ACCESS.md` is a maintenance index, not a runtime file.** Nothing loads it during a run and nothing should. D8 described it on the `ROUTING.md` model, but `ROUTING.md` is read by the agent on every task and this is not — the substitute already lives in the module bullet. Stated in the file itself so nobody later "fixes" it by wiring it into the agent prompt.
 
@@ -186,6 +190,28 @@ Decided 2026-09-03. This is an APM package other people install, and it currentl
 **The rule:** any capability gated on a binary, an API key, or an account gets a short setup note in `README.md` — what it is, what it buys, that it is optional, and how to get it. The agent prompt keeps saying "never install"; the README is where a person is told. Those are different audiences and the current docs only serve one.
 
 **Applies now to `crwl`, and to firecrawl if it is ever added** ([Q6](docs/questions/Q6-firecrawl-rung.md)). Firecrawl carries an extra obligation the others do not: it is a **paid API**, so it can never be a silent default — a consumer must opt in knowing it costs them money. Its signup link is `https://firecrawl.link/stephan-miller`, and because that is a referral link it should be labeled as one where it appears. Disclosing it costs nothing and is the norm; an undisclosed one in a public repo is the kind of thing that gets noticed later.
+
+<!-- D14 — Site files, earned by recurrence -->
+### D14 — A site earns its own file when a second module names it 🔨
+
+Decided 2026-09-03. Modules stay organized by **topic**; the **sites** inside them become a small referenced layer at `skills/web-search-modules/sites/<slug>.md`.
+
+**The threshold is recurrence, not judgment.** A site gets a file when it is named by two or more modules — the same logic as D2's "no module until a real project needs one," applied one level down. Nothing is written speculatively, and the set grows only when the payload itself demonstrates the need.
+
+**Measured, not assumed.** 75 distinct domains are named across the eleven modules. Counting by *domain string* found only 6 recurring — but modules name sites in prose (`**Reddit**`, `Hacker News`), so that undercounted. Counting by name gives **9**: GitHub (6 modules), Stack Overflow / Stack Exchange (3), Reddit (3), Hugging Face (3), and OpenRouter, Hacker News, `dev.to`, Artificial Analysis, Twitter/X (2 each). GitHub at 6 is the case that proves the point — its good querying method (the raw `CHANGELOG.md` pattern, checking whether a repo is maintained) exists in `agent-tooling` and nowhere else, while five other modules name GitHub without it.
+
+**Division of labor, and why the module bullet cannot just be a pointer:**
+
+| | Holds | Why |
+|---|---|---|
+| **Site file** | the deep, durable method for one site; a dated one-line reachability verdict | Written once. This is what the six GitHub bullets are currently missing. |
+| **Module bullet** | one self-sufficient line of access method, plus a path citation | The agent must be able to act **without opening a second file mid-run**. A bullet that only says "see the site file" strands the agent if nothing loaded it. |
+
+**Two motivations, and only one of them was real.** Sharing a site across modules is the weak case on its own — nine files is a footnote, not a library. The strong case is **overflow**: `stackoverflow.md` needs the closed/duplicate signal, score-vs-recency, `[tag]` syntax, and comment-vs-answer, none of which fit in a module that also has to cover the rest of Stack Exchange under a ~40-line cap. Site files are an overflow mechanism that happens to also deduplicate, not a parallel taxonomy. Nothing about routing changes.
+
+**These are author-and-maintainer reference for now — nothing loads them at runtime**, same standing as `ACCESS.md` under D12(b). Wire one into the agent only if a real run shows the inline bullet was not enough. That keeps the context cost at zero until there is evidence it is needed.
+
+**`ACCESS.md` gives up its site-keyed entries.** Reddit's section becomes `sites/reddit.md`'s `Reachable:` line. `ACCESS.md` keeps only what has no site to live in — "JS-shell pages," and the note on how far the JSON-endpoint trick generalizes.
 
 ## Open questions
 
@@ -229,6 +255,20 @@ Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-sea
 ## Session log
 
 > Most recent sessions inline; older sessions archived → see `docs/sessions/`.
+
+### Session 5 — 2026-09-03
+
+Two implementer queues shipped and a two-round grill, interleaved. Opened by reviewing the returned access-method retrofit, which is what surfaced the session's real finding.
+
+- **The retrofit landed** — all 7 pieces, ten modules now carry access methods, `ACCESS.md` created. Review caught three things: a case-sensitive `grep` in the task's own Tests that passed by skipping a file, two URLs written without content verification (both the right page, neither a guess), and one bullet that named a block with no substitute — the exact passive form the task had just replaced.
+- **D7 named a mechanism that does not exist.** Looking for its implementation found none: the agent prompt says "record it as unreachable" four times and never names a destination, and `research-report/SKILL.md` contradicts itself two lines apart about whether `uncertain[]` is displayed or filtered. **D11** gives "unreachable" its own channel, annotating provenance rather than blocking a field, and supersedes D7's mechanism clause while leaving the rest of D7 standing.
+- **D12** came from the user asking the right question about the diff: the retrofit had typed an expiring claim into four files with no record of where. The answer went through one revision — the agent's `[ACCESS:reddit]` marker was retired when the user pointed out that a module must cite its site file anyway, and *that citation is already the tag*.
+- **D13** from the user noting this is a package other people install: the `crwl` fallback is documented as a feature with install instructions nowhere, so it can silently never fire. Any capability gated on a binary, key, or account now gets a README setup note. Firecrawl carries the extra condition that it is paid, so never a default, with a labeled referral link.
+- **D14** unifies the session's structural thread. Sites become a small referenced layer, earned at two modules. Counting settled it: GitHub is named by six modules and only one of them knows how to query it properly.
+- **Q3's blockers were both false** — the inaccessible machine is the work computer, not this one, and the firecrawl key and CLI are already installed here. The re-test is runnable now, and Q3 now carries the revert list beside the procedure.
+- **Q6** opened rather than decided: whether firecrawl ships inside the agent is a different question from using it to answer Q3, because the fetch carve-out ends with the words "no second helper" and firecrawl spends the consumer's money.
+
+Mirror reconciled both directions; its three repo-less items landed as one parking-lot cluster, since the install-scope question gates the other two.
 
 ### Session 4 — 2026-09-03
 

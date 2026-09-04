@@ -8,7 +8,7 @@
 **Siblings:** `stackoverflow` — pair the two when the error is as likely a usage mistake as a bug.
 
 ## 搜索源
-- **GitHub Issues** (both open and closed) - excellent for known bugs and workarounds. Query as `site:github.com/<org>/<repo>/issues "<exact error text>"` once the repo is known, or `site:github.com issues "<exact error text>"` when it isn't yet.
+- **GitHub Issues** (both open and closed) - excellent for known bugs and workarounds. Query as `site:github.com/<org>/<repo>/issues "<exact error text>"` once the repo is known, or `site:github.com issues "<exact error text>"` when it isn't yet. See `sites/github.md`.
 
 ## 查询策略 (1.1 Debugging Assistance)
 - Search for exact error messages in quotes

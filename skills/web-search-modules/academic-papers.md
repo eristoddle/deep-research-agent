@@ -10,7 +10,7 @@
 ## 搜索源 (Academic Sources)
 - **Google Scholar** (scholar.google.com) - comprehensive academic search engine. Query `site:scholar.google.com <title or author>`.
 - **arXiv** (arxiv.org) - preprints in physics, math, CS, and related fields. Query `site:arxiv.org <title or terms>`, or fetch `https://arxiv.org/abs/<id>` directly once the ID is known.
-- **Hugging Face Papers** (huggingface.co/papers) - daily/monthly trending ML/AI papers with community upvotes. Query `site:huggingface.co/papers <topic>`.
+- **Hugging Face Papers** (huggingface.co/papers) - daily/monthly trending ML/AI papers with community upvotes. Query `site:huggingface.co/papers <topic>`. See `sites/huggingface.md`.
 - **bioRxiv** (biorxiv.org) - preprints in biology and life sciences. Query `site:biorxiv.org <title or terms>`.
 - **ResearchGate** (researchgate.net) - academic social network with papers and author profiles. Query `site:researchgate.net <title or author>`.
 - **Semantic Scholar** (semanticscholar.org) - AI-powered academic search. Query `site:semanticscholar.org <title or author>`.
