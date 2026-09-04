@@ -9,11 +9,11 @@
 
 In descending order of independence, which is the axis that matters here:
 
-- **Independent evaluators** — LMArena and similar human-preference arenas (Elo, not accuracy); Artificial Analysis (latency, throughput, cost-per-token, quality index in one table). Best starting point because the evaluator has no stake in the result.
-- **The benchmark's own home** — its repo, docs site, or hosted leaderboard. SWE-bench, HELM, `lm-evaluation-harness`, and coding/agentic evals mostly publish a live table in the repo README or a project site. This is where the *methodology* lives, and methodology is what makes two numbers comparable or not.
-- **Hugging Face** — Spaces hosting leaderboards, model cards with an eval table, and collections that gather a benchmark's submissions. Leaderboard aggregation has largely consolidated here as standalone trackers shut down.
-- **Vendor announcements and model cards** — the fastest source and the least neutral. Always usable, always labeled as self-reported.
-- **OpenRouter rankings** — actual usage share by model, which answers "what do people really run" in a way no benchmark does.
+- **Independent evaluators** — LMArena and similar human-preference arenas (Elo, not accuracy); Artificial Analysis (latency, throughput, cost-per-token, quality index in one table). Best starting point because the evaluator has no stake in the result. Verified working: `https://arena.ai/leaderboard` (LMArena's own domain now redirects here), `https://artificialanalysis.ai/models`.
+- **The benchmark's own home** — its repo, docs site, or hosted leaderboard. SWE-bench, HELM, `lm-evaluation-harness`, and coding/agentic evals mostly publish a live table in the repo README or a project site. This is where the *methodology* lives, and methodology is what makes two numbers comparable or not. Verified working: `https://www.swebench.com/` (Verified/Lite/Multilingual leaderboards), `https://github.com/stanford-crfm/helm` (HELM's hosted leaderboard pages render client-side; the repo README links the current ones), `https://github.com/EleutherAI/lm-evaluation-harness`.
+- **Hugging Face** — Spaces hosting leaderboards, model cards with an eval table, and collections that gather a benchmark's submissions. Leaderboard aggregation has largely consolidated here as standalone trackers shut down — the original Open LLM Leaderboard itself retired in 2026. Verified working: `https://huggingface.co/spaces?category=model-benchmarking`, `https://huggingface.co/spaces/ArtificialAnalysis/LLM-Performance-Leaderboard`.
+- **Vendor announcements and model cards** — the fastest source and the least neutral. Always usable, always labeled as self-reported. Same provider blog/newsroom URLs as `model-releases`' newsroom bullet.
+- **OpenRouter rankings** — actual usage share by model, which answers "what do people really run" in a way no benchmark does. Verified working: `https://openrouter.ai/rankings`.
 
 ## Query tactics
 

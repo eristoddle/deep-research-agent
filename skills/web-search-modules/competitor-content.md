@@ -7,11 +7,13 @@
 
 ## Sources
 
+**None by design.** The result list *is* the source — see the first bullet below. Pinning a fixed set of sites would defeat the sampling this module exists to do.
+
 - **A plain, unrefined `WebSearch` of the query a reader would actually type.** The result list is the sample. Resist improving the query: a better query returns a better answer and a *worse* sample of what the reader will see.
 - **The top-ranking pages themselves**, 3-5 of them, fetched and read for **structure** — H2/H3 outline, what gets defined, what gets compared, what gets cited, roughly how long. Not for prose.
 - **`people also ask <query>` as its own search** — surfaces the question set around the topic.
 - **Query variants** — the same topic phrased as a beginner, a buyer, and a practitioner would phrase it. Each returns a partly different set, and the union is the real landscape.
-- **Reddit and forum threads on the query** — where the questions that no ranking page answers get asked out loud. Usually the richest source of a genuine gap.
+- **Reddit and forum threads on the query** — where the questions that no ranking page answers get asked out loud. Usually the richest source of a genuine gap. Reddit itself is unreachable from this toolchain — use niche forums and `people also ask` for the same signal instead. See `ACCESS.md`. `[ACCESS:reddit]`
 - **The commissioning site's own existing content**, when the project has a list of it. Prevents re-covering ground and surfaces internal link targets.
 
 ## Query tactics

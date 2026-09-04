@@ -7,11 +7,11 @@
 
 ## Sources
 
-- **API docs "models" page** — the authoritative list of currently served model IDs. Outranks every announcement post: blogs say what launched, docs say what is live right now.
-- **Deprecation, sunset, and migration pages** — usually a separate page from the model list, and the only place that tells you a model is going away. Check it explicitly; nothing else surfaces it.
-- **Provider newsrooms and engineering blogs** — Anthropic, OpenAI, Google DeepMind, Meta AI, Mistral, DeepSeek, Qwen, and the inference hosts. Good for intent and capability claims, weak for exact identifiers.
-- **Hugging Face model repos** for open weights — commit history, revision tags, and README diffs are ground truth on what actually changed, including silent re-uploads that never got an announcement.
-- **GitHub releases** for the surrounding stack — SDKs, inference engines (vLLM, SGLang), and `transformers`. Support for a new architecture often lands here before the model is announced.
+- **API docs "models" page** — the authoritative list of currently served model IDs. Outranks every announcement post: blogs say what launched, docs say what is live right now. Verified working: `https://platform.claude.com/docs/en/about-claude/models/overview`, `https://developers.openai.com/api/docs/models`, `https://ai.google.dev/gemini-api/docs/models`.
+- **Deprecation, sunset, and migration pages** — usually a separate page from the model list, and the only place that tells you a model is going away. Check it explicitly; nothing else surfaces it. Verified working: `https://platform.claude.com/docs/en/about-claude/model-deprecations`.
+- **Provider newsrooms and engineering blogs** — Anthropic, OpenAI, Google DeepMind, Meta AI, Mistral, DeepSeek, Qwen, and the inference hosts. Good for intent and capability claims, weak for exact identifiers. Verified working: `https://www.anthropic.com/news`. OpenAI's `openai.com/news/` returns 403 to a direct fetch — reach it via `site:openai.com/news` instead.
+- **Hugging Face model repos** for open weights — commit history, revision tags, and README diffs are ground truth on what actually changed, including silent re-uploads that never got an announcement. `https://huggingface.co/<org>` lists an org's repos; verified working on `https://huggingface.co/deepseek-ai`.
+- **GitHub releases** for the surrounding stack — SDKs, inference engines (vLLM, SGLang), and `transformers`. Support for a new architecture often lands here before the model is announced. Verified working: `https://github.com/vllm-project/vllm/releases`.
 
 ## Query tactics
 

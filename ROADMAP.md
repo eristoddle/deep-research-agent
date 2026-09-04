@@ -19,9 +19,9 @@ The first four landed together as one family because they overlap deliberately; 
 
 `agent-tooling` is the first module to open a family by *carving one out of an existing one*. `AI ecosystem & market` asked whether a question was about "a shipped AI product," which swallowed agent CLIs whole — an agent CLI has versions, a price, and competitors. That question was narrowed to a *model or model provider*, and the tooling half moved to its own row above it. It is also the first module built access-method-first through `/research-add-module`, which makes it the reference shape for the retrofit below rather than a subject of it.
 
-## Retrofit: access methods
+## Retrofit: access methods — landed
 
-`SKILL.md` requires every source in a module to carry an access method — a `site:` query, a tested search-URL pattern, a stable index page to fetch directly, or a note that it blocks fetching. **None of the ten modules that predate `/research-add-module` has one**, and those ten are the scope of this retrofit. `agent-tooling` was written to the spec and is excluded — it is the worked example of what compliance looks like. The requirement was added after they were written, so the spec and the payload disagree. `/research-add-module` produces modules that comply; the existing ten need a pass. `pricing` and `benchmarks` are the highest value (provider pricing pages and leaderboard URLs are stable and worth naming outright), `competitor-content` the lowest (its sources are by definition whatever the query returns).
+All ten pre-`/research-add-module` modules now carry an access method, keyed to a three-kind taxonomy in `SKILL.md`: **fixed-site** (one named domain) gets a literal `site:` query, **parameterized** (a description that expands into many vendors/leaderboards) gets a URL pattern plus a verified seed list, **open-query** (`general-web`, `competitor-content`) gets an explicit "none by design" note rather than an invented source list. The fourth form — a source unreachable from this toolchain — is no longer a passive note that it blocks fetching; it is a directive naming the block and the substitute, backed by the shared `skills/web-search-modules/ACCESS.md`. `PLAN.md` **D1**, **D8**.
 
 ## Fill in `stackoverflow.md`
 

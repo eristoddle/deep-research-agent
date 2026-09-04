@@ -8,13 +8,13 @@
 **Siblings:** `github-debug` — pair them when you need a paper and its reference implementation.
 
 ## 搜索源 (Academic Sources)
-- **Google Scholar** (scholar.google.com) - comprehensive academic search engine
-- **arXiv** (arxiv.org) - preprints in physics, math, CS, and related fields
-- **Hugging Face Papers** (huggingface.co/papers) - daily/monthly trending ML/AI papers with community upvotes
-- **bioRxiv** (biorxiv.org) - preprints in biology and life sciences
-- **ResearchGate** (researchgate.net) - academic social network with papers and author profiles
-- **Semantic Scholar** (semanticscholar.org) - AI-powered academic search
-- **ACM Digital Library** and **IEEE Xplore** - CS and engineering papers
+- **Google Scholar** (scholar.google.com) - comprehensive academic search engine. Query `site:scholar.google.com <title or author>`.
+- **arXiv** (arxiv.org) - preprints in physics, math, CS, and related fields. Query `site:arxiv.org <title or terms>`, or fetch `https://arxiv.org/abs/<id>` directly once the ID is known.
+- **Hugging Face Papers** (huggingface.co/papers) - daily/monthly trending ML/AI papers with community upvotes. Query `site:huggingface.co/papers <topic>`.
+- **bioRxiv** (biorxiv.org) - preprints in biology and life sciences. Query `site:biorxiv.org <title or terms>`.
+- **ResearchGate** (researchgate.net) - academic social network with papers and author profiles. Query `site:researchgate.net <title or author>`.
+- **Semantic Scholar** (semanticscholar.org) - AI-powered academic search. Query `site:semanticscholar.org <title or author>`.
+- **ACM Digital Library** and **IEEE Xplore** - CS and engineering papers. Query `site:dl.acm.org <title>` and `site:ieeexplore.ieee.org <title>` respectively.
 
 ## 查询策略 (1.3 Academic Paper Search)
 - Use Google Scholar as primary source with advanced search operators

@@ -52,9 +52,21 @@ minimum the IP-scoped rows may come back differently.
 target machine, plus firecrawl, before treating any Reddit source as unreachable there. That
 procedure is the thing worth carrying; the table above is one machine's answer to it.
 
+### 2026-09-03 — corrected: not blocked, and never was on this machine
+
+Two errors in the entry above, both mine, both recorded here rather than edited away.
+
+**"Access to the other computer" had it backwards.** The machine where the five routes failed is the *work* computer, which is the one that is hard to get to. This machine — where the plan lives and where the work happens — is the accessible one. There was never a hardware blocker.
+
+**The firecrawl API key is already here.** Checked directly: `FIRECRAWL_API_KEY` is set in the environment (35 characters), the `firecrawl` CLI is installed, and `crwl` is installed. `fetch-anything`'s `SKILL.md:64` names that variable as where the key is read from, and its Reddit handler escalates to firecrawl with `--proxy auto` specifically for IP-based blocks.
+
+**So the re-test is runnable now**, and the five-row table above should be re-run here before any of it is treated as settled — the original run was on the *other* machine, so even the harness-scoped `WebFetch` refusal may read differently. The user has stated the firecrawl test will happen, timing open.
+
+**What flips if firecrawl reaches Reddit** — the revert set, so it does not have to be rediscovered. Every bullet resting on this verdict is tagged `[ACCESS:reddit]` per D12(a); `grep -rl "ACCESS:reddit"` prints the current list. As of this writing that is `skills/web-search-modules/{general-web,competitor-content,vendor-landscape}.md` plus the Reddit section of `skills/web-search-modules/ACCESS.md`. A positive result also reopens D8's deferred venue half (a Reddit *modifier*, never a topic module) and changes what `demand-signals` (D9) can be built on, since that module is currently Reddit-free by construction rather than by preference.
+
 ## Blocked on
 
-- Access to the other computer, and a firecrawl API key on it.
+- **Nothing.** See the 2026-09-03 correction below — both previously recorded blockers were wrong.
 
 ## Related
 

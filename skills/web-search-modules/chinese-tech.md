@@ -8,14 +8,14 @@
 **Siblings:** Pairs with any topic module.
 
 ## 搜索源 (Chinese Technical Sites)
-- **CSDN** (csdn.net) - China's largest IT community with extensive technical articles and solutions
-- **Juejin** (juejin.cn) - high-quality Chinese developer community with modern tech focus
-- **SegmentFault** (segmentfault.com) - Chinese Q&A platform similar to Stack Overflow
-- **Zhihu** (zhihu.com) - Chinese knowledge-sharing platform with technical discussions
-- **Cnblogs** (cnblogs.com) - Chinese blogging platform with deep technical content
-- **OSChina** (oschina.net) - Chinese open source community and technical news
-- **V2EX** (v2ex.com) - Chinese developer community with active discussions
-- **Tencent Cloud** and **Alibaba Cloud** developer communities - enterprise-level solutions
+- **CSDN** (csdn.net) - China's largest IT community with extensive technical articles and solutions. Query `site:csdn.net <中文 terms>`.
+- **Juejin** (juejin.cn) - high-quality Chinese developer community with modern tech focus. Query `site:juejin.cn <中文 terms>`.
+- **SegmentFault** (segmentfault.com) - Chinese Q&A platform similar to Stack Overflow. Query `site:segmentfault.com <中文 terms>`.
+- **Zhihu** (zhihu.com) - Chinese knowledge-sharing platform with technical discussions. Query `site:zhihu.com <中文 terms>`.
+- **Cnblogs** (cnblogs.com) - Chinese blogging platform with deep technical content. Query `site:cnblogs.com <中文 terms>`.
+- **OSChina** (oschina.net) - Chinese open source community and technical news. Query `site:oschina.net <中文 terms>`.
+- **V2EX** (v2ex.com) - Chinese developer community with active discussions. Query `site:v2ex.com <中文 terms>`.
+- **Tencent Cloud** and **Alibaba Cloud** developer communities - enterprise-level solutions. Query `site:cloud.tencent.com/developer <中文 terms>` and `site:developer.aliyun.com <中文 terms>` respectively.
 
 ## 查询策略 (Bilingual Research)
 - **For bilingual research**: Generate queries in both English and Chinese (中文)

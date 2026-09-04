@@ -13,6 +13,7 @@ This directory is a data bundle, not a workflow. It exists so the `web-search-ag
 |------|------|
 | `ROUTING.md` | **The router.** Families, defaults, modifiers, per-depth module slots, ambiguity rule. The agent reads this first, every task. |
 | `<domain>.md` | A strategy module: where to look in one domain and how to query it. Read only when routing selects it. |
+| `ACCESS.md` | Shared record of venues known to be unreachable from this toolchain, what was tried, and the substitute. Not a module, not routed to — a module's directive cites it instead of restating the finding. |
 
 `ROUTING.md` is the single source of truth for which modules exist. The agent's own prompt names no modules — it only knows to read the router — so the module list can grow without touching `agents/web-search-agent.md`.
 
@@ -34,7 +35,7 @@ Modules are plain reference files, not code. The agent loads at most one to thre
 
 1. **Write `<domain>.md`.** Follow the shape of the existing files:
    - A routing header: `**Family:**`, `**Use when:**`, `**Do not use for:**`, `**Siblings:**`. The anti-trigger matters as much as the trigger — it is what lets a mis-route correct itself at read time.
-   - A prioritized **source list**, noting what each source is actually good for **and how to query it** — a `site:` query, a tested search-URL pattern, a stable index page to fetch directly, or a note that it blocks fetching. A name without an access method makes the agent rediscover the same thing every run.
+   - A prioritized **source list**, noting what each source is actually good for **and how to query it**. The access method takes one of three shapes, by the source's kind: **fixed-site** (one named domain) gets a literal `site:` query; **parameterized** (a description that expands into many vendors, leaderboards, or providers) gets a URL pattern plus a short seed list of the ones that actually recur; **open-query** (the result list itself is the sample, e.g. `competitor-content`) gets an explicit "none by design" note instead of a source list — inventing one would defeat the module. A name without an access method makes the agent rediscover the same thing every run. **A guessed URL is worse than none**: the agent trusts it and spends a fetch on a 404 instead of falling back to search, so a seed URL earns its place only once it has been confirmed to resolve. A source unreachable from this toolchain does not get a passive note that it blocks fetching — it gets a **directive** that names the block *and* the substitute ("unreachable from this toolchain — use X for the same signal"), sourced from `ACCESS.md`, the shared file recording what is known about reaching a given venue across modules.
    - **Query tactics** — the search patterns that work in that domain, not generic advice.
 
    Keep it under ~40 lines. It enters the agent's context whole on every routed task, so length is a real cost.

@@ -8,7 +8,10 @@
 **Siblings:** Any.
 
 ## 搜索源
-- **Reddit** (r/programming, r/webdev, r/javascript, and topic-specific subreddits) - real-world experiences
+
+**None by design.** This module's value is its breadth — the answer is wherever the query actually lands, and pinning a fixed source list would narrow it back into a topic module. Query tactics below are the access method.
+
+- **Reddit** (r/programming, r/webdev, r/javascript, and topic-specific subreddits) - real-world experiences. Unreachable from this toolchain — use niche forums, Hacker News, and search-suggestion autocomplete for the same signal instead. See `ACCESS.md`. `[ACCESS:reddit]`
 - **Official documentation** and changelogs - authoritative information
 - **Blog posts** and tutorials - detailed explanations
 - **Hacker News** discussions - high-quality technical discourse

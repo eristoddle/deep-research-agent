@@ -100,6 +100,8 @@ Three places it binds:
 
 This is about *behavior*, not about Reddit. It holds for any source, and it holds regardless of how [Q3](docs/questions/Q3-reddit-reachability.md) resolves.
 
+**Mechanism superseded by D11** — `uncertain[]` is the wrong channel, and had no implementation in any case. Everything above stands.
+
 <!-- D8 — Access methods in one shared file; the fourth form is a directive -->
 ### D8 — Access methods live in one shared file, and the fourth form is a directive 🔨
 
@@ -137,6 +139,54 @@ Origin is `fetch-anything`'s handler registry, **inverted**. There, a ledger rec
 
 **Why this can ship where [harvest-from-runs](docs/parking-lot/harvest-from-runs.md) is stuck:** access outcomes are binary and observed; source *quality* needs judgment, which is exactly [Q1](docs/questions/Q1-source-accumulation.md)'s blocker. Same "accumulate observed evidence from runs" shape, different payload, and only one of them needs a human in the loop.
 
+<!-- D11 — Unreachable is a separate channel from unanswered -->
+### D11 — "Unreachable" is a separate output channel from "unanswered" 🔨
+
+Decided 2026-09-03. **Supersedes D7's mechanism clause** — D7 said "the `uncertain[]` array is already the mechanism; this is what it is for." It is not, and D7's requirement stands unchanged on everything else.
+
+**Two defects found while looking for the implementation, because there is none:**
+
+- **"Record it as unreachable" has no destination.** `agents/web-search-agent.md` says it four times (the exception preamble, and lines 50, 55, 61) and never once names a field, an array, or an output slot. The instruction dead-ends: the agent is told to record something with nowhere to put it.
+- **`uncertain[]`'s display is self-contradictory.** `skills/research-report/SKILL.md:78` lists `uncertain` among internal fields to *filter out*; line 80, in the same block, gives it *display formatting*. Section 5 then skips every field named in it. Whether an unanswered field is visible at all depends on which instruction the script-generating agent follows that run.
+
+**Why a separate array rather than overloading `uncertain[]`:** the two facts have different audiences — a *reader* needs to know a named source was a wall, the *pipeline* needs to know a field is blank — and different lifetimes. An unanswered field dies with the run; a wall persists across runs and is exactly the content that feeds `ACCESS.md` and D10's ledger. Overloading would force `generate_report.py` to partially un-skip by parsing the string inside an entry, which is the class of implicit contract this repo already breaks on.
+
+The shape:
+
+| | |
+|---|---|
+| **Channel** | `unreachable[]` in `results/*.json`, sibling to `uncertain[]` |
+| **Placement** | Per-item, deduplicated by `/research-report` into one section. The item agent is the only thing that observes the failure and it writes exactly one file — its own. A run-level file would need N parallel agents writing one path: a concurrency problem and a new `Write` target in a deliberately narrow allowlist. The redundancy is not pure: item 3 may reach a page item 7 could not, and that difference is signal. |
+| **Scope** | Both hard fetch failure *and* silent substitution. |
+| **Severity** | **Annotates provenance, never blocks a field.** If D8's substitute answered the question, the field is answered — `unreachable[]` records that the answer did not come from the named source. Blocking would make the pipeline fail loudly on a wall it has a documented workaround for, which fights D8's design. |
+| **Report** | Keep skipping the unanswered *cell* — an empty cell in a comparison table teaches nothing. Resolve the 78/80 contradiction toward disclosure so coverage is stated rather than silently shrunk. |
+
+**The detection rule, which is what makes the substitution half enforceable:** *if you constrained a search to a domain and no returned URL is on that domain, that is a zero-result finding, not a result set.* Mechanical, no judgment, and the URLs needed to evaluate it are already in the agent's hands. Without that sentence the agent has no reason to look, because nothing errored — which is the whole of D7.
+
+<!-- D12 — Temporary findings must be findable again -->
+### D12 — A finding that will expire has to be findable when it does 🔨
+
+Decided 2026-09-03, from a live example. The access-method retrofit typed the sentence *"unreachable from this toolchain — use niche forums and Hacker News instead"* into `general-web.md`, `competitor-content.md`, `vendor-landscape.md`, and `ACCESS.md`. Four copies of a claim that is **expected to become false** — Q3 is open and the whole point of testing firecrawl is to make Reddit reachable. Nothing recorded where those four copies were.
+
+Three parts:
+
+**(a) Tag anything provisional so a search finds it.** Every bullet resting on a venue's access verdict carries a marker — `[ACCESS:reddit]` — so `grep -rl "ACCESS:reddit"` prints the exact revert list. The alternative considered was removing the substitute from the modules entirely and making them point at `ACCESS.md`, which makes rollback a one-file edit but costs 33 lines of context on every routed task and only works if the agent is instructed to open that file. Not worth it: the substitute has to be inline for the agent to act on it, so the fix is to make the copies *findable*, not to eliminate them.
+
+**(b) `ACCESS.md` is a maintenance index, not a runtime file.** Nothing loads it during a run and nothing should. D8 described it on the `ROUTING.md` model, but `ROUTING.md` is read by the agent on every task and this is not — the substitute already lives in the module bullet. Stated in the file itself so nobody later "fixes" it by wiring it into the agent prompt.
+
+**(c) The task contract gains a `Reversible if:` line.** One line per task naming any open question whose answer would undo part of the work. Q3 was open for the entire retrofit and nothing in the task said the Reddit bullets were provisional, which is how four copies of an expiring claim got written without a trace. Pairs with (a): the line says *what* could reverse it, the tag says *where*.
+
+<!-- D13 — A public package must tell the human how to enable its optional rungs -->
+### D13 — If a capability is gated on something the consumer must install, the package says how 🔨
+
+Decided 2026-09-03. This is an APM package other people install, and it currently ships a feature that can silently never work.
+
+**The existing gap:** `README.md:123` documents the `crwl` fetch fallback, and `agents/web-search-agent.md` correctly tells the agent to check `command -v crwl`, stop if absent, and **never install anything**. That agent rule is right and stays. But no file anywhere tells the *human* how to install `crwl`. A consumer installs the package, the fallback never fires, and nothing explains why — the capability reads as broken rather than as unconfigured.
+
+**The rule:** any capability gated on a binary, an API key, or an account gets a short setup note in `README.md` — what it is, what it buys, that it is optional, and how to get it. The agent prompt keeps saying "never install"; the README is where a person is told. Those are different audiences and the current docs only serve one.
+
+**Applies now to `crwl`, and to firecrawl if it is ever added** ([Q6](docs/questions/Q6-firecrawl-rung.md)). Firecrawl carries an extra obligation the others do not: it is a **paid API**, so it can never be a silent default — a consumer must opt in knowing it costs them money. Its signup link is `https://firecrawl.link/stephan-miller`, and because that is a referral link it should be labeled as one where it appears. Disclosing it costs nothing and is the norm; an undisclosed one in a public repo is the kind of thing that gets noticed later.
+
 ## Open questions
 
 > Each is a heading (the question) + a link to its discussion in `docs/questions/`. Thread files are append-only — a later grill adds a dated section rather than rewriting.
@@ -157,6 +207,14 @@ Every route inside the agent's tool discipline failed on one machine, 2026-09-03
 
 D10 settles the ledger's shape, not its mechanics: location (the `apm install` overwrite problem), the `Write` carve-out an item agent would need, and expiry. See [docs/questions/Q4-ledger-mechanics.md](docs/questions/Q4-ledger-mechanics.md).
 
+### Q5 — Should sites be their own structure, referenced by topic modules?
+
+Modules are organized by topic. Sites recur across them and each one has its own querying quirks, which are currently rediscovered every run. See [docs/questions/Q5-site-references.md](docs/questions/Q5-site-references.md).
+
+### Q6 — Should firecrawl become a third fetch rung in the shipped agent?
+
+Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-search-agent` is a separate and larger question, because it is paid and the carve-out is deliberately narrow. See [docs/questions/Q6-firecrawl-rung.md](docs/questions/Q6-firecrawl-rung.md).
+
 ## Parking lot
 
 > Deferred ideas. Each is a one-line hook + a link to `docs/parking-lot/`.
@@ -165,6 +223,7 @@ D10 settles the ledger's shape, not its mechanics: location (the `apm install` o
 - **Rewrite `stackoverflow.md`** — 12 lines, two vague source bullets, zero query tactics; a rewrite, not a retrofit — [docs/parking-lot/stackoverflow-rewrite.md](docs/parking-lot/stackoverflow-rewrite.md)
 - **Non-technical families** (health, law and policy, finance) — attach when a project needs one; `competitor-content` is the worked example — [docs/parking-lot/non-technical-families.md](docs/parking-lot/non-technical-families.md)
 - **Wanted modules** (AI writing communities, docs-and-API-reference) — parked under D2 until real demand — [docs/parking-lot/wanted-modules.md](docs/parking-lot/wanted-modules.md)
+- **The AUQ consumer install** — pin bump, `rough/`-level vs per-client scope, and DeepInfra/OCR local modules; one cluster because the scope question gates the other two — [docs/parking-lot/auq-consumer-install.md](docs/parking-lot/auq-consumer-install.md)
 - **Verify the `crwl` fetch fallback** — ✅ **tested 2026-08-29**: escalation runs clean and the `head -c` bound holds, but it does *not* recover a JS-shell page. Rule kept; prefer a JSON endpoint beside the HTML page instead — [docs/parking-lot/verify-crwl-fallback.md](docs/parking-lot/verify-crwl-fallback.md)
 
 ## Session log

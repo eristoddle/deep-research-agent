@@ -1,6 +1,6 @@
 # Rewrite `stackoverflow.md`
 
-**Parked** 2026-08-21. Distinct from the access-method retrofit, which covers this file at piece 5.
+**Parked** 2026-08-21. Distinct from the access-method retrofit, which covers this file at piece 6.
 
 `skills/web-search-modules/stackoverflow.md` is **12 lines** — the shortest module by a wide margin. It has a correct routing header, two vague source bullets ("Stack Overflow and other Stack Exchange sites", "Technical forums and discussion boards"), and **zero query tactics**. Every other module carries a tactics section; this one carries none, so it contributes almost nothing beyond its routing decision.
 
