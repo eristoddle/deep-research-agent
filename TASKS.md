@@ -16,83 +16,16 @@
 
 ---
 
-# ⏭ NEXT ACTIVE TASK — Build the nine site files
-
-## Goal
-
-The nine sites that more than one module names each get one small file at `skills/web-search-modules/sites/<slug>.md`, holding the querying method that is currently either duplicated across modules or written well in exactly one of them and missing from the rest. Done means: a maintainer editing how we query GitHub edits one file, not six; every module bullet naming one of the nine cites its site file by path; and no module bullet has become dependent on that file to function.
-
-## Why (pointer)
-
-`PLAN.md` **D14**. GitHub is named by **six** modules, and the method that actually works — fetching `https://raw.githubusercontent.com/<org>/<repo>/main/CHANGELOG.md` instead of a changelog aggregator, checking the last commit date before trusting a repo — exists in `agent-tooling.md` and nowhere else. Five modules point at GitHub with no method at all. That is the shape this fixes.
-
-**The citation is the tag** (D12(a), amended). A module referencing `sites/reddit.md` is what makes `grep -rl "sites/reddit.md"` produce the revert list when Reddit's status changes. There is no separate marker: **delete the `[ACCESS:reddit]` tags** currently in `general-web.md`, `competitor-content.md`, `vendor-landscape.md`, and `ACCESS.md` — the path citation replaces them.
-
-**Reversible if:** [Q3](docs/questions/Q3-reddit-reachability.md) flips Reddit to reachable — that changes one line in `sites/reddit.md` and nothing else, which is the point. [Q5](docs/questions/Q5-site-references.md) and [Q6](docs/questions/Q6-firecrawl-rung.md) are open but do not reverse this work.
-
-### ▶ Run state (the agent keeps this current on every stop)
-_<done · all 5 pieces landed, none blocked · nothing remains · see implementer report for the github/stackoverflow/twitter-x citation-count discrepancy against D14's counts>_
-
-## Size
-
-**~50 minutes.** This is **consolidation, not research.** Every method you write already exists somewhere in this repo — in a module bullet, in `ACCESS.md`, or in `agent-tooling.md`, and the URLs in them were verified in the previous task. **Do not search. Do not fetch. Do not verify URLs.** If a site file would need a method nobody has written down yet, write what is known and leave the gap explicit rather than inventing one.
-
-## The format — all nine files use it exactly
-
-```markdown
-# <Site name> — <domain>
-
-**Used by:** <comma-separated module names that reference this file>
-**Reachable:** yes | no — <substitute, if no> · <date, only when a verdict was actually tested>
-
-## Query
-- <the access method: `site:` query, URL pattern, or JSON endpoint>
-
-## Worth knowing
-- <2-5 bullets: what works, what wastes budget. Omit the section entirely rather than padding it.>
-```
-
-**Hard cap 20 lines per site file.** These are small on purpose. `Reachable:` carries a date **only** where a verdict was actually tested — Reddit and nothing else. For the other eight write `**Reachable:** yes` with no date; do not invent test results.
-
-`Used by:` is a hint, verified by `grep`, not a contract. List the modules you actually edited in piece 3.
-
-## Design — numbered pieces (status: `[ ]` not started · `[x]` done · `[!]` blocked)
-
-- [x] **1.** `[S]` **Create `skills/web-search-modules/sites/` and write the four multi-module files**: `github.md` (6 modules), `stackoverflow.md` (3 — name it `stackoverflow.md`; it is a *site* file and is unrelated to the topic module of the same name, which stays where it is), `reddit.md` (3), `huggingface.md` (3). Source the content from what already exists: GitHub's method from `agent-tooling.md`, Reddit's verdict and substitute from `ACCESS.md`'s Reddit section, the rest from the bullets in the modules that name them.
-- [x] **2.** `[S]` **Write the five two-module files**: `openrouter.md`, `hacker-news.md`, `devto.md`, `artificial-analysis.md`, `twitter-x.md`. _(depends on #1 for the established format)_ Same rule — consolidate what the modules already say. `twitter-x.md` will be thin; that is a correct outcome, not a reason to pad it.
-- [x] **3.** `[M]` **Add the path citation to every module bullet that names one of the nine.** _(depends on #1, #2)_ The bullet keeps its own self-sufficient one-line access method and gains `See \`sites/<slug>.md\`.` **The bullet must still work if nobody opens the site file** — do not move the access method out of the bullet and into the file. Line counts stay under 40; `academic-papers.md` is at 31 and `general-web.md` at 33, so append inline.
-- [x] **4.** `[S]` **Strip the `[ACCESS:reddit]` markers** from `general-web.md`, `competitor-content.md`, `vendor-landscape.md`, and `ACCESS.md`. _(depends on #3)_ The path citation added in #3 replaces them entirely.
-- [x] **5.** `[S]` **Move Reddit out of `ACCESS.md`.** _(depends on #1)_ Its verdict and substitute become `sites/reddit.md`'s `Reachable:` line. Replace the section with a one-line pointer. `ACCESS.md` keeps "JS-shell pages" and the JSON-endpoint scope note, which have no site to live in. Update its header paragraph so it describes what it actually still holds.
-
-## Files
-
-- `skills/web-search-modules/sites/*.md` — pieces 1, 2 (new directory, 9 new files)
-- `skills/web-search-modules/*.md` — pieces 3, 4 (citations; bullets otherwise untouched)
-- `skills/web-search-modules/ACCESS.md` — pieces 4, 5
-
-## Tests (add; keep the suite green)
-
-1. `python3 -m py_compile skills/research/validate_json.py` still passes (should be untouched).
-2. **Every site file is ≤20 lines** and every module stays **<40**. Report before/after for each module touched.
-3. **`grep -rl "sites/reddit.md" skills/`** returns every module that names Reddit — this is the revert-list mechanism working. Same spot-check for `sites/github.md`.
-4. **`grep -rn "ACCESS:reddit" skills/` returns nothing.**
-5. **Every module bullet you edited still names its own access method.** Read them back: a bullet reduced to only a pointer is a regression, not a simplification.
-
-## Out of scope (do NOT do)
-
-- **Do not search, fetch, or verify any URL.** Consolidation only. A method nobody has written down stays unwritten — say so in the report.
-- **Do not wire site files into any agent or skill prompt.** D14: nothing loads them at runtime. No `Read` instruction, no mention in `ROUTING.md`, `SKILL.md`, or `agents/`.
-- **Do not touch `ROUTING.md`** or any routing header. No module changes family, and site files are not routed to.
-- **Do not rewrite the `stackoverflow.md` *module*.** That rewrite is still parked. `sites/stackoverflow.md` is a different file; creating it does not unpark the other.
-- **Do not create a site file for a site named by only one module.** The threshold is two. Nine files, no tenth.
-- **Do not create any file under `agents/`.**
-- **Do not "improve" prose** in a module you are otherwise editing.
-- Do not commit.
-
-## Report back
-
-Per site file: its line count and where its content came from. Per module: before/after line count and the citation added. Then, separately: **any site file that came out thin because the method was never written down anywhere** — that is the list that tells the planning thread what still needs discovering.
 ## ✅ Done (collapsed — full detail in the planning doc's session log)
+
+### `[site-files]` A referenced site layer, earned by recurrence — 2026-09-03
+
+All 5 pieces landed, none blocked. `skills/web-search-modules/sites/` now holds **seven** files (81 lines total) for the sites more than one module cites: GitHub, Reddit, Hugging Face, OpenRouter, Hacker News, `dev.to`, Artificial Analysis. Each carries `Used by:`, a dated `Reachable:` line, the query method, and what wastes budget. Every citing module gained a path citation while keeping its own self-sufficient access method — a bullet reduced to a bare pointer would strand the agent mid-run. `ACCESS.md` gave up its Reddit section (39 → 30 lines) and keeps only what has no site to live in. `PLAN.md` **D14**.
+
+The `[ACCESS:reddit]` markers added earlier the same day are gone: the path citation *is* the tag, and `grep -rl "sites/reddit.md"` returns the revert list.
+
+**The agent caught a counting error in the task's own premise**, which is the result worth keeping. D14's module counts came from a prose name-match that scored things that were not citations: routing-header cross-references to the sibling *module* `github-debug`, a "similar to Stack Overflow" comparison, and `v2ex.com` matching the substring `x.com`. Real counts are GitHub 4 (not 6), Stack Overflow 1 (not 3), Twitter/X 1 (not 2). Two files were built below their own threshold and removed after review — Twitter/X had no method written anywhere, and Stack Overflow's held only what its module bullet already said. Stack Overflow gets its file when the parked rewrite lands, which is when there is finally something to overflow.
+
 
 ### `[access-methods]` Access-method retrofit across the ten pre-`agent-tooling` modules — 2026-09-03
 

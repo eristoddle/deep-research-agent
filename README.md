@@ -88,7 +88,28 @@ npm install -g @mendable/firecrawl-cli
 export FIRECRAWL_API_KEY=fc-...        # fish: set -Ux FIRECRAWL_API_KEY fc-...
 ```
 
-Use it yourself when you want to check a stubborn source. If you have a local fetch-escalation skill installed, the agent prefers that over calling any of this directly, since such a skill knows more about specific sites than a general rule can.
+Use it yourself when you want to check a stubborn source.
+
+### The easier route: install a fetch-escalation skill
+
+The agent's own rule ends with a deferral — if a dedicated fetch-escalation skill is available locally, it prefers that over calling `crwl` directly, because such a skill knows more about specific sites than a general rule can.
+
+**`fetch-anything`** is that skill. It owns the full ladder — defuddle → crawl4ai → firecrawl — climbing only when a rung actually fails, plus per-domain handlers for sites that need special treatment. Installing it is a better answer than wiring the two tools above together by hand, because it decides which rung to use rather than leaving that to a general instruction.
+
+It lives in [eristoddle/agent-skills](https://github.com/eristoddle/agent-skills):
+
+```sh
+git clone https://github.com/eristoddle/agent-skills.git
+cp -r agent-skills/skills/fetch-anything ~/.claude/skills/
+```
+
+Or, if you manage skills across several tools:
+
+```sh
+skillshare install https://github.com/eristoddle/agent-skills
+```
+
+It still needs `crwl`, and a firecrawl key for the top rung, so the setup above applies either way. What it adds is the judgment about when to climb.
 
 ## Usage
 

@@ -7,3 +7,5 @@
 It routes on real traffic — the Software & debugging family is the most-hit family — so it should earn its slot rather than coasting on a sibling relationship with `github-debug`.
 
 The retrofit adds access methods only. A rewrite means writing the tactics that actually work on Stack Exchange: the closed/duplicate signal, score-vs-recency tension on old accepted answers, `[tag]` search syntax, and when the answer is in a comment rather than the accepted post. That is authoring work, not a mechanical pass, and it is a good candidate for `/research-add-module` rather than hand-writing.
+
+**This rewrite is also what earns Stack Overflow a site file.** Under `PLAN.md` **D14** a site qualifies by *recurrence* (two modules cite it — Stack Overflow has one) or by *overflow* (its site knowledge outgrew the module holding it). It is the textbook overflow case, but only once the content exists: a `sites/stackoverflow.md` was built and then removed the same day because it held nothing the module bullet did not already say. When this rewrite lands, the depth goes in `sites/stackoverflow.md` and the module keeps its self-sufficient one-line query pattern.

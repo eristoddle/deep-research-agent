@@ -194,11 +194,24 @@ Decided 2026-09-03. This is an APM package other people install, and it currentl
 <!-- D14 — Site files, earned by recurrence -->
 ### D14 — A site earns its own file when a second module names it 🔨
 
-Decided 2026-09-03. Modules stay organized by **topic**; the **sites** inside them become a small referenced layer at `skills/web-search-modules/sites/<slug>.md`.
+Decided 2026-09-03; **seven** files built the same day. Modules stay organized by **topic**; the **sites** inside them become a small referenced layer at `skills/web-search-modules/sites/<slug>.md`.
 
 **The threshold is recurrence, not judgment.** A site gets a file when it is named by two or more modules — the same logic as D2's "no module until a real project needs one," applied one level down. Nothing is written speculatively, and the set grows only when the payload itself demonstrates the need.
 
-**Measured, not assumed.** 75 distinct domains are named across the eleven modules. Counting by *domain string* found only 6 recurring — but modules name sites in prose (`**Reddit**`, `Hacker News`), so that undercounted. Counting by name gives **9**: GitHub (6 modules), Stack Overflow / Stack Exchange (3), Reddit (3), Hugging Face (3), and OpenRouter, Hacker News, `dev.to`, Artificial Analysis, Twitter/X (2 each). GitHub at 6 is the case that proves the point — its good querying method (the raw `CHANGELOG.md` pattern, checking whether a repo is maintained) exists in `agent-tooling` and nowhere else, while five other modules name GitHub without it.
+**Measured — after two bad counts, which are recorded because the method mattered more than the number.** Counting by *domain string* (`reddit.com`) found 6 recurring sites, but modules name sites in prose, so it undercounted. Counting by *prose name* found 9, but it overcounted: it matched routing-header cross-references (`academic-papers.md` names `github-debug` in its `Siblings:` line — a pointer to a sibling **module**, not a citation of github.com), comparisons (`chinese-tech.md` calls SegmentFault "similar to Stack Overflow"), and a substring (`v2ex.com` contains `x.com`).
+
+**The number that counts is citations in a `## Sources` bullet with an access method attached** — the only kind of mention a site file can serve:
+
+| Site | Modules citing it |
+|---|---|
+| GitHub | **4** — `agent-tooling`, `benchmarks`, `github-debug`, `model-releases` |
+| Reddit · Hugging Face | 3 |
+| OpenRouter · Hacker News · `dev.to` · Artificial Analysis | 2 |
+| Stack Overflow · Twitter/X | **1 each — below threshold** |
+
+GitHub at 4 still proves the point: the raw `CHANGELOG.md` pattern and the check-the-last-commit-date rule live in `agent-tooling` and nowhere else, while three other modules cite GitHub without them.
+
+**Two triggers, not one.** The threshold above is *recurrence*. The second is *overflow* — one module whose site knowledge already exceeds what the module can hold. Both are earned by something that **exists**: a site file is never created for content someone intends to write. Stack Overflow clarified this. It is cited by exactly one module, so it fails recurrence; it is the textbook overflow case *once the parked rewrite exists*, but until then there is nothing to overflow, and a file holding only what the module bullet already says is an empty container inviting speculative filling. It gets its file the day the rewrite lands. Twitter/X fails both triggers and has no written method anywhere.
 
 **Division of labor, and why the module bullet cannot just be a pointer:**
 

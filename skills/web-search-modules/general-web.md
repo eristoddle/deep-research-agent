@@ -18,7 +18,7 @@
 - **Dev.to** (dev.to) - developer community with high-quality technical articles. See `sites/devto.md`.
 - **Medium** (medium.com) - technical blog platform with in-depth articles
 - **Discord** - official discussion channels for many open source projects
-- **X/Twitter** - technical announcements and discussions from developers and maintainers. See `sites/twitter-x.md`.
+- **X/Twitter** - technical announcements and discussions from developers and maintainers.
 
 ## 查询策略 (1.2 Best Practices & Comparative Research)
 - Look for official recommendations first
