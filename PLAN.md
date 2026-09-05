@@ -253,6 +253,8 @@ For the Reddit helper, a `429` retry is another network request and consumes ano
 
 **Why this distinction matters:** the old "do not write your own scripts" sentence was guarding against an agent improvising crawlers, report generators, and caches to evade retrieval limits. It does not prohibit a maintained helper whose purpose, inputs, and bounds are already reviewed. The general rule stays: generated one-off scripts live with their run; reusable helpers earn a durable home only through actual repeat use.
 
+**Shipped 2026-09-04** — see `TASKS.md` `[helper-firecrawl]`. The helper carve-out is written as an allowlist of exactly one: the prompt names `reddit_feed.py` and forbids every other helper in the same breath, so it does not read as general permission to invoke scripts. `--max-attempts` is what keeps the helper's own `429` backoff inside the item's fetch budget instead of quietly outspending it.
+
 <!-- D16 — Firecrawl is an optional shipped fallback -->
 ### D16 — Firecrawl is an optional third fetch rung 🔨
 
@@ -260,7 +262,7 @@ Decided 2026-09-04. The shipped ladder is `WebFetch` -> `crwl` -> Firecrawl for 
 
 Firecrawl is optional and paid. The agent never installs it. A consumer opts in by configuring `FIRECRAWL_API_KEY` and making the Firecrawl CLI available; when either is absent, the agent records the URL as unreachable after the available rungs rather than prompting, installing, or spending money. When Firecrawl runs, the agent states that it used the paid rung and treats that call as the current URL's bounded fallback, never a route into crawling or browser automation.
 
-This supersedes Q6's decision question. The remaining work is mechanical: replace the existing two-rung prompt contract and README's stale "never automatic" wording, establish the exact bounded CLI invocation, and test the behavior in an environment with an opted-in key.
+This supersedes Q6's decision question. **Shipped 2026-09-04** — see `TASKS.md` `[helper-firecrawl]`. The bounded invocation is `firecrawl scrape "<url>" -f markdown -o "<item-specific temp path>.md"`, then `head -c 40000` on that file, then delete it. That shape came from a live scrape on an opted-in machine rather than from the docs: Firecrawl writes plain Markdown to the `-o` path with no JSON envelope and keeps stdout to a one-line scrape ID, which is why the temp-file-and-delete form is the bounded one rather than a stdout pipe like `crwl`'s.
 
 ## Open questions
 
@@ -304,6 +306,13 @@ Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-sea
 ## Session log
 
 > Most recent sessions inline; older sessions archived → see `docs/sessions/`.
+
+### Session 7 — 2026-09-04
+
+- **D15 and D16 shipped together** — the fetch contract is now a three-rung ladder (`WebFetch` → `crwl` → Firecrawl) for one URL, and `reddit_feed.py` is the one approved package helper an item agent may invoke. Both landed in the same task because they are the same edit to the same two prompts; splitting them would have meant rewriting the Tool Discipline section twice.
+- **The fetch budget was redefined, not just extended.** It now counts every network retrieval attempt rather than only native `WebFetch` calls — otherwise the two new rungs and the helper's `429` retries would have been free, which is exactly the overspend the budget exists to prevent. A blocked page's whole ladder is still one logical fetch sequence for that URL; the helper's individual attempts each cost a slot.
+- **Firecrawl's CLI shape was settled by running it, not by reading about it.** A single control scrape on this opted-in machine showed it writes plain Markdown to `-o` and prints only a scrape ID — so the bounded form is temp-file-then-delete, not a stdout pipe. This is what the previous session deferred for lack of a configured key.
+- Review caught nothing that had to be reverted. One thing worth recording: the task's own Test 5 `rg` was scoped to the eight files it edited, so a repo-wide grep was needed to confirm no stale Reddit directive survived elsewhere. It found two hits in `web-search-modules/SKILL.md` that are the *authoring guidance* for the fourth-form directive pattern — still correct, correctly untouched. Same shape as the case-sensitive `reddit` grep in the `[access-methods]` task: a test that can pass by not looking.
 
 ### Session 6 — 2026-09-04
 

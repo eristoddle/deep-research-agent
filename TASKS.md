@@ -16,53 +16,23 @@
 
 ---
 
-# ⏭ NEXT ACTIVE TASK — D15/D16: Approved helper and Firecrawl integration
+# ⏭ NEXT ACTIVE TASK — none queued
 
-**Goal:** Make the existing Reddit Atom-feed reader and optional Firecrawl fallback available to item agents without weakening the bounded-research contract.
-
-**Why:** D15 approves reusable, reviewed helpers as a token-efficient part of research and requires their network activity to remain budgeted. D16 makes Firecrawl a ready, optional paid fallback so an opted-in consumer does not have to modify the package mid-project. The current prompts still prohibit every script, describe only two fetch rungs, and tell agents that Reddit is unreachable even though `reddit_feed.py` works.
-
-**Reversible if:** A live opted-in Firecrawl check shows the documented CLI behavior or cost model is materially different; keep the Reddit helper integration and revise only the Firecrawl piece.
-
-**Design:**
-
-1. [x] Update `skills/research/reddit_feed.py`, `agents/web-search-agent.md`, and the hard-constrained template plus one-shot example in `skills/research-deep/SKILL.md` to allow only the approved package helper. Add a positive `--max-attempts` CLI option to `reddit_feed.py`, defaulting to its existing five attempts. The agent command must use `--json --limit 25 --max-attempts <remaining-fetch-budget>` and bounded stdout (`head -c 40000`). A `429` retry is a separate network request and consumes a fetch slot; do not begin another attempt when no slots remain. Redefine prompt wording consistently so the fetch budget covers every network retrieval attempt, not just native `WebFetch` calls, while retaining one logical fetch sequence per URL. Agents may not author arbitrary scripts, invoke an unlisted helper, download artifacts, or use browser automation.
-
-2. [x] Extend the same canonical agent prompt and `research-deep` template/example with the optional Firecrawl third rung. After `WebFetch` and the existing one `crwl` retry fail on the same URL, run Firecrawl only when both `command -v firecrawl` succeeds and `FIRECRAWL_API_KEY` is configured; otherwise record the URL as unreachable and continue. The configured key is the consumer's opt-in; no install, interactive prompt, or extra per-run confirmation. Treat the paid scrape as one bounded retrieval attempt, state in the item output that the paid rung ran, and never crawl multiple URLs. Firecrawl must write only to an item-specific temporary Markdown path beside that item's JSON output, read no more than 40,000 bytes, then delete that temporary file. A dedicated project fetch-escalation skill remains preferred when available. Update README setup/behavior so it accurately says Firecrawl is an optional configured fallback rather than "never automatic"; retain the paid disclosure and affiliate disclosure.
-
-3. [x] Update `skills/web-search-modules/sites/reddit.md`, `general-web.md`, `competitor-content.md`, and `vendor-landscape.md` to replace their stale Reddit-unreachable directive with the approved listing-reader method. Each module bullet remains self-sufficient and cites `sites/reddit.md`; it must say that the Atom reader yields listings, not full post bodies, and name its own non-Reddit companion sources so the breadth rule remains intact. The site file becomes the detailed source of the reader's limits: only public Atom feeds, no `old.reddit.com`, and title/permalink/date/subreddit listing results. Do not create a Reddit modifier or the `demand-signals` module in this task.
-
-**Files:**
-- `skills/research/reddit_feed.py`
-- `agents/web-search-agent.md`
-- `skills/research-deep/SKILL.md`
-- `README.md`
-- `skills/web-search-modules/sites/reddit.md`
-- `skills/web-search-modules/general-web.md`
-- `skills/web-search-modules/competitor-content.md`
-- `skills/web-search-modules/vendor-landscape.md`
-- `TASKS.md` (piece status and run state only)
-
-**Tests:**
-1. Run `python3 -m py_compile skills/research/reddit_feed.py skills/research/validate_json.py` and `python3 skills/research/reddit_feed.py --help`; confirm `--max-attempts` is documented.
-2. Compare `skills/research-deep/SKILL.md`'s prompt template and one-shot example after variable substitution. Their Search Budget and helper/escalation instructions must match exactly.
-3. Run a normal public-listing command with `--json --limit 25 --max-attempts 1`; verify it emits only post entries and no more than 25. Run it again with an intentionally nonpositive `--max-attempts` and verify it exits as bad arguments without a network request.
-4. On an opted-in machine only, run Firecrawl against a known reachable control page and verify its temporary item-specific file is bounded-read then removed. Confirm the agent's missing-key path skips Firecrawl and records the URL unreachable; never supply a key through chat or commit one.
-5. Run `rg -n 'reddit_feed|max-attempts|Firecrawl|FIRECRAWL_API_KEY|unreachable from this toolchain' agents/web-search-agent.md skills/research-deep/SKILL.md README.md skills/web-search-modules/{general-web,competitor-content,vendor-landscape}.md skills/web-search-modules/sites/reddit.md` and confirm no stale Reddit-unreachable directive remains.
-6. Run `git diff --check`.
-
-**Out of scope:**
-- Building or routing the `demand-signals` module, a Reddit modifier, a fetch-outcome ledger, or project-local reusable helpers.
-- Changing agent tool allowlists, Firecrawl's package/CLI dependency, package installation behavior, `fetch-anything`, or any source unrelated to Reddit.
-- Any live research run beyond the focused helper and Firecrawl checks listed above.
-
-**Report back:** List each completed or blocked piece, all files changed, every test result, the actual Firecrawl CLI behavior observed in the opted-in environment, and whether any instruction had to differ between Claude and Copilot. Update every piece status and the run-state note before stopping.
-
-> ▶ Run state: done 2026-09-04. All 3 pieces landed, none blocked. `reddit_feed.py` has `--max-attempts` (default 5, rejects nonpositive values before any network call); `agents/web-search-agent.md` and `skills/research-deep/SKILL.md`'s hard-constrained template/example now describe a three-rung fetch ladder (`WebFetch` → `crwl` → Firecrawl, one logical fetch sequence per URL) plus the approved `reddit_feed.py` helper (each of its own network attempts, including `429` retries, counted individually); README's Firecrawl section and changelog item 15 no longer say "never automatic"; the four Reddit module bullets and `sites/reddit.md` now describe the Atom-feed listing reader instead of "unreachable from this toolchain". All 6 Tests run and passed — see the implementer's report for each result, plus the live Firecrawl CLI behavior observed on this opted-in machine (`firecrawl scrape <url> -f markdown -o <path>` writes clean bounded Markdown to the file and prints only a scrape-ID line to stdout).
+> The queue is empty. The planning thread writes the next one here once a decision in `PLAN.md` is concrete enough to build.
 
 ---
 
 ## ✅ Done (collapsed — full detail in the planning doc's session log)
+
+### `[helper-firecrawl]` The approved package helper and Firecrawl's third fetch rung — 2026-09-04
+
+All 3 pieces landed, none blocked. The fetch contract is now a three-rung ladder for a single blocked URL — `WebFetch` → `crwl` → Firecrawl — with the paid rung gated on both `command -v firecrawl` and a configured `FIRECRAWL_API_KEY`, writing to an item-specific temp file that is bounded-read at 40,000 bytes and then deleted. `skills/research/reddit_feed.py` became the one approved package helper an item agent may invoke, with a new `--max-attempts` option (default 5, nonpositive values rejected before any network call) that caps its `429` backoff at the item's remaining budget. `PLAN.md` **D15/D16**.
+
+**The fetch budget was redefined rather than extended**: it now counts every network retrieval attempt, not just native `WebFetch` calls. Without that, the two new rungs and the helper's retries would have been free — the exact overspend the budget exists to prevent. A blocked page's whole ladder remains one logical fetch sequence; the helper's attempts each cost a slot.
+
+Firecrawl's invocation was pinned by running it once against a control page on an opted-in machine: it writes plain Markdown to `-o` with no JSON envelope and prints only a one-line scrape ID, which is why the bounded form is temp-file-then-delete rather than a stdout pipe like `crwl`'s. That live check is what the previous session deferred for lack of a configured key.
+
+Verified: all 6 Tests passed, including template/one-shot-example lockstep in `skills/research-deep/SKILL.md` and `git diff --check`. Reviewed in the planning thread — nothing needed reverting. **The task's own Test 5 `rg` was scoped to the eight files it edited**, so a repo-wide grep was needed to confirm no stale Reddit directive survived elsewhere; it surfaced two hits in `web-search-modules/SKILL.md` that are the authoring guidance for the fourth-form directive pattern, still correct and correctly untouched. Same shape as the case-sensitive `reddit` grep in `[access-methods]`: a test that can pass by not looking.
 
 ### `[unreachable-output]` Separate unreachable-source provenance from unanswered fields — 2026-09-04
 
