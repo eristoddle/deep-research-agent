@@ -16,88 +16,116 @@
 
 ---
 
-# ⏭ NEXT ACTIVE TASK — D17 harvest half: `/research-harvest`
+# ⏭ NEXT ACTIVE TASK — `demand-signals`: build the module through discovery
 
-**Goal:** A hand-invoked `/research-harvest` skill that scans every run under the research root, tallies which sources supported fields across runs, and writes a reviewable candidate list — plus the shipped script that does the counting.
+**Goal:** A shipped `demand-signals` module in `skills/web-search-modules/`, built by actually running `/research-add-module`'s discovery procedure rather than by writing a plausible source list, registered in `ROUTING.md` as its own family, and verified against `general-web`.
 
-**Why:** `PLAN.md` **D17** (harvest half) and **D18** (its implementation shape). Capture shipped 2026-09-04, so results files can now carry `sources[]`; nothing reads them yet. D17's amendment settles that this ships now rather than waiting for data to accumulate — "wait for several runs" described one consumer's situation and is not a condition this repo can observe.
+**Why:** `PLAN.md` **D9**. D2's trigger is met and the module is approved in shape and family; what has never been done is the discovery pass that turns an approved shape into a tested source list. AGENTS.md is explicit that a hand-written source list is a guess and guessed sources route the agent to plausible sites that turn out to be empty — so the deliverable here is the *discovery*, and the module file is its output.
 
-**Reversible if:** Nothing open. The promotion threshold (3 runs / field-support in 2) is D17-settled; if it later proves wrong only the two constants in the script change.
+**Reversible if:** Step 7's comparison fails. If the module does not beat `general-web` on its own probe questions, say so and discard it rather than shipping it — a module that loses is negative value, since it consumes a routing slot and costs context on every task it matches. That outcome is a legitimate result of this task, not a failure of it.
+
+**Read first:** `skills/research-add-module/SKILL.md` (you are executing its Steps 3-7 by hand — you have no `Skill` tool and no `AskUserQuestion`, so its two ask-the-user points are pre-answered below), `skills/web-search-modules/SKILL.md` (module shape, the three-kind access-method taxonomy, the fourth directive form), `PLAN.md` **D9** and **D1**, and `skills/web-search-modules/ACCESS.md`.
+
+**Pre-answered (do not re-decide these):**
+- **Step 2 destination — the package**, `skills/web-search-modules/demand-signals.md`. D9 approves it as general enough to ship. Not a local module.
+- **Step 3.1 probe questions** — pinned below; do not redraft them.
+- **Step 1** is already satisfied by D9; do not re-litigate whether the module is warranted.
+- **Family** — its own row, question resolved by D9: *Is the question which problems, desires, or frustrations recur in people's own words across independent venues?*
+- **Discovery budget — 12 searches, 14 fetches**, deliberately wider than the skill's stated 6/8. Every other module built this way covered one domain; this one spans five venue *classes* (niche forums, People-Also-Ask, search suggestions, review sites, Amazon Q&A), and 6 searches cannot probe five classes. Report usage as you go and stop at the ceiling.
 
 **Design:**
 
-## 1. `skills/research/harvest_sources.py` — the read-only tally helper
+## 1. Discovery pass — Steps 3 and 4 of `/research-add-module`
 
-[x] New file, beside `validate_json.py` and `reddit_feed.py` in `skills/research/`. Match `validate_json.py`'s house style: stdlib only (no PyYAML — see below), `argparse`, exit `2` on usage/input error, bounded output.
+[x] **The trap to avoid, stated first: the module is domain-general, not about any of the probe topics.** The seven questions below are *probes* — instruments for watching which kinds of venue surface people describing problems in their own words. A module full of espresso forums and 3D-printing subreddits would be a failed run even if every link works. What you are cataloguing is **venue classes and how to query them**, transferable to a topic none of the probes mention.
 
-- **Arguments:** `--root <path>` (the research root; scan every run beneath it) and `--run <path>` (one run folder), mutually exclusive, at least one required. Optional `--min-runs` (default `3`) and `--min-field-runs` (default `2`) so the D17 threshold is visible and adjustable, not buried in a literal.
-- **Discovery:** a run folder is any directory containing `outline.yaml`. Under `--root`, glob one and two levels deep, matching `skills/research/LAYOUT.md`'s rule — do not invent a third depth or a recursive walk.
-- **Results location:** read `execution.output_dir` from `outline.yaml`, **resolved relative to the run folder, never the cwd** (LAYOUT.md); default `results` when absent or unparseable. `outline.yaml` is YAML but PyYAML is not a dependency anywhere in this package — do not add one. A line-oriented read for the single `output_dir:` key under `execution:` is sufficient and must fail soft to `results`.
-- **Scan:** every `*.json` directly in that directory. A file that is not valid JSON, or not a JSON object, is counted as skipped and named in the summary — never a traceback, never a silent drop.
-- **Per-run classification, which is the point of the whole script (D17 amendment):** a run is `no-capture` when **no** result file in it has a `sources` key, and `captured` when at least one does. Report the two counts separately.
-- **Tally key is the URL**, normalized only by stripping a trailing `/` and lowercasing the scheme+host (leave the path case alone). Carry the `source` name(s) seen for that URL for display. Per URL, count: number of distinct runs it appears in, and number of distinct runs where its `fields` array was non-empty. An entry missing `fields`, or with an empty one, still counts toward run appearances but never toward field-support.
-- **Malformed `sources` entries** (not an object, missing `url`, `fields` not a list) are counted and reported as a single "N malformed source entries skipped" line, not enumerated.
-- **Output is bounded — this is load-bearing, the script's stdout enters an agent's context.** Print, in order: a one-line scan summary (runs scanned, of which captured / no-capture / skipped files); the qualifying candidates in full, one block each with url, source name(s), run count, field-support run count, the run names, and the distinct field names; then near-misses (appeared in >1 run but below threshold) capped at **20** with a `… and N more` line; then nothing else. Cap the field-name list per entry at 12 names plus a count. No raw JSON dumps, no per-file logging.
-- **When there are no candidates**, print which case it is, explicitly, in the words D17 asks for: all runs `no-capture` → these runs predate source capture; otherwise → sources were captured and none reached the threshold. A mixed scan says both, with counts.
-- Add `--json` **only if** it falls out for free; if it complicates the output-bounding, skip it. The skill consumes the text.
+Run these seven as ordinary `WebSearch` queries, the way `general-web` would, and watch what surfaces:
 
-## 2. `skills/research-harvest/SKILL.md` — the skill
+1. What do people repeatedly complain about when using note-taking apps for long-form writing?
+2. What recurring problems do freelance writers describe about getting paid on time?
+3. What do buyers keep complaining about in reviews of standing desks?
+4. What questions do beginners keep asking when they start 3D printing?
+5. What do people say is missing from personal budgeting apps?
+6. What frustrations do small landlords repeatedly describe about managing rental properties?
+7. What do home espresso owners keep saying goes wrong in their first year?
 
-[x] New directory + `SKILL.md`, frontmatter in the same shape as the other skills (`name`, `user-invocable: true`, `description`, `allowed-tools`). Allowed tools: `Bash, Read, Write, Glob, AskUserQuestion` — no `WebSearch`, no `WebFetch`, no `Task`. Harvest reads what runs already recorded; it does no research and launches no agent. Keep it under ~70 lines.
+Then, per Step 3: tally the venue classes that keep producing *useful* results rather than merely frequent ones, and drop aggregators and SEO farms that repackage a source you already have — keep the source they repackage. **Target 4-8 sources.**
 
-- **Trigger** `/research-harvest`, optionally naming one run. **Never invoked automatically** by `/research-deep` or `/research-report` — state this (D17's reasoning: runs routinely stop before the report step, and a prompt after every run gets trained away).
-- **Locate step defers to `skills/research/LAYOUT.md`**, like every other skill — do not restate the discovery rule. Default scope is the whole root; a named run narrows it.
-- **Resolve the script** with the same four-path lookup and same ordering `skills/research-deep/SKILL.md` uses for `{validator_path}` (`.agents` project, `.claude` project, `~/.agents`, `~/.claude`). When none exists, **stop and say so** — do not hand-write a substitute tally.
-- **Report the empty cases in plain words**, carrying the script's distinction through to the user rather than printing "no candidates found."
-- **Write `.agents/web-search-modules-local/CANDIDATES.md`.** Prefer that path; write to `.claude/web-search-modules-local/CANDIDATES.md` instead only when that legacy directory already exists and the `.agents` one does not — the same preference order `ROUTING.md` step 0 uses for local modules. Create the directory when neither exists.
-- **File shape:** a header naming the date, the scope scanned, the threshold used, and one line noting that only **parameterized** modules (D1) can absorb a source; then `## Candidates`, one unticked `- [ ]` per source with its URL, run count, field-support count, and the fields it supported; then `## Dispositioned`.
-- **Regeneration rule (D18):** the file is rewritten whole on every harvest, but read it first — any entry the human has **ticked (`- [x]`) or struck (`~~…~~`)** moves to (or stays in) `## Dispositioned` and is **excluded from `## Candidates`** even if it still qualifies. State plainly that this is what stops a rejected source returning as new every harvest. Never delete a dispositioned line.
-- **No module attribution and no module edits.** The skill never writes into a module file — D17: discovery stays automatic, judgment stays manual.
+[x] Per Step 4, work out and **actually test** the access method for each surviving source, recording it in the form its kind calls for (D1's taxonomy: fixed-site → a literal `site:` query; parameterized → a URL pattern plus a verified seed list; open-query → an explicit "none by design" note; unreachable → a directive naming the block **and** the substitute, never a passive note that it blocks). Two things already in the record, so do not spend budget rediscovering them:
+  - **Discourse forums expose JSON** — `search.json?q=` was confirmed on the Obsidian forum (`PLAN.md` D9, ROADMAP's fetch-fallback section). Confirm the pattern generalizes to at least one *other* Discourse forum and record a seed list; XenForo is untested and worth one probe.
+  - **`skills/web-search-modules/sites/` already holds eight site files.** Read the relevant ones instead of rediscovering their methods, and cite them from your bullets — while keeping each bullet self-sufficient, because the agent may never open the citation.
+  - **Reddit** is available through `skills/research/reddit_feed.py` and gets **at most one bullet**. D9 is explicit: it may contribute one listing-level signal alongside unrelated venues, and must never define the module or be its only evidence. `sites/reddit.md` has the method.
 
-## 3. Documentation — README and ROADMAP
+[x] Write your discovery notes — probe-by-probe, which venues surfaced, what each access-method test returned — to a scratchpad file, and give its path in the report. This is the evidence that discovery actually ran; the module file is too short to carry it.
 
-[x] `README.md`: add `/research-harvest` to the **Usage** block (one line, matching the existing comment style). Then backfill the **Additions** list, which stops at 18 and is missing three shipped capabilities — continue the numbering, match the existing entries' register (what it is, why upstream's absence was a problem, what the rule actually is), and keep them to one paragraph each:
-  - **19** — `unreachable[]` as an output channel separate from unanswered `uncertain[]`, and the deduplicated `## Unreachable sources` report section (`PLAN.md` D11, `TASKS.md` `[unreachable-output]`).
-  - **20** — the one approved package helper (`reddit_feed.py`, its `--max-attempts` cap) and the fetch budget's redefinition to count *every* network retrieval attempt rather than only native `WebFetch` calls (D15, `[helper-firecrawl]`). Note that entry 15 already covers the Firecrawl rung — do not duplicate it, reference it.
-  - **21** — source capture and harvest together: `sources[]` on every result file, and `/research-harvest`'s candidate list with its 3-runs/2-field-support threshold (D17, D18).
+## 2. Write the module
 
-[x] `ROADMAP.md`: two sections are stale and read as open work.
-  - **"Fill in `stackoverflow.md`"** — landed 2026-09-04, and the finding is worth keeping rather than deleting: `site:stackoverflow.com` returns **zero** SO URLs and fills with answer-scraping farms, `WebFetch` is refused at both the site and its API, and the working route is the Stack Exchange API through the existing `crwl` escalation (keyless, 300/day, `filter=withbody` returns the accepted answer's text with no page fetch). Rewrite it as a landed section in the register of "Retrofit: access methods — landed".
-  - **"Verify the fetch fallback"** — the parking lot records this as tested 2026-08-29: the escalation runs clean and the `head -c` bound holds, but it does **not** recover a JS-shell page; prefer a JSON endpoint beside the HTML page. The section still says "has never fired in a real run." Reconcile it to what was actually found; keep the Obsidian forum observation, which is the worked example.
-  - Do **not** touch the module table, the `chinese-tech` section, or the Wanted modules list.
+[x] `skills/web-search-modules/demand-signals.md`, **under 40 lines**, in **English** (the Chinese section headers are an upstream-module legacy, not the house style). Shape per `skills/web-search-modules/SKILL.md`:
+  - Routing header — `**Family:**`, `**Use when:**`, `**Do not use for:**`, `**Siblings:**`. Write the anti-trigger honestly. The nearest neighbour is `competitor-content`, which is this module's mirror image — what has already been *published* about a topic versus what is being *asked* about it — so `Do not use for` must draw that line sharply enough that a mis-route corrects itself at read time.
+  - Sources in priority order, each with what it is good for **and** its tested access method.
+  - Query tactics specific to this domain. **One of them is load-bearing and comes from D9: full threads are the wrong unit.** Recurrence across venues is a listing- and title-level signal — many titles, cheaply. Full bodies matter only for verbatim vocabulary, as a narrower second pass. At `standard`'s 12 fetches, spending them on whole threads buys depth where this module needs breadth. Say that in the module, in the agent's own operational terms.
+
+[x] Only write a `sites/<slug>.md` if one is genuinely earned — a second module now names the site, **or** what you learned overflows the bullet — and only once that content exists. A site file restating its bullet is an empty container; two were built and deleted the same day for exactly that. If nothing earns one, write none and say so.
+
+## 3. Register it
+
+[x] Add one family row to `skills/web-search-modules/ROUTING.md`'s step-2 table, using D9's question verbatim. Place it **after** Published-content landscape and **before** General — General is the default and must stay last. Change nothing else in the table: no existing family's question, no existing module's row.
+
+[x] If the new family's boundary against `competitor-content` needs a sentence of disambiguation, add it in the same prose style as the existing "Between tooling & platform and AI ecosystem & market" and "Within software & debugging" notes below the table. One sentence, only if the routing genuinely needs it.
+
+## 4. Verify it beats `general-web` — Step 7
+
+[x] Re-run **two** of the seven probe questions, this time following the new module. Compare honestly against what plain search returned for those same questions in piece 1, and report the comparison with specifics — which venues the module reached that plain search did not, and whether the answers were actually better rather than merely different. Budget: 4 searches, 4 fetches, on top of piece 1's.
+
+[x] **If it does not beat `general-web`, do not ship it.** It does beat it (see report) — module kept. Leave the module file and the ROUTING.md row out (or revert them), report the comparison, and say plainly that the module lost. Do not soften a losing result into a marginal win.
+
+## 5. Documentation — only if piece 4 passes
+
+[x] `ROADMAP.md`: one row in the "Modules added since the fork" table (`demand-signals` | its family | what it is), in the register of the existing rows. If the module opened a family by a route worth recording — the way `agent-tooling` is noted as the first to carve a family out of an existing one — add it to the prose below the table rather than the row.
+
+[x] `README.md`: Additions entry **22**, continuing the numbering, one paragraph, in the register of 12 and 16 (which are the other module-family entries). It should say what question the module answers, why upstream's five modules could not, and name the breadth-over-depth constraint as the module's actual rule rather than a nicety.
 
 **Files:**
-- `skills/research/harvest_sources.py` (new)
-- `skills/research-harvest/SKILL.md` (new)
-- `README.md`
-- `ROADMAP.md`
+- `skills/web-search-modules/demand-signals.md` (new)
+- `skills/web-search-modules/ROUTING.md`
+- `skills/web-search-modules/sites/<slug>.md` (new, only if genuinely earned)
+- `ROADMAP.md`, `README.md`
 - `TASKS.md` (piece status and run state only)
 
 **Tests:**
-1. `python3 -m py_compile skills/research/harvest_sources.py` and `python3 -m py_compile skills/research/validate_json.py` (the latter must still compile; you are not editing it).
-2. **Build a synthetic fixture in the scratchpad** — D17's amendment says live verification is impossible here, so the fixture *is* the test. A root with four run folders: one whose results have no `sources` key at all (predates capture); three that carry `sources`, arranged so that exactly one URL appears in 3 runs with a non-empty `fields` in 2 of them (a candidate), one appears in 3 runs but has field support in only 1 (a near-miss), and one appears in a single run. Include one result file with `output_dir` set to something other than `results`, one unparseable `.json`, and one malformed `sources` entry.
-3. Run `--root` against that fixture. Confirm: exactly one candidate is reported; the near-miss appears under near-misses, not candidates; the unparseable file is named as skipped and does not crash the run; the non-default `output_dir` run was scanned; the scan summary counts 1 no-capture and 3 captured.
-4. Run `--run` against the single no-capture run alone. Confirm the output says these runs predate source capture, in those terms, and does **not** say sources were captured but nothing met the threshold.
-5. Delete the `sources` arrays from the fixture's captured runs and re-run `--root`; confirm the message flips to the predates-capture case. Then restore them, lower `--min-runs 2`, and confirm the near-miss is still excluded (it fails the *field-support* clause, not the run-count one) — this is the check that proves the two-clause threshold is really two clauses.
-6. Pipe the fixture's `--root` output through `wc -l` and confirm it is bounded; then synthesize 60 qualifying-ish URLs and confirm near-misses cap at 20 with the `… and N more` line.
-7. Exercise the `CANDIDATES.md` regeneration rule by hand: write a `CANDIDATES.md` containing one ticked and one struck entry, then follow the skill's own written steps against the fixture and confirm those two land under `## Dispositioned` and appear nowhere under `## Candidates`. If the skill's wording does not make that mechanically followable, the wording is the bug — fix it.
-8. `rg -n 'research-harvest' README.md skills/research-harvest/SKILL.md` and confirm the skill is in the Usage block; confirm the Additions numbering runs 1–21 with no gaps or repeats.
-9. `git diff --check`.
+1. `wc -l skills/web-search-modules/demand-signals.md` — under 40.
+2. The module carries all four routing-header fields, and `Do not use for` explicitly distinguishes it from `competitor-content`.
+3. Every source bullet carries an access method. `rg -n 'site:|https?://|search\.json|reddit_feed' skills/web-search-modules/demand-signals.md` — no bullet is a bare site name. Read the output rather than trusting the exit code: a grep can pass by not looking, which has now happened twice in this repo (`[access-methods]`, `[helper-firecrawl]`).
+4. Every URL pattern in the module was actually fetched during piece 1. List them in the report with what each returned. An untested pattern in a module is worse than no pattern, because it will be trusted.
+5. `ROUTING.md` — the new family row sits before General, the table is otherwise byte-identical to its previous state, and `general-web` is still described as the default. Confirm with `git diff skills/web-search-modules/ROUTING.md` and read it.
+6. Reddit appears in at most one bullet, and the module does not depend on it.
+7. The breadth-over-depth rule (listings and titles, not full threads) appears in the module's query tactics.
+8. Piece 4's comparison is reported with specifics, not asserted.
+9. README Additions numbering runs 1-22 with no gaps or repeats; ROADMAP's module table gained exactly one row.
+10. `git diff --check`.
 
 **Out of scope:**
-- Writing into any module file, or attributing a candidate to a module. D17 keeps promotion manual.
-- Backfilling existing runs with sources, or any migration.
-- Changing either agent's `tools:` allowlist, the depth/budget table, the fetch ladder, `validate_json.py`, or `unreachable[]`'s render-by-default behavior.
-- Live verification against a consumer project — D17 names that a separate later check, and it cannot be done from this checkout.
-- `PLAN.md` (the planning thread owns it) and any consumer-project pin bump.
+- Any other module, the existing family questions, `chinese-tech`'s modifier status, or the depth/budget table.
+- The two Wanted modules in ROADMAP (AI writing communities, docs-and-API-reference) — different domains, parked under D2.
+- `PLAN.md` (the planning thread owns it), `AGENTS.md`, and any consumer-project pin bump.
+- Building a local module, or writing anything into an installed `.agents/skills/` or `.claude/skills/` directory.
+- Rewriting `competitor-content` to make room. D9 settled that the two are distinct families; nothing existing changes to admit this one.
 
-**Report back:** Each piece completed or blocked, files changed, every test result with the actual output line that proves it (especially Tests 4, 5, and 7), the fixture's scratchpad path so the planning thread can re-run it, and anything in the D17/D18 spec that turned out underspecified when you tried to build against it.
+**Report back:** Each piece completed or blocked; the scratchpad path for the discovery notes; the venue classes that survived the tally and the ones you dropped, with why; every access-method test and what it returned, including the failures; piece 4's honest comparison; whether anything earned a `sites/` file; and anything in D9 that turned out underspecified when you tried to build against it. If the module lost to `general-web`, that is the report — say so plainly.
 
-> ▶ Run state: **done**, all 3 pieces landed, none blocked. All 9 Tests passed, including Tests 4/5/7 (the ones the report-back calls out specifically). Fixture built at `/private/tmp/claude-501/-Users-eristoddle-Dropbox-Writing-deep-research-agent/c5cbdd7b-99b6-40ad-8bea-dbbf17214da5/scratchpad/harvest-fixture` (a backup pre-edit copy sits alongside it at `harvest-fixture-backup`, and a second disposable fixture for the 60-URL near-miss cap check at `harvest-fixture-nearmiss-cap`) — re-runnable, see the implementer's report for the exact commands. Nothing left in the queue; see the full report in the session transcript for underspecified points raised (PyYAML's parenthetical justification, and the "named in the summary" vs "one-line summary" wording tension, both resolved by implementation choice rather than blocking).
+> ▶ Run state: done 2026-09-05. All 5 pieces landed, none blocked; all 10 Tests passed. The module beat `general-web` in piece 4 and shipped. Reviewed in the planning thread — both live endpoints re-verified independently (autocomplete returns frustration-shaped completions as claimed; Trustpilot fetches on a second unrelated brand, so the pattern generalizes). One clause added there: **Trustpilot's low-star reviews skew hard toward billing, refunds, and support**, not product gaps, and the bullet now says so and points at the forum bullet for "what the product cannot do." Without it the module answers "what's missing from budgeting apps" with a page of refund complaints. Discovery notes at `<scratchpad>/demand-signals-discovery-notes.md`.
 
 ---
 
 ## ✅ Done (collapsed — full detail in the planning doc's session log)
+
+### `[harvest]` D17 harvest half: `/research-harvest` — 2026-09-05
+
+All 3 pieces landed, none blocked, all 9 Tests passed against a synthetic fixture (live verification is impossible from this checkout — no run anywhere has captured sources yet, which D17's amendment settles as a separate later check). New `skills/research/harvest_sources.py` is a read-only tally: it discovers runs per LAYOUT.md, reads each run's `output_dir` relative to its run folder, and counts each source URL by runs-appeared-in and runs-where-it-supported-a-field. New `/research-harvest` is hand-invoked only, resolves the script by the same four-path lookup `/research-deep` uses for the validator, and writes `.agents/web-search-modules-local/CANDIDATES.md` — regenerated whole each run, but ticked or struck entries move to `## Dispositioned` and never return as fresh candidates. README gained `/research-harvest` in Usage plus Additions 19-21 (the list had stopped at 18 and was missing three shipped capabilities); ROADMAP's two stale sections now read as landed. `PLAN.md` **D17/D18**.
+
+**Review found the two run states D17 named are three.** A run folder holding only an `outline.yaml` — made by `/research` and never researched — was classified `no-capture` and therefore reported as *predates source capture*, the opposite of the truth, and on the most likely first invocation of all: harvesting straight after making an outline. Fixed in the planning thread; runs are now `captured` / `no-capture` / `no-results`, the third with its own sentence in both script and skill.
+
+Also worth keeping: the task's own justification for avoiding PyYAML ("not a dependency anywhere in this package") was **false** — `validate_json.py:9` imports it. The design was unaffected (harvest needs one scalar out of `outline.yaml`, so a line-oriented read is still right), but a task can hand the implementer a true instruction for a false reason, and the agent catching it is why the report-back asks what turned out underspecified.
 
 ### `[source-capture]` D17 capture half: record which sources answered — 2026-09-04
 

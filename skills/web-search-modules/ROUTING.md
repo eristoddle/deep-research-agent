@@ -27,11 +27,14 @@ Work down the families in order and stop at the first whose question is a yes. R
 | Literature | Does the answer live in a paper, preprint, or citation trail? | `academic-papers` |
 | AI ecosystem & market | Is it a fact about a *model or model provider* — its scores, its versions, its token price, or who competes with it? | `benchmarks`, `model-releases`, `pricing`, `vendor-landscape` |
 | Published-content landscape | Is the question what has already been *written* about this topic, and what those pages cover? | `competitor-content` |
+| Demand signals | Is the question which problems, desires, or frustrations recur in people's own words across independent venues? | `demand-signals` |
 | General *(default)* | Nothing above fits — opinion, practice, comparison, product, news, or anything unclassified | `general-web` |
 
 Between **tooling & platform** and **AI ecosystem & market**: the split is the thing being asked about, not the company. "What did Anthropic charge for Opus 5" is `pricing`; "what changed in Claude Code 2.1" is `agent-tooling`. A tool's own subscription tiers are `agent-tooling`, because they are documented with the tool and not on the API pricing page.
 
 Within **software & debugging**: `github-debug` when the artifact is a specific project (an error from a named library, a regression, a known bug); `stackoverflow` when the question is how to use a language or API correctly.
+
+Between **Demand signals** and **Published-content landscape**: both read the same forum layer, but for different reasons. `competitor-content` reads it as context around ranked pages, to find what published coverage misses; `demand-signals` reads it as the primary evidence, when the task is about what people want or struggle with rather than about a gap in existing content. "What's missing from what's already written" is `competitor-content`; "what people keep saying is wrong" is `demand-signals`.
 
 Within **AI ecosystem & market**, pick by what the answer *is*:
 
