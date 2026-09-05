@@ -13,7 +13,7 @@
 - **The top-ranking pages themselves**, 3-5 of them, fetched and read for **structure** — H2/H3 outline, what gets defined, what gets compared, what gets cited, roughly how long. Not for prose.
 - **`people also ask <query>` as its own search** — surfaces the question set around the topic.
 - **Query variants** — the same topic phrased as a beginner, a buyer, and a practitioner would phrase it. Each returns a partly different set, and the union is the real landscape.
-- **Reddit and forum threads on the query** — where the questions that no ranking page answers get asked out loud. Usually the richest source of a genuine gap. Reddit itself is unreachable from this toolchain — use niche forums and `people also ask` for the same signal instead. See `sites/reddit.md`.
+- **Reddit and forum threads on the query** — where the questions that no ranking page answers get asked out loud. Usually the richest source of a genuine gap. Read Reddit through the approved Atom-feed listing reader (titles and permalinks, not full threads) and pair it with niche forums and `people also ask` for the same signal in more depth. See `sites/reddit.md`.
 - **The commissioning site's own existing content**, when the project has a list of it. Prevents re-covering ground and surfaces internal link targets.
 
 ## Query tactics

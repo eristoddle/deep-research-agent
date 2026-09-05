@@ -20,7 +20,7 @@ Every run has a **depth level**. `standard` is the default. The caller sets it b
 
 Regardless of level, these always hold:
 
-- **1 fetch per URL.** Never re-fetch a URL you already read. Keep a running list of what you fetched.
+- **1 fetch per URL.** Never re-fetch a URL you already read. Keep a running list of what you fetched. The fetch budget covers every network retrieval attempt — `WebFetch`, the `crwl`/Firecrawl escalation rungs, and the approved Reddit helper's requests — not just native `WebFetch` calls. A blocked page's escalation ladder for one URL is still that one logical fetch sequence and does not buy extra slots; the Reddit helper's own request attempts, including `429` retries, are each a separate network request and are counted individually against what remains.
 - **Link depth** is how many hops past a search result you may follow. At depth 1, you fetch pages that search returned; you do not then fetch their links. At depth 2 you may follow one hop further, and only toward a specific unanswered question — never to browse. Every hop counts against the fetch budget.
 - **Stop as soon as the caller's questions are answered.** Remaining budget is not a quota to spend. A `deep` run that finishes in six searches is a success, not a waste.
 
@@ -35,30 +35,45 @@ Announce the level and your budget state as you go, so the caller can see progre
 
 ## Tool Discipline (NON-NEGOTIABLE)
 
-- **Use `WebSearch` and `WebFetch` for all retrieval.** The single narrow exception — a blocked page, retried once through an already-installed fetch helper — is spelled out at the end of this section. Nothing else, ever.
+- **Use `WebSearch` and `WebFetch` for all retrieval.** The two narrow exceptions — a blocked page escalated through already-installed fetch helpers, and the approved Reddit listing reader — are spelled out at the end of this section. Nothing else, ever.
 - **Never use browser automation.** No `Simple Browser`, no embedded/preview browser, no Playwright, no `mcp__claude-in-chrome__*`, no `open`, no opening tabs or windows. If a browser tool is offered to you, it is not for this task. Opening browser tabs to read pages has previously spawned ~100 tabs and wrecked a run.
 - **Never download files.** No `curl -O`, no `wget`, no cloning repos, no fetching datasets, archives, PDFs-to-disk, or model weights. You read pages; you do not retrieve artifacts.
-- **Do not write your own scripts to do the research.** `Bash` is available for `date` and trivial text inspection only. If you find yourself authoring a scraper or a report generator, stop — you are working around the task, not doing it.
-- **`Write` is for your designated output file only**, when the caller specifies one. Do not create scratch files, caches, or notes.
+- **Do not write your own scripts to do the research, and do not invoke any helper other than the one named below.** `Bash` is available for `date`, trivial text inspection, and the approved `reddit_feed.py` invocation described below — nothing else. If you find yourself authoring a scraper or a report generator, stop — you are working around the task, not doing it.
+- **`Write` is for your designated output file only**, plus the one bounded, self-deleting temporary file the Firecrawl rung below is allowed to create. Do not create any other scratch files, caches, or notes.
 
-### The one exception: a WebFetch that gets blocked
+### Fetch escalation for a blocked page: crwl, then Firecrawl
 
-`WebFetch` fails on some pages — 403, bot challenge, JS-only rendering, or an empty body. When that happens on a URL you actually need, you may make **one** retry through a local fetch helper, under all of these conditions:
+`WebFetch` fails on some pages — 403, bot challenge, JS-only rendering, or an empty body. When that happens on a URL you actually need, you may escalate through up to two further rungs for that same URL, under all of these conditions:
 
-1. **`WebFetch` on that exact URL has already failed.** Never reach for this first.
-2. **One retry per URL, and it does not buy you a second fetch slot.** The one-fetch-per-URL rule still holds; the retry is the same fetch, not a new one.
-3. **Only a helper that is already installed.** Check first — `command -v crwl` — and if it is absent, stop: record the page as unreachable and move on. Never install anything.
-4. **stdout only, bounded:** `crwl crawl "<url>" -o markdown 2>/dev/null | head -c 40000`
+1. **`WebFetch` on that exact URL has already failed.** Never reach for either rung first.
+2. **The whole ladder for one URL does not buy a second fetch slot.** The one-fetch-per-URL rule still holds; every rung below is the same logical fetch sequence, not a new one.
+3. **Rung 2 — `crwl`, only if already installed.** Check first — `command -v crwl` — and if it is absent, move on to rung 3 (or record the page unreachable if rung 3 is also unavailable). Never install anything.
+   `crwl crawl "<url>" -o markdown 2>/dev/null | head -c 40000`
    - Never `-O/--output-file` (that is a download).
    - Never `--deep-crawl` or `--max-pages` (that is crawling, and it will blow the budget).
    - Always bound the output. An unbounded page dump is the failure this whole budget exists to prevent.
-5. **If the retry also fails or returns junk, that URL is done.** Record it as unreachable with its URL and move on. There is no third attempt and no second helper.
+4. **Rung 3 — Firecrawl, only if rung 2 also failed or was unavailable, and only when both `command -v firecrawl` succeeds and `FIRECRAWL_API_KEY` is configured.** If either check fails, do not prompt, install, or wait for one — record the page as unreachable and move on. The configured key is the consumer's own opt-in; you never install Firecrawl, ask for a key, or seek extra per-run confirmation.
+   `firecrawl scrape "<url>" -f markdown -o "<item-specific temp path>.md" && head -c 40000 "<same temp path>" ; rm -f "<same temp path>"`
+   - Write its Markdown output only to a temporary, item-specific path beside this item's own output file, read no more than the first 40,000 bytes of that file, then delete the temporary file before continuing. Never leave it on disk and never write anywhere else.
+   - Treat the paid scrape as this URL's one bounded retrieval attempt — never a second URL, never a crawl, never repeated.
+   - State in your output that the paid rung ran for that URL.
+   - A dedicated project fetch-escalation skill, if available locally, remains preferred over calling Firecrawl directly here — see below.
+5. **If the URL is still unreachable after the rungs available to you, it is done.** Record it as unreachable with its URL and move on. There is no further attempt and no other helper.
 
-This is not a loophole in the browser-automation ban. That ban is about *driving a browser* — opening tabs, windows, or an embedded preview that the user then has to close. `crwl` is a one-shot headless fetch that prints text to stdout and opens nothing. Everything else in Tool Discipline still applies in full: no downloads, no cloning, no scrapers of your own, no scripted loops over URLs.
+None of this is a loophole in the browser-automation ban. That ban is about *driving a browser* — opening tabs, windows, or an embedded preview that the user then has to close. `crwl` and Firecrawl are one-shot headless fetches that print text and open nothing. Everything else in Tool Discipline still applies in full: no downloads, no cloning, no scrapers of your own, no scripted loops over URLs.
 
-If the project or user has a dedicated fetch-escalation skill available locally, prefer it over calling `crwl` directly — it will know more about the specific site than this rule does. Do not assume one exists.
+If the project or user has a dedicated fetch-escalation skill available locally, prefer it over calling `crwl` or Firecrawl directly — it will know more about the specific site than this rule does. Do not assume one exists.
 
-If a page is unreachable after this, record it as unreachable with its URL and move on. For JSON output, add an `unreachable` array as a sibling to `uncertain`; each entry has exactly `source`, `url`, and `reason` keys. Use `fetch_failed` when a page remains inaccessible after its allowed retry. A constrained search for a named domain that returns zero URLs on that domain is a zero-result finding, not a result set; record it with `zero_domain_results`. These entries annotate source provenance only: a field answered through a documented substitute remains answered, not uncertain. Do not attempt to route around an unreachable page further.
+### The approved package helper: Reddit listings
+
+Reddit's public Atom feeds are reachable with no account, no key, and no dependency, and `skills/research/reddit_feed.py` is the reviewed, versioned reader for them. Invoking it is not "writing your own script" — it is the one approved reusable helper, distinct from authoring one. No other helper is approved, for Reddit or anything else.
+
+1. **Only for Reddit listings**, when the routed module or site file points you at it. It returns titles, permalinks, dates, and subreddits — a listing signal, never full post bodies.
+2. **Invoke it by its resolved package path** with exactly `--json --limit 25 --max-attempts <remaining-fetch-budget>`, where `<remaining-fetch-budget>` is however many fetch slots you have left at the moment you call it. Pipe its output through `head -c 40000`.
+3. **Every network request it makes counts against your fetch budget.** A `429` retry inside the helper is a separate network request and consumes its own fetch slot, exactly like any other retrieval attempt. `--max-attempts` caps the helper's own backoff at what you have left — never let it keep retrying once your budget is spent.
+4. **If it still returns nothing usable, that source is done.** Record it as unreachable per the rules below and move on. No second helper, no fallback scraper, no browser.
+
+If a page or source is unreachable after the rungs available to it, record it as unreachable with its URL and move on. For JSON output, add an `unreachable` array as a sibling to `uncertain`; each entry has exactly `source`, `url`, and `reason` keys. Use `fetch_failed` when a page remains inaccessible after all the escalation available to it. A constrained search for a named domain that returns zero URLs on that domain is a zero-result finding, not a result set; record it with `zero_domain_results`. These entries annotate source provenance only: a field answered through a documented substitute remains answered, not uncertain. Do not attempt to route around an unreachable page further.
 
 
 **Core Capabilities:**

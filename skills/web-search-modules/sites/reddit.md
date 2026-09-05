@@ -1,15 +1,15 @@
 # Reddit — reddit.com
 
 **Used by:** competitor-content, general-web, vendor-landscape
-**Reachable:** no — niche forums on the same topic, `people also ask <query>`, search-suggestion autocomplete · 2026-09-03
+**Reachable:** yes — public Atom feeds only, via `skills/research/reddit_feed.py` · 2026-09-04
 
 ## Query
-- Every route inside `web-search-agent`'s tool discipline fails: `WebSearch site:reddit.com`, `WebFetch` on `www.reddit.com`/`old.reddit.com`, `curl` with a browser User-Agent on the `.json` endpoint, and the `crwl` carve-out.
+- Every scraper route into Reddit still fails: `WebFetch` is refused by the harness at the domain level, `crwl` cannot parse the feed XML anyway, and Firecrawl refuses the domain by vendor policy (*"we do not support this site"*, tested on both `old.` and `www.`, listing and thread).
+- **The public Atom feeds are the one open route.** `skills/research/reddit_feed.py` reads `/r/<sub>/.rss` and `/r/<sub>/search.rss` with the stdlib — no account, no token, no API registration. Invoke it with `--json --limit 25 --max-attempts <remaining-fetch-budget>`; each attempt, including a `429` backoff retry, is a real network request and counts against the caller's fetch budget.
+- `www.reddit.com` only. `old.reddit.com` now 302s and is degrading; never prefer it.
 
 ## Worth knowing
-- The search layer fails *silently* — ten plausible results from unrelated domains (Etsy community, SBA, slideshare), no error.
-- **Settled 2026-09-03**, re-tested on a second machine and a different IP: `curl` gets a 302 to the login wall, `crwl` gets a 174-byte login page. Not an IP artifact.
-- **Firecrawl refuses Reddit by policy**, not by block: *"we do not support this site."* Same on `old.` and `www.`, listing and thread. A control scrape elsewhere succeeded. A proxy pool cannot route around a vendor's refusal, so no scraper rung will help.
-- **But the Atom feed is open.** `curl https://www.reddit.com/r/<sub>/.rss` returns real current listings, no auth, 200. `WebFetch` is refused on the domain by the *harness*, and `crwl` cannot parse XML — so the block is in our tooling, not at Reddit. Listings are the right unit anyway. Reopened; see Q3.
-- `old.reddit.com` now 302s and is degrading. Do not prefer it.
-- The `.json` endpoint exists on every view but isn't reachable by any route this toolchain has. The "JSON endpoint beside the HTML page" trick that works for Discourse forums is falsified for Reddit specifically.
+- **Listings only.** Output is title, permalink, date, and subreddit per entry — the reader never returns a post's body or its comments. That is a narrower, cheaper unit than a full thread and the right one for a repetition/listing-level signal; full bodies are a separate, later job this helper does not do.
+- The `WebSearch` layer fails *silently* on Reddit — ten plausible results from unrelated domains (Etsy community, SBA, slideshare), no error. Use the feed reader instead of relying on `site:reddit.com` search results.
+- The search feed (`search.rss`) mixes matching *subreddits* into results alongside matching *posts*; the reader already filters to permalinks containing `/comments/`, so this is handled for you rather than something a caller needs to re-check.
+- The `.json` endpoint exists on every view but is not reachable by any route this toolchain has; it is not a substitute for the Atom feed.

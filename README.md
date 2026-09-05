@@ -75,11 +75,11 @@ Nothing else is needed — the agent looks for `crwl` on `PATH` and uses it if i
 
 It does **not** recover a page whose content is rendered by client-side JavaScript; it snapshots before that content loads. For those, a JSON endpoint beside the HTML page is usually the better route, which is the kind of thing recorded in `skills/web-search-modules/ACCESS.md`.
 
-### Firecrawl — paid, and never automatic
+### Firecrawl — paid, optional, and configured rather than automatic
 
 Firecrawl is the rung above `crwl`: a hosted API with a proxy pool, which is what makes it the one option likely to get past a block that is based on your IP address rather than your user agent.
 
-**It costs money, so nothing in this package calls it on your behalf.** It is not wired into the agent, and installing it does not change how a research run behaves. It is here because it is the tool that answers "is this site actually unreachable, or just unreachable from my machine?" — a question worth being able to settle when a source you need keeps failing.
+**It costs money, so nothing in this package calls it unless you configure it.** When a page defeats both `WebFetch` and `crwl`, the agent uses Firecrawl as the third fetch rung for that one URL only if `firecrawl` is on `PATH` and `FIRECRAWL_API_KEY` is set — one bounded scrape, written to a temporary file beside that item's own output and deleted once read, never a crawl and never a second URL. Leave either check unmet and nothing changes: the agent never installs Firecrawl, never asks for a key, and never spends your money — the page is simply recorded as unreachable, same as before this fallback existed. Configuring it *is* the opt-in; there is no separate switch.
 
 Sign up: **[firecrawl.link/stephan-miller](https://firecrawl.link/stephan-miller)** *(affiliate link — it costs you nothing extra and supports this project; [firecrawl.dev](https://firecrawl.dev) is the plain one if you would rather.)*
 
@@ -88,11 +88,11 @@ npm install -g @mendable/firecrawl-cli
 export FIRECRAWL_API_KEY=fc-...        # fish: set -Ux FIRECRAWL_API_KEY fc-...
 ```
 
-Use it yourself when you want to check a stubborn source.
+Configuring both is enough — there is nothing further to wire up, and use it yourself directly whenever you want to check a stubborn source outside a run.
 
 ### The easier route: install a fetch-escalation skill
 
-The agent's own rule ends with a deferral — if a dedicated fetch-escalation skill is available locally, it prefers that over calling `crwl` directly, because such a skill knows more about specific sites than a general rule can.
+The agent's own rule ends with a deferral — if a dedicated fetch-escalation skill is available locally, it prefers that over calling `crwl` or Firecrawl directly, because such a skill knows more about specific sites than a general rule can.
 
 **`fetch-anything`** is that skill. It owns the full ladder — defuddle → crawl4ai → firecrawl — climbing only when a rung actually fails, plus per-domain handlers for sites that need special treatment. Installing it is a better answer than wiring the two tools above together by hand, because it decides which rung to use rather than leaving that to a general instruction.
 
@@ -174,7 +174,7 @@ Capability upstream never had, added here.
 
 14. **Locally-created modules survive reinstalls.** Modules can live in `.agents/web-search-modules-local/`, which APM does not own. `ROUTING.md` prefers that directory, retains `.claude/web-search-modules-local/` as a legacy fallback, and lets local entries win on a name conflict, so a project can add its own modules — a client's competitive set, a niche source list — without editing any packaged file and without losing them to the next `apm install`.
 
-15. **A bounded fetch fallback for blocked pages.** `WebFetch` returns 403s, bot challenges, and JS-only shells often enough to lose real sources. The agent may now retry **one** such URL through `crwl` (crawl4ai) if it is already installed — stdout only, output bounded with `head -c`, no `--deep-crawl`, no output-to-file, no install attempt, no second helper, no third try. It does not buy an extra fetch slot, since it is the same URL. The prompt also states why this is not a hole in the browser-automation ban: that ban is about driving a visible browser, and this is a one-shot headless fetch that prints text.
+15. **A bounded fetch escalation ladder for blocked pages.** `WebFetch` returns 403s, bot challenges, and JS-only shells often enough to lose real sources. The agent may now escalate one such URL through up to two further rungs, each conditional on what is actually configured: `crwl` (crawl4ai), free, if it is already installed; then Firecrawl, paid, only if both the CLI is on `PATH` and `FIRECRAWL_API_KEY` is set. Every rung is stdout-only and bounded (`head -c`, or a temporary file read then deleted for Firecrawl), with no `--deep-crawl`, no output-to-file, no install attempt at any rung, and nothing beyond the rungs actually available. The whole ladder does not buy an extra fetch slot, since it is one logical fetch sequence for the same URL. The prompt also states why this is not a hole in the browser-automation ban: that ban is about driving a visible browser, and every rung here is a one-shot headless fetch that prints text.
 
 16. **A `competitor-content` module, and the first non-technical family.** Research that has to say something competitors do not needs to know what competitors already said. This module samples what is published on a topic — an unrefined search of the reader's actual query, 3-5 top pages read for *outline* rather than prose, PAA and forum questions, query variants — and reports the union of subtopics plus the gap. It states its limits rather than filling them in: `WebSearch` returns a result list, not a SERP, so ranking position, search volume, and keyword difficulty are unavailable and must never be estimated. Where the caller is doing brief-level SEO work rather than per-item pipeline research, it names `ct-seo-research` as the better instrument instead of half-reproducing it. Its family question — *what has already been written about this?* — is the first that is not about technology at all, and is the worked example for attaching non-technical families.
 

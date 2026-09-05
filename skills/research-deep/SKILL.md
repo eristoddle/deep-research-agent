@@ -64,8 +64,9 @@ Research {item_related_info}, output structured JSON to {output_path}
 Read {fields_path} to get all field definitions
 
 ## Search Budget
-Depth level: {depth}. Hard limits for this item: {searches} WebSearch calls, {fetches} WebFetch calls, one fetch per URL.
-Use WebSearch and WebFetch only. No browser automation, no downloads, no cloning, no self-written scripts.
+Depth level: {depth}. Hard limits for this item: {searches} WebSearch calls, {fetches} fetches, one logical fetch sequence per URL.
+The fetch budget covers every network retrieval attempt -- WebFetch, the crwl/Firecrawl escalation rungs, and the approved reddit_feed.py helper's own requests -- not just native WebFetch calls.
+Use WebSearch and WebFetch for all retrieval. Escalate a blocked page through crwl then Firecrawl, and invoke reddit_feed.py for Reddit listings only, exactly per your own tool discipline. No browser automation, no downloads, no cloning, no self-written scripts, no other helper.
 Stop when the fields are answered. Mark whatever is still open as [uncertain] rather than spending more budget on it.
 
 ## Modules
@@ -78,7 +79,7 @@ otherwise load exactly the modules named. Either way, state the modules you load
 2. Mark uncertain field values with [uncertain]
 3. Add uncertain array at the end of JSON, listing all uncertain field names
 4. Add unreachable array as a sibling to uncertain; each entry has exactly source, url, and reason keys
-5. Use reason fetch_failed when a page remains inaccessible after its allowed retry, or zero_domain_results when a search constrained to a named domain returns zero URLs on that domain; zero matching-domain URLs are a zero-result finding, not a result set
+5. Use reason fetch_failed when a page remains inaccessible after all the escalation available to it, or zero_domain_results when a search constrained to a named domain returns zero URLs on that domain; zero matching-domain URLs are a zero-result finding, not a result set
 6. Unreachable entries annotate source provenance only; a field answered through a documented substitute remains answered, not uncertain
 7. All field values must be in English
 
@@ -103,8 +104,9 @@ description: Developed by Microsoft/GitHub, first mainstream AI coding assistant
 Read {project_dir}/fields.yaml to get all field definitions
 
 ## Search Budget
-Depth level: standard. Hard limits for this item: 8 WebSearch calls, 12 WebFetch calls, one fetch per URL.
-Use WebSearch and WebFetch only. No browser automation, no downloads, no cloning, no self-written scripts.
+Depth level: standard. Hard limits for this item: 8 WebSearch calls, 12 fetches, one logical fetch sequence per URL.
+The fetch budget covers every network retrieval attempt -- WebFetch, the crwl/Firecrawl escalation rungs, and the approved reddit_feed.py helper's own requests -- not just native WebFetch calls.
+Use WebSearch and WebFetch for all retrieval. Escalate a blocked page through crwl then Firecrawl, and invoke reddit_feed.py for Reddit listings only, exactly per your own tool discipline. No browser automation, no downloads, no cloning, no self-written scripts, no other helper.
 Stop when the fields are answered. Mark whatever is still open as [uncertain] rather than spending more budget on it.
 
 ## Modules
@@ -117,7 +119,7 @@ otherwise load exactly the modules named. Either way, state the modules you load
 2. Mark uncertain field values with [uncertain]
 3. Add uncertain array at the end of JSON, listing all uncertain field names
 4. Add unreachable array as a sibling to uncertain; each entry has exactly source, url, and reason keys
-5. Use reason fetch_failed when a page remains inaccessible after its allowed retry, or zero_domain_results when a search constrained to a named domain returns zero URLs on that domain; zero matching-domain URLs are a zero-result finding, not a result set
+5. Use reason fetch_failed when a page remains inaccessible after all the escalation available to it, or zero_domain_results when a search constrained to a named domain returns zero URLs on that domain; zero matching-domain URLs are a zero-result finding, not a result set
 6. Unreachable entries annotate source provenance only; a field answered through a documented substitute remains answered, not uncertain
 7. All field values must be in English
 

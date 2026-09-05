@@ -132,16 +132,25 @@ def main():
     ap.add_argument("--sort", default="new", choices=["new", "top", "hot", "rising", "relevance", "comments"])
     ap.add_argument("--limit", type=int, default=25)
     ap.add_argument("--json", action="store_true", help="emit JSON instead of text")
+    ap.add_argument(
+        "--max-attempts",
+        type=int,
+        default=5,
+        help="cap on request attempts, including 429 retries (default 5); each attempt is one network request",
+    )
     args = ap.parse_args()
 
     if not args.target and not args.search:
         ap.error("give a subreddit (r/SideProject) or --search")
 
+    if args.max_attempts <= 0:
+        ap.error("--max-attempts must be a positive integer")
+
     url = build_url(args)
     if not url:
         ap.error("could not build a feed URL from those arguments")
 
-    xml_text = fetch(url)
+    xml_text = fetch(url, retries=args.max_attempts)
     if xml_text is None:
         return 1
 
