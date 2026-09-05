@@ -55,12 +55,16 @@ For each surviving source, determine and record the access method — this is wh
 
 Record only patterns you actually tested. An untested URL pattern in a module is worse than no pattern, because it will be trusted.
 
+**Check `web-search-modules/sites/` before working any of this out.** If a source already has a `sites/<slug>.md`, its method and its reachability verdict are already recorded there — read it instead of rediscovering it, and cite it from your source bullet (`See sites/reddit.md.`). Keep the bullet self-sufficient regardless: it must carry the method itself, because the agent may never open the citation.
+
+If your testing produces more about one site than its bullet can hold, or you are the second module to name that site, write `sites/<slug>.md` — `**Used by:**`, a dated `**Reachable:**` line, `## Query`, `## Worth knowing`. Only write one when the content already exists; a site file that just restates the bullet is an empty container. Package modules put it in `skills/web-search-modules/sites/`; local modules put it beside the local module.
+
 ### Step 5: Write the module
 
 `<domain>.md` in the chosen directory, under ~40 lines, following the shape in `web-search-modules/SKILL.md`:
 
 - Routing header: `**Family:**`, `**Use when:**`, `**Do not use for:**`, `**Siblings:**`. Write the anti-trigger honestly — it is what lets a mis-route correct itself.
-- **Sources**, in priority order, each with what it is good for **and its access method from Step 4**.
+- **Sources**, in priority order, each with what it is good for **and its access method from Step 4**. Cite a `sites/<slug>.md` where one applies, without reducing the bullet to a bare pointer.
 - **Query tactics** — what you learned in Step 3 about phrasing that works in this domain. Not generic search advice; only what is specific to these sources.
 
 ### Step 6: Register it

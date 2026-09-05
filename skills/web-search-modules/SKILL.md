@@ -40,9 +40,24 @@ Modules are plain reference files, not code. The agent loads at most one to thre
 
    Keep it under ~40 lines. It enters the agent's context whole on every routed task, so length is a real cost.
 
-2. **Add it to `ROUTING.md`** — a row in an existing family, or a new family row with its own discriminating question. That is the only registration step; nothing else needs editing.
+2. **Cite a site file when one exists.** `sites/<slug>.md` holds what is known about reaching one specific website — how to query it, whether it is reachable at all, and what wastes budget there. Check `sites/` before writing a source bullet for a site that already has a file, and cite it (`See sites/github.md.`). **Keep the bullet self-sufficient anyway** — the agent may not open the citation, so a bullet reduced to a bare pointer strands it mid-run. The bullet carries the method; the site file carries the depth.
+
+3. **Add it to `ROUTING.md`** — a row in an existing family, or a new family row with its own discriminating question. That is the only registration step; nothing else needs editing.
 
 Families should stay few and answerable by a yes/no question about the task. When a family's module list grows past three or four, that is the signal to split the family, not to lengthen the row.
+
+### Site files
+
+`sites/<slug>.md` is a small file about one website, shared by every module that names it. Each carries `**Used by:**`, a dated `**Reachable:**` verdict, `## Query` (the method that works), and `## Worth knowing` (what wastes budget, what to distrust). They exist because the same site's quirks were being rediscovered every run, and because a module under a ~40-line cap cannot hold them.
+
+**A site earns a file two ways, and both require the content to already exist:**
+
+- **Recurrence** — a second module names the same site.
+- **Overflow** — one module's knowledge of a site outgrew the space the module has. `sites/stackoverflow.md` is the worked example: the module's own bullet could not hold the Stack Exchange API's endpoints, filters, and quota.
+
+Never create one for content someone intends to write later. A file holding only what the module bullet already says is an empty container that invites speculative filling — two were built and deleted the same day for exactly that reason.
+
+When a site turns out to be unreachable, the verdict goes on that site's `**Reachable:**` line. `ACCESS.md` keeps only what has no site file to live in.
 
 ### Modifiers
 
