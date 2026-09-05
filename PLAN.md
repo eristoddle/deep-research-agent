@@ -204,7 +204,7 @@ Decided 2026-09-03. This is an APM package other people install, and it currentl
 <!-- D14 — Site files, earned by recurrence -->
 ### D14 — A site earns its own file when a second module names it 🔨
 
-Decided 2026-09-03; **seven** files built the same day. Modules stay organized by **topic**; the **sites** inside them become a small referenced layer at `skills/web-search-modules/sites/<slug>.md`.
+Decided 2026-09-03; **seven** files built the same day, and an **eighth** (`sites/stackoverflow.md`) on 2026-09-04 when the parked rewrite landed and gave it something to hold. Modules stay organized by **topic**; the **sites** inside them become a small referenced layer at `skills/web-search-modules/sites/<slug>.md`.
 
 **The threshold is recurrence, not judgment.** A site gets a file when it is named by two or more modules — the same logic as D2's "no module until a real project needs one," applied one level down. Nothing is written speculatively, and the set grows only when the payload itself demonstrates the need.
 
@@ -221,7 +221,7 @@ Decided 2026-09-03; **seven** files built the same day. Modules stay organized b
 
 GitHub at 4 still proves the point: the raw `CHANGELOG.md` pattern and the check-the-last-commit-date rule live in `agent-tooling` and nowhere else, while three other modules cite GitHub without them.
 
-**Two triggers, not one.** The threshold above is *recurrence*. The second is *overflow* — one module whose site knowledge already exceeds what the module can hold. Both are earned by something that **exists**: a site file is never created for content someone intends to write. Stack Overflow clarified this. It is cited by exactly one module, so it fails recurrence; it is the textbook overflow case *once the parked rewrite exists*, but until then there is nothing to overflow, and a file holding only what the module bullet already says is an empty container inviting speculative filling. It gets its file the day the rewrite lands. Twitter/X fails both triggers and has no written method anywhere.
+**Two triggers, not one.** The threshold above is *recurrence*. The second is *overflow* — one module whose site knowledge already exceeds what the module can hold. Both are earned by something that **exists**: a site file is never created for content someone intends to write. Stack Overflow clarified this. It is cited by exactly one module, so it fails recurrence; it is the textbook overflow case *once the parked rewrite exists*, but until then there is nothing to overflow, and a file holding only what the module bullet already says is an empty container inviting speculative filling. It gets its file the day the rewrite lands — **which it did, 2026-09-04**: the rewrite produced verified API depth that does not fit under the module's line cap, so the overflow trigger fired exactly as specified rather than being waived. Twitter/X fails both triggers and has no written method anywhere.
 
 **Division of labor, and why the module bullet cannot just be a pointer:**
 
@@ -297,10 +297,8 @@ Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-sea
 > Deferred ideas. Each is a one-line hook + a link to `docs/parking-lot/`.
 
 - **Harvest sources from completed runs into a local module** — [docs/parking-lot/harvest-from-runs.md](docs/parking-lot/harvest-from-runs.md)
-- **Rewrite `stackoverflow.md`** — 12 lines, two vague source bullets, zero query tactics; a rewrite, not a retrofit — [docs/parking-lot/stackoverflow-rewrite.md](docs/parking-lot/stackoverflow-rewrite.md)
 - **Non-technical families** (health, law and policy, finance) — attach when a project needs one; `competitor-content` is the worked example — [docs/parking-lot/non-technical-families.md](docs/parking-lot/non-technical-families.md)
 - **Wanted modules** (AI writing communities, docs-and-API-reference) — parked under D2 until real demand — [docs/parking-lot/wanted-modules.md](docs/parking-lot/wanted-modules.md)
-- **AUQ local modules** — DeepInfra and OCR/LlamaIndex source maps via `/research-add-module`; the install level and the update are both settled (2026-09-04) — [docs/parking-lot/auq-consumer-install.md](docs/parking-lot/auq-consumer-install.md)
 - **Verify the `crwl` fetch fallback** — ✅ **tested 2026-08-29**: escalation runs clean and the `head -c` bound holds, but it does *not* recover a JS-shell page. Rule kept; prefer a JSON endpoint beside the HTML page instead — [docs/parking-lot/verify-crwl-fallback.md](docs/parking-lot/verify-crwl-fallback.md)
 
 ## Session log
@@ -312,6 +310,7 @@ Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-sea
 - **D15 and D16 shipped together** — the fetch contract is now a three-rung ladder (`WebFetch` → `crwl` → Firecrawl) for one URL, and `reddit_feed.py` is the one approved package helper an item agent may invoke. Both landed in the same task because they are the same edit to the same two prompts; splitting them would have meant rewriting the Tool Discipline section twice.
 - **The fetch budget was redefined, not just extended.** It now counts every network retrieval attempt rather than only native `WebFetch` calls — otherwise the two new rungs and the helper's `429` retries would have been free, which is exactly the overspend the budget exists to prevent. A blocked page's whole ladder is still one logical fetch sequence for that URL; the helper's individual attempts each cost a slot.
 - **Firecrawl's CLI shape was settled by running it, not by reading about it.** A single control scrape on this opted-in machine showed it writes plain Markdown to `-o` and prints only a scrape ID — so the bounded form is temp-file-then-delete, not a stdout pipe. This is what the previous session deferred for lack of a configured key.
+- **`stackoverflow.md` rewritten, and the module was actively wrong rather than merely thin.** Its only access method was `site:stackoverflow.com`, which **fails silently** — verified 2026-09-04: zero `stackoverflow.com` URLs returned, the page filled instead with answer-scraping farms (`bobbyhadz.com`, `techoverflow.net`, `itsourcecode.com`). `WebFetch` is also refused at both `stackoverflow.com` and `api.stackexchange.com`. The working route is the **Stack Exchange API through the existing escalation ladder** (`WebFetch` fails → `crwl` returns the JSON verbatim): keyless, 300 requests/day, and `filter=withbody` returns the accepted answer's text without ever loading a page. Two calls replace a blocked page fetch. This makes it the second venue after Reddit whose `site:` search fails *without an error*, which is the failure mode worth generalizing.
 - Review caught nothing that had to be reverted. One thing worth recording: the task's own Test 5 `rg` was scoped to the eight files it edited, so a repo-wide grep was needed to confirm no stale Reddit directive survived elsewhere. It found two hits in `web-search-modules/SKILL.md` that are the *authoring guidance* for the fourth-form directive pattern — still correct, correctly untouched. Same shape as the case-sensitive `reddit` grep in the `[access-methods]` task: a test that can pass by not looking.
 
 ### Session 6 — 2026-09-04
