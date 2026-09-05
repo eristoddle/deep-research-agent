@@ -18,6 +18,16 @@ Ledger for the `living-plan` skill. One entry per run.
 
 ## Runs
 
+### 2026-09-04 — grill (source accumulation)
+
+Two rounds, frontier emptied, ten questions dispositioned. **Decided:** D17 (capture sources before harvesting them). **Promoted:** Q1 → D17, closed. **Folded in and closed:** parking-lot item `harvest-from-runs`. **Opened:** nothing. **Parked:** nothing.
+
+The finding that reordered the whole thread: Q1's stated premise — that `results/*.json` records the URLs each item agent used — was **false**, verified against a live consumer run holding exactly one URL per item, and only because that project's `fields.yaml` declared a URL field. Capture had to be designed before harvest could exist. Worth generalizing: a question that has sat open for weeks may rest on a factual claim nobody re-checked, so verify the premise before grilling the branches hanging off it.
+
+Round 1 asked five questions on capture and deferred the promotion threshold, because the threshold's answer depended on what capture records — the ordering rule doing real work rather than being observed for its own sake.
+
+Incidental defect surfaced while checking a premise: `validate_json.py:22` `_SKIP_KEYS` never gained `"unreachable"` when that array shipped the same morning. Tested — cosmetic, no false pass. Queued with the capture work.
+
 ### 2026-08-21 — scaffold
 
 Greenfield. Created `PLAN.md`, `TASKS.md`, `.claude/agents/implementer.md`, the `docs/` tree, and this log. Appended the planning blurb + external-task-mirror pointer to `CLAUDE.md`, replacing the interim § *Where the task list lives*.

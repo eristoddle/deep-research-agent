@@ -1,9 +1,4 @@
 # Harvest sources from completed runs into a local module
 
-**Parked** 2026-08-21. Depends on [Q1](../questions/Q1-source-accumulation.md) being decided first.
-
-Every completed run leaves `{topic_slug}/results/*.json`, which records the URLs each item agent actually used. Today that evidence is discarded. The idea: pull recurring URLs out of finished runs and fold them into a **local** module in `.claude/web-search-modules-local/` — project-owned, never overwritten by `apm install`, which is the only tree where an accumulating source list can safely live.
-
-Applies only to **parameterized** modules (PLAN.md D1); fixed-site modules have nothing to accumulate and open-query modules cannot.
-
-Not started because the hard part is not extraction, it is **what justifies keeping a URL** — see Q1. Harvesting uncritically refills modules with the guessed-quality sources `/research-add-module` exists to filter out.
+> **CLOSED 2026-09-04 — folded into `PLAN.md` D17.** Not a parked item any more.
+> Kept only because it named the dependency correctly: this always depended on Q1 being decided first. Q1 was decided 2026-09-04, and in the process its factual premise — that completed runs already record the URLs each agent used — was falsified. They do not. Capture had to be designed before harvest could exist, which is what D17 does.

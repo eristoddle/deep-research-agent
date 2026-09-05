@@ -264,13 +264,36 @@ Firecrawl is optional and paid. The agent never installs it. A consumer opts in 
 
 This supersedes Q6's decision question. **Shipped 2026-09-04** — see `TASKS.md` `[helper-firecrawl]`. The bounded invocation is `firecrawl scrape "<url>" -f markdown -o "<item-specific temp path>.md"`, then `head -c 40000` on that file, then delete it. That shape came from a live scrape on an opted-in machine rather than from the docs: Firecrawl writes plain Markdown to the `-o` path with no JSON envelope and keeps stdout to a one-line scrape ID, which is why the temp-file-and-delete form is the bounded one rather than a stdout pipe like `crwl`'s.
 
+<!-- D17 — Capture sources before harvesting them -->
+### D17 — Capture which sources answered, before trying to harvest them 🔨
+
+Decided 2026-09-04, from a two-round grill on Q1. **The premise everything here rested on was false.** Q1 claimed `results/*.json` "records the URLs each item agent actually used." It does not. Verified against a live run (`AUQ/rough/DeepInfra/research/inference-speed-cost`): each result file holds **exactly one URL**, and only because that project's `fields.yaml` declared a `pricing_source_url` field. The results record *answers*, not their provenance. Nothing has been accumulating.
+
+So the work splits in two, and the order is load-bearing — building the harvest first yields a skill with nothing to read.
+
+**Capture (first).** Every `results/*.json` gains a `sources[]` array, sibling to `uncertain[]` and `unreachable[]`, with the same three-key entry shape: the URL, the source name, and **which fields it supported**. That last key is what proves a source was load-bearing rather than merely opened, and it is the entire basis for promoting one later. Only sources that *contributed to an answer* are recorded — dead ends are already `unreachable[]`'s job, and logging every page opened is noise that would make the threshold below meaningless.
+
+The rule lives **in the agent prompt**, not in a `fields.yaml` convention. A convention the author must remember is one that gets forgotten on the run that mattered, which is precisely how the one-URL-per-item state arose.
+
+`/research-report` does **not** render sources by default. It renders them when the prompt asks — *asked for in natural language, not a formal flag.* Use of this pipeline varies run to run (sometimes a readable report, sometimes only raw material for an article), and steering that by prompting is a property to preserve rather than formalize.
+
+**Harvest (only once capture has run several times).** A new `/research-harvest` skill, **invoked by hand** — never automatically after a run. Two of three runs in the live AUQ project stopped at `findings.md` and never reached the report step, so anything hanging off `/research-report` would simply never fire there; and a prompt after every run is one the user is mid-article for and learns to dismiss. It scans every run under the research root by default (recurrence across runs is the whole signal, and is invisible from inside one run), with an option to name a single run.
+
+It writes a **candidate list, never straight into a module** — `.agents/web-search-modules-local/CANDIDATES.md`, one file per project. Writing directly would refill modules with exactly the guessed-quality sources `/research-add-module` exists to filter out; discovery stays automatic and judgment stays manual, the same split D2 relies on. One file rather than one per module, because *which* module a source serves is part of what the human is reviewing — splitting up front forces that call too early.
+
+**Promotion threshold: at least 3 separate runs, having supported a field in at least 2 of them.** One appearance is an accident. The second clause is what the per-entry field list buys; without it this collapses back into counting fetches.
+
+**Existing runs get nothing.** They cannot acquire sources retroactively, and reconstructing which URL answered which field would mean re-running paid research against data that never recorded it. They age out.
+
+Applies only to **parameterized** modules (D1) — fixed-site modules have nothing to accumulate, open-query modules cannot by design.
+
 ## Open questions
 
 > Each is a heading (the question) + a link to its discussion in `docs/questions/`. Thread files are append-only — a later grill adds a dated section rather than rewriting.
 
-### Q1 — Should modules accumulate sources over time, and which kind can?
+### Q1 — Should modules accumulate sources over time, and which kind can? — ✅ resolved 2026-09-04 by D17
 
-See [docs/questions/Q1-source-accumulation.md](docs/questions/Q1-source-accumulation.md).
+Answered over two grill rounds, after the question's own premise (that runs already record their source URLs) was falsified. See [docs/questions/Q1-source-accumulation.md](docs/questions/Q1-source-accumulation.md).
 
 ### Q2 — What makes an access method "tested"? — ✅ resolved 2026-09-04
 
@@ -296,7 +319,6 @@ Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-sea
 
 > Deferred ideas. Each is a one-line hook + a link to `docs/parking-lot/`.
 
-- **Harvest sources from completed runs into a local module** — [docs/parking-lot/harvest-from-runs.md](docs/parking-lot/harvest-from-runs.md)
 - **Non-technical families** (health, law and policy, finance) — attach when a project needs one; `competitor-content` is the worked example — [docs/parking-lot/non-technical-families.md](docs/parking-lot/non-technical-families.md)
 - **Wanted modules** (AI writing communities, docs-and-API-reference) — parked under D2 until real demand — [docs/parking-lot/wanted-modules.md](docs/parking-lot/wanted-modules.md)
 - **Verify the `crwl` fetch fallback** — ✅ **tested 2026-08-29**: escalation runs clean and the `head -c` bound holds, but it does *not* recover a JS-shell page. Rule kept; prefer a JSON endpoint beside the HTML page instead — [docs/parking-lot/verify-crwl-fallback.md](docs/parking-lot/verify-crwl-fallback.md)
@@ -311,6 +333,7 @@ Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-sea
 - **The fetch budget was redefined, not just extended.** It now counts every network retrieval attempt rather than only native `WebFetch` calls — otherwise the two new rungs and the helper's `429` retries would have been free, which is exactly the overspend the budget exists to prevent. A blocked page's whole ladder is still one logical fetch sequence for that URL; the helper's individual attempts each cost a slot.
 - **Firecrawl's CLI shape was settled by running it, not by reading about it.** A single control scrape on this opted-in machine showed it writes plain Markdown to `-o` and prints only a scrape ID — so the bounded form is temp-file-then-delete, not a stdout pipe. This is what the previous session deferred for lack of a configured key.
 - **`stackoverflow.md` rewritten, and the module was actively wrong rather than merely thin.** Its only access method was `site:stackoverflow.com`, which **fails silently** — verified 2026-09-04: zero `stackoverflow.com` URLs returned, the page filled instead with answer-scraping farms (`bobbyhadz.com`, `techoverflow.net`, `itsourcecode.com`). `WebFetch` is also refused at both `stackoverflow.com` and `api.stackexchange.com`. The working route is the **Stack Exchange API through the existing escalation ladder** (`WebFetch` fails → `crwl` returns the JSON verbatim): keyless, 300 requests/day, and `filter=withbody` returns the accepted answer's text without ever loading a page. Two calls replace a blocked page fetch. This makes it the second venue after Reddit whose `site:` search fails *without an error*, which is the failure mode worth generalizing.
+- **Grill on source accumulation → D17.** Two rounds, frontier emptied. The headline is that the question's premise was false: `results/*.json` does **not** record which URLs an agent used — a live AUQ run holds exactly one URL per item, and only because its `fields.yaml` asked for one. So capture, not harvest, is the first problem, and nothing has been accumulating. Ten questions dispositioned across the two rounds; `harvest-from-runs` folded in and closed.
 - Review caught nothing that had to be reverted. One thing worth recording: the task's own Test 5 `rg` was scoped to the eight files it edited, so a repo-wide grep was needed to confirm no stale Reddit directive survived elsewhere. It found two hits in `web-search-modules/SKILL.md` that are the *authoring guidance* for the fourth-form directive pattern — still correct, correctly untouched. Same shape as the case-sensitive `reddit` grep in the `[access-methods]` task: a test that can pass by not looking.
 
 ### Session 6 — 2026-09-04

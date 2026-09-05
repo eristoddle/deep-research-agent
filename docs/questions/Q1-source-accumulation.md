@@ -72,3 +72,5 @@ Five questions answered this round, all confirming the recommended option:
 5. **Existing runs get nothing.** They have no captured sources and cannot acquire them retroactively; reconstructing which URL answered which field would mean re-running paid research against data that never recorded it. Let them age out.
 
 **Frontier empty.** Every branch visited. The remaining work is mechanical and belongs in the task queue, not here.
+
+→ **promoted to D17** 2026-09-04. This thread is closed; the decision record in `PLAN.md` is authoritative.
