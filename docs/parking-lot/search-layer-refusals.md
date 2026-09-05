@@ -1,5 +1,9 @@
 # Search-layer refusals — the failure no fetch escalation can fix
 
+> **CLOSED 2026-09-04. Not an open item — kept as the run evidence behind D7 and Q3.**
+> Every thread here is dispositioned: the silent-substitution finding became `PLAN.md` **D7**, the sharpened fourth access-method form became **D8**, Reddit's reachability became **Q3** (answered: Atom feeds), and this page's last live prediction — that `stackoverflow.md` "routes to a source the toolchain cannot currently reach" and needs `api.stackexchange.com` as its real access method — **shipped 2026-09-04** in the module rewrite and `sites/stackoverflow.md`. Stack Overflow's `site:` search was re-confirmed that day to fail the same silent way Reddit's does: zero on-domain URLs, no error, content farms in their place. Two confirmed venues, same failure. Do not re-open this as work.
+
+
 **Parked** 2026-09-02, from evidence in four live `/research-deep` runs (a Firecrawl cookbook in the `sm-static` blog repo). Full row-by-row log lives there: `research/FETCH-BLOCKING-LOG.md`.
 
 ## The distinction
