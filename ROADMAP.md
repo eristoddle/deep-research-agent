@@ -23,9 +23,7 @@ The first four landed together as one family because they overlap deliberately; 
 
 All ten pre-`/research-add-module` modules now carry an access method, keyed to a three-kind taxonomy in `SKILL.md`: **fixed-site** (one named domain) gets a literal `site:` query, **parameterized** (a description that expands into many vendors/leaderboards) gets a URL pattern plus a verified seed list, **open-query** (`general-web`, `competitor-content`) gets an explicit "none by design" note rather than an invented source list. The fourth form — a source unreachable from this toolchain — is no longer a passive note that it blocks fetching; it is a directive naming the block and the substitute, backed by the shared `skills/web-search-modules/ACCESS.md`. `PLAN.md` **D1**, **D8**.
 
-## Fill in `stackoverflow.md`
-
-Twelve lines, two source bullets, no query tactics at all — the weakest module in the set and the only one still carrying nothing but upstream's source list. It routes on real traffic, so it should earn its slot.
+**`stackoverflow.md` filled in, 2026-09-04.** `site:stackoverflow.com` itself returns **zero** genuine Stack Overflow URLs and fills the result list with answer-scraping farms instead — the search engine has effectively stopped indexing the site by that operator. `WebFetch` is refused at both the site and its own API domain. The working route is the Stack Exchange API reached through the existing `crwl` escalation rung: it is keyless, capped at 300 requests/day, and `filter=withbody` returns the accepted answer's text directly with no page fetch needed at all.
 
 ## Wanted modules
 
@@ -34,9 +32,9 @@ Twelve lines, two source bullets, no query tactics at all — the weakest module
 
 Extend the AI ecosystem & market family rather than adding near-duplicates beside it — unless the discriminating question is genuinely different, which is the `agent-tooling` case and the reason it got a row instead of a fifth slot in that family. Non-technical families (health, law and policy, finance, history) attach the same way: one new family row in `ROUTING.md` with its own yes/no question. `competitor-content` is the worked example — its family question is not about technology at all.
 
-## Verify the fetch fallback
+## The fetch fallback, tested 2026-08-29
 
-The `crwl` escalation has never fired in a real run. Both failures in the first live test were a 404 and a page that simply lacked the data, both correctly handled by searching instead. It needs one genuine 403 or JS-shell page to confirm the rule works and the `head -c` bound holds. **A genuine JS-shell page has now been seen**: `forum.obsidian.md/search?q=` renders a placeholder to any fetch. It did not exercise `crwl`, because that site's Discourse `search.json` endpoint answered directly and better. Observed while building a project-local module outside this repo. The escalation is still unvalidated, and the transferable lesson is to check for a JSON endpoint beside the HTML page before escalating at all.
+The escalation runs clean and the `head -c` bound holds, verified on a genuine JS-shell page: `forum.obsidian.md/search?q=` renders a placeholder to any fetch. It did **not** exercise `crwl` in that case, because that site's Discourse `search.json` endpoint answered directly and better — so what was actually confirmed is that the rule does not blindly escalate when a JSON endpoint beside the HTML page will do. Observed while building a project-local module outside this repo. It has still not recovered a page from a real 403 or bot challenge in a live run; the transferable lesson meanwhile is to check for a JSON endpoint beside the HTML page before escalating at all.
 
 ## Why `chinese-tech` stays
 

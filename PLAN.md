@@ -277,7 +277,7 @@ The rule lives **in the agent prompt**, not in a `fields.yaml` convention. A con
 
 `/research-report` does **not** render sources by default. It renders them when the prompt asks — *asked for in natural language, not a formal flag.* Use of this pipeline varies run to run (sometimes a readable report, sometimes only raw material for an article), and steering that by prompting is a property to preserve rather than formalize.
 
-**Harvest (only once capture has run several times).** A new `/research-harvest` skill, **invoked by hand** — never automatically after a run. Two of three runs in the live AUQ project stopped at `findings.md` and never reached the report step, so anything hanging off `/research-report` would simply never fire there; and a prompt after every run is one the user is mid-article for and learns to dismiss. It scans every run under the research root by default (recurrence across runs is the whole signal, and is invisible from inside one run), with an option to name a single run.
+**Harvest.** A new `/research-harvest` skill, **invoked by hand** — never automatically after a run. Two of three runs in the live AUQ project stopped at `findings.md` and never reached the report step, so anything hanging off `/research-report` would simply never fire there; and a prompt after every run is one the user is mid-article for and learns to dismiss. It scans every run under the research root by default (recurrence across runs is the whole signal, and is invisible from inside one run), with an option to name a single run.
 
 It writes a **candidate list, never straight into a module** — `.agents/web-search-modules-local/CANDIDATES.md`, one file per project. Writing directly would refill modules with exactly the guessed-quality sources `/research-add-module` exists to filter out; discovery stays automatic and judgment stays manual, the same split D2 relies on. One file rather than one per module, because *which* module a source serves is part of what the human is reviewing — splitting up front forces that call too early.
 
@@ -285,7 +285,26 @@ It writes a **candidate list, never straight into a module** — `.agents/web-se
 
 **Existing runs get nothing.** They cannot acquire sources retroactively, and reconstructing which URL answered which field would mean re-running paid research against data that never recorded it. They age out.
 
+**Amended 2026-09-04, same day.** The original wording gated the harvest half on capture "having run several times." That is not a condition anything in this repo can observe. This is a package; runs happen in consumer projects, on machines this checkout may never see, at whatever commit each consumer pinned. "Wait for data to accumulate" described one consumer's situation and was wrongly promoted into a package decision.
+
+What that mistake surfaced is a real requirement instead: **finding nothing is a normal outcome the harvest skill must handle and explain.** It has to distinguish *these runs predate source capture* (no `sources` array at all — the common case for any consumer bumping a pin over existing work) from *sources were captured but none met the threshold*. Reporting an empty list without saying which of those happened would read as "you have no good sources" when the truth is "nothing was recorded yet."
+
+The genuine constraint is **verification, not scheduling**: no run anywhere has captured sources yet, so the skill cannot be exercised end-to-end on this machine. Build it against a synthetic fixture, and treat live verification in a consumer project as a separate, later check.
+
 Applies only to **parameterized** modules (D1) — fixed-site modules have nothing to accumulate, open-query modules cannot by design.
+
+<!-- D18 — Harvest tally is a script -->
+### D18 — The harvest tally is a shipped script; the skill only judges and writes 🔨
+
+Decided 2026-09-05, implementing D17's harvest half.
+
+**The tally runs in a script, not in the agent's context.** `skills/research/harvest_sources.py`, resolved by the same four-path lookup `/research-deep` already uses for `validate_json.py`. This is D15's third row — a reviewed, versioned helper reusable by every consumer, not a per-run convenience. It is also the only shape that scales: recurrence *across* runs is the whole signal, so the input is every `results/*.json` under the root, and having an agent read them all in order to count is unbounded context spent on arithmetic.
+
+**The script is read-only and writes nothing.** It prints one bounded summary; the skill interprets it and writes `CANDIDATES.md`. That split keeps the judgment — which sources deserve a human's attention, and how to say so — in the prompt where wording can change it, and keeps the counting in code where it is deterministic and free.
+
+**Its first job is the distinction D17 named.** Per run it reports whether the result files carry a `sources` key at all. "No candidates" then resolves into a specific sentence rather than an empty list. **Review 2026-09-05 found the two states D17 named are three.** A run folder holding only an `outline.yaml` — created by `/research` and never researched — has no results to read, which the first build classified as `no-capture` and therefore reported as *predates source capture*. That is the opposite of the truth, and it is the exact failure the amendment exists to prevent, hit on the most likely first invocation of all: harvesting right after making an outline. Runs are now classified `captured` / `no-capture` / `no-results`, and the third gets its own sentence.
+
+**`CANDIDATES.md` is regenerated whole, but dispositions survive.** Fresh candidates land as unticked checkboxes; anything the human has ticked or struck through moves into a `## Dispositioned` section and is excluded from the candidate list on every later harvest. Without that, a source rejected once returns as new every time and the file teaches the user to ignore it. The file carries no module attribution — which module a source serves is the human's call (D17) — only a header noting that only **parameterized** modules (D1) can absorb one.
 
 ## Open questions
 

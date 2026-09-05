@@ -16,51 +16,92 @@
 
 ---
 
-# ⏭ NEXT ACTIVE TASK — D17 capture half: record which sources answered
+# ⏭ NEXT ACTIVE TASK — D17 harvest half: `/research-harvest`
 
-**Goal:** Every `results/*.json` records the sources that actually answered its fields, so that recurrence across runs becomes measurable later.
+**Goal:** A hand-invoked `/research-harvest` skill that scans every run under the research root, tallies which sources supported fields across runs, and writes a reviewable candidate list — plus the shipped script that does the counting.
 
-**Why:** `PLAN.md` **D17**. Verified 2026-09-04 against a live consumer run: result files record *answers*, not provenance — one URL per item, and only because that project's `fields.yaml` happened to declare a URL field. Nothing accumulates today, so the harvest skill D17 also describes would have nothing to read. Capture must ship first and can only see runs from the day it lands.
+**Why:** `PLAN.md` **D17** (harvest half) and **D18** (its implementation shape). Capture shipped 2026-09-04, so results files can now carry `sources[]`; nothing reads them yet. D17's amendment settles that this ships now rather than waiting for data to accumulate — "wait for several runs" described one consumer's situation and is not a condition this repo can observe.
 
-**Reversible if:** Nothing open. D17 settled every branch; the harvest half is deliberately not in this task.
+**Reversible if:** Nothing open. The promotion threshold (3 runs / field-support in 2) is D17-settled; if it later proves wrong only the two constants in the script change.
 
 **Design:**
 
-1. [x] Add the `sources[]` contract to `agents/web-search-agent.md`, beside the existing `unreachable[]` rules. It is a top-level array, sibling to `uncertain[]` and `unreachable[]`. Each entry has exactly three keys: `source` (the site or publication name), `url`, and `fields` (an array of the field names that source supported). **Record only sources that contributed to an answer** — a page that was opened and did not inform any field is not recorded, and a page that failed is already `unreachable[]`'s job. A source that supported several fields is one entry with several names in `fields`, never repeated entries. Do not add a new tool, permission, fetch, or search to produce this: it is written from what the agent already has in hand at output time.
+## 1. `skills/research/harvest_sources.py` — the read-only tally helper
 
-2. [x] Mirror the same contract into `skills/research-deep/SKILL.md` — both the hard-constrained prompt template **and** its one-shot example, in lockstep. The example must show a populated `sources` array with at least two entries, one of which supports more than one field, so the multi-field shape is demonstrated rather than described. Follow the numbered-output-rules format already used there for `unreachable`.
+[x] New file, beside `validate_json.py` and `reddit_feed.py` in `skills/research/`. Match `validate_json.py`'s house style: stdlib only (no PyYAML — see below), `argparse`, exit `2` on usage/input error, bounded output.
 
-3. [x] `skills/research/validate_json.py:22` — `_SKIP_KEYS` is `{"_source_file", "uncertain"}`. Add both `"unreachable"` (missed when that array shipped 2026-09-04) and `"sources"`. Without this they are counted as unexpected top-level keys and printed under "Extra fields". Confirmed cosmetic, not a false pass — the walker never descends into these arrays — so do not restructure the walker; this is a one-line set addition.
+- **Arguments:** `--root <path>` (the research root; scan every run beneath it) and `--run <path>` (one run folder), mutually exclusive, at least one required. Optional `--min-runs` (default `3`) and `--min-field-runs` (default `2`) so the D17 threshold is visible and adjustable, not buried in a literal.
+- **Discovery:** a run folder is any directory containing `outline.yaml`. Under `--root`, glob one and two levels deep, matching `skills/research/LAYOUT.md`'s rule — do not invent a third depth or a recursive walk.
+- **Results location:** read `execution.output_dir` from `outline.yaml`, **resolved relative to the run folder, never the cwd** (LAYOUT.md); default `results` when absent or unparseable. `outline.yaml` is YAML but PyYAML is not a dependency anywhere in this package — do not add one. A line-oriented read for the single `output_dir:` key under `execution:` is sufficient and must fail soft to `results`.
+- **Scan:** every `*.json` directly in that directory. A file that is not valid JSON, or not a JSON object, is counted as skipped and named in the summary — never a traceback, never a silent drop.
+- **Per-run classification, which is the point of the whole script (D17 amendment):** a run is `no-capture` when **no** result file in it has a `sources` key, and `captured` when at least one does. Report the two counts separately.
+- **Tally key is the URL**, normalized only by stripping a trailing `/` and lowercasing the scheme+host (leave the path case alone). Carry the `source` name(s) seen for that URL for display. Per URL, count: number of distinct runs it appears in, and number of distinct runs where its `fields` array was non-empty. An entry missing `fields`, or with an empty one, still counts toward run appearances but never toward field-support.
+- **Malformed `sources` entries** (not an object, missing `url`, `fields` not a list) are counted and reported as a single "N malformed source entries skipped" line, not enumerated.
+- **Output is bounded — this is load-bearing, the script's stdout enters an agent's context.** Print, in order: a one-line scan summary (runs scanned, of which captured / no-capture / skipped files); the qualifying candidates in full, one block each with url, source name(s), run count, field-support run count, the run names, and the distinct field names; then near-misses (appeared in >1 run but below threshold) capped at **20** with a `… and N more` line; then nothing else. Cap the field-name list per entry at 12 names plus a count. No raw JSON dumps, no per-file logging.
+- **When there are no candidates**, print which case it is, explicitly, in the words D17 asks for: all runs `no-capture` → these runs predate source capture; otherwise → sources were captured and none reached the threshold. A mixed scan says both, with counts.
+- Add `--json` **only if** it falls out for free; if it complicates the output-bounding, skip it. The skill consumes the text.
 
-4. [x] `skills/research-report/SKILL.md` — a generated report **does not render sources by default**. It renders them only when the invoking prompt asks for sources or citations, in natural language; do not add a flag, an option, or a config key. State this explicitly so the default stays quiet and the behavior stays promptable. This is deliberately unlike `unreachable[]`, which does render by default.
+## 2. `skills/research-harvest/SKILL.md` — the skill
+
+[x] New directory + `SKILL.md`, frontmatter in the same shape as the other skills (`name`, `user-invocable: true`, `description`, `allowed-tools`). Allowed tools: `Bash, Read, Write, Glob, AskUserQuestion` — no `WebSearch`, no `WebFetch`, no `Task`. Harvest reads what runs already recorded; it does no research and launches no agent. Keep it under ~70 lines.
+
+- **Trigger** `/research-harvest`, optionally naming one run. **Never invoked automatically** by `/research-deep` or `/research-report` — state this (D17's reasoning: runs routinely stop before the report step, and a prompt after every run gets trained away).
+- **Locate step defers to `skills/research/LAYOUT.md`**, like every other skill — do not restate the discovery rule. Default scope is the whole root; a named run narrows it.
+- **Resolve the script** with the same four-path lookup and same ordering `skills/research-deep/SKILL.md` uses for `{validator_path}` (`.agents` project, `.claude` project, `~/.agents`, `~/.claude`). When none exists, **stop and say so** — do not hand-write a substitute tally.
+- **Report the empty cases in plain words**, carrying the script's distinction through to the user rather than printing "no candidates found."
+- **Write `.agents/web-search-modules-local/CANDIDATES.md`.** Prefer that path; write to `.claude/web-search-modules-local/CANDIDATES.md` instead only when that legacy directory already exists and the `.agents` one does not — the same preference order `ROUTING.md` step 0 uses for local modules. Create the directory when neither exists.
+- **File shape:** a header naming the date, the scope scanned, the threshold used, and one line noting that only **parameterized** modules (D1) can absorb a source; then `## Candidates`, one unticked `- [ ]` per source with its URL, run count, field-support count, and the fields it supported; then `## Dispositioned`.
+- **Regeneration rule (D18):** the file is rewritten whole on every harvest, but read it first — any entry the human has **ticked (`- [x]`) or struck (`~~…~~`)** moves to (or stays in) `## Dispositioned` and is **excluded from `## Candidates`** even if it still qualifies. State plainly that this is what stops a rejected source returning as new every harvest. Never delete a dispositioned line.
+- **No module attribution and no module edits.** The skill never writes into a module file — D17: discovery stays automatic, judgment stays manual.
+
+## 3. Documentation — README and ROADMAP
+
+[x] `README.md`: add `/research-harvest` to the **Usage** block (one line, matching the existing comment style). Then backfill the **Additions** list, which stops at 18 and is missing three shipped capabilities — continue the numbering, match the existing entries' register (what it is, why upstream's absence was a problem, what the rule actually is), and keep them to one paragraph each:
+  - **19** — `unreachable[]` as an output channel separate from unanswered `uncertain[]`, and the deduplicated `## Unreachable sources` report section (`PLAN.md` D11, `TASKS.md` `[unreachable-output]`).
+  - **20** — the one approved package helper (`reddit_feed.py`, its `--max-attempts` cap) and the fetch budget's redefinition to count *every* network retrieval attempt rather than only native `WebFetch` calls (D15, `[helper-firecrawl]`). Note that entry 15 already covers the Firecrawl rung — do not duplicate it, reference it.
+  - **21** — source capture and harvest together: `sources[]` on every result file, and `/research-harvest`'s candidate list with its 3-runs/2-field-support threshold (D17, D18).
+
+[x] `ROADMAP.md`: two sections are stale and read as open work.
+  - **"Fill in `stackoverflow.md`"** — landed 2026-09-04, and the finding is worth keeping rather than deleting: `site:stackoverflow.com` returns **zero** SO URLs and fills with answer-scraping farms, `WebFetch` is refused at both the site and its API, and the working route is the Stack Exchange API through the existing `crwl` escalation (keyless, 300/day, `filter=withbody` returns the accepted answer's text with no page fetch). Rewrite it as a landed section in the register of "Retrofit: access methods — landed".
+  - **"Verify the fetch fallback"** — the parking lot records this as tested 2026-08-29: the escalation runs clean and the `head -c` bound holds, but it does **not** recover a JS-shell page; prefer a JSON endpoint beside the HTML page. The section still says "has never fired in a real run." Reconcile it to what was actually found; keep the Obsidian forum observation, which is the worked example.
+  - Do **not** touch the module table, the `chinese-tech` section, or the Wanted modules list.
 
 **Files:**
-- `agents/web-search-agent.md`
-- `skills/research-deep/SKILL.md`
-- `skills/research/validate_json.py`
-- `skills/research-report/SKILL.md`
+- `skills/research/harvest_sources.py` (new)
+- `skills/research-harvest/SKILL.md` (new)
+- `README.md`
+- `ROADMAP.md`
 - `TASKS.md` (piece status and run state only)
 
 **Tests:**
-1. `python3 -m py_compile skills/research/validate_json.py`.
-2. Build a throwaway `fields.yaml` + item JSON in the scratchpad containing populated `uncertain`, `unreachable`, and `sources` arrays. Run the validator and confirm none of the three appears under "Extra fields", and that coverage is unchanged from the same file with those arrays removed.
-3. Compare the prompt template and the one-shot example in `skills/research-deep/SKILL.md` after variable substitution. Their output-rules and `sources` instructions must match exactly. This is the regression nothing else here catches.
-4. Confirm the one-shot example's `sources` array is syntactically valid JSON and contains an entry whose `fields` array has more than one name.
-5. `rg -n 'sources' agents/web-search-agent.md skills/research-deep/SKILL.md skills/research-report/SKILL.md` — confirm the report file states the not-by-default rule and that no flag or option was introduced.
-6. `git diff --check`.
+1. `python3 -m py_compile skills/research/harvest_sources.py` and `python3 -m py_compile skills/research/validate_json.py` (the latter must still compile; you are not editing it).
+2. **Build a synthetic fixture in the scratchpad** — D17's amendment says live verification is impossible here, so the fixture *is* the test. A root with four run folders: one whose results have no `sources` key at all (predates capture); three that carry `sources`, arranged so that exactly one URL appears in 3 runs with a non-empty `fields` in 2 of them (a candidate), one appears in 3 runs but has field support in only 1 (a near-miss), and one appears in a single run. Include one result file with `output_dir` set to something other than `results`, one unparseable `.json`, and one malformed `sources` entry.
+3. Run `--root` against that fixture. Confirm: exactly one candidate is reported; the near-miss appears under near-misses, not candidates; the unparseable file is named as skipped and does not crash the run; the non-default `output_dir` run was scanned; the scan summary counts 1 no-capture and 3 captured.
+4. Run `--run` against the single no-capture run alone. Confirm the output says these runs predate source capture, in those terms, and does **not** say sources were captured but nothing met the threshold.
+5. Delete the `sources` arrays from the fixture's captured runs and re-run `--root`; confirm the message flips to the predates-capture case. Then restore them, lower `--min-runs 2`, and confirm the near-miss is still excluded (it fails the *field-support* clause, not the run-count one) — this is the check that proves the two-clause threshold is really two clauses.
+6. Pipe the fixture's `--root` output through `wc -l` and confirm it is bounded; then synthesize 60 qualifying-ish URLs and confirm near-misses cap at 20 with the `… and N more` line.
+7. Exercise the `CANDIDATES.md` regeneration rule by hand: write a `CANDIDATES.md` containing one ticked and one struck entry, then follow the skill's own written steps against the fixture and confirm those two land under `## Dispositioned` and appear nowhere under `## Candidates`. If the skill's wording does not make that mechanically followable, the wording is the bug — fix it.
+8. `rg -n 'research-harvest' README.md skills/research-harvest/SKILL.md` and confirm the skill is in the Usage block; confirm the Additions numbering runs 1–21 with no gaps or repeats.
+9. `git diff --check`.
 
 **Out of scope:**
-- The `/research-harvest` skill, `CANDIDATES.md`, the promotion threshold, and anything reading across runs. That is D17's harvest half and is deliberately later.
-- Backfilling existing runs; D17 settled that they get nothing.
-- Changing either agent's `tools:` allowlist, the fetch-escalation ladder, the depth/budget table, or `unreachable[]`'s existing render-by-default behavior.
+- Writing into any module file, or attributing a candidate to a module. D17 keeps promotion manual.
+- Backfilling existing runs with sources, or any migration.
+- Changing either agent's `tools:` allowlist, the depth/budget table, the fetch ladder, `validate_json.py`, or `unreachable[]`'s render-by-default behavior.
+- Live verification against a consumer project — D17 names that a separate later check, and it cannot be done from this checkout.
+- `PLAN.md` (the planning thread owns it) and any consumer-project pin bump.
 
-**Report back:** Each piece completed or blocked, files changed, every test result, and whether the template and its one-shot example needed any wording to differ. Update every piece status and the run-state note before stopping.
+**Report back:** Each piece completed or blocked, files changed, every test result with the actual output line that proves it (especially Tests 4, 5, and 7), the fixture's scratchpad path so the planning thread can re-run it, and anything in the D17/D18 spec that turned out underspecified when you tried to build against it.
 
-> ▶ Run state: done 2026-09-04. All 4 pieces landed, none blocked. All 6 Tests passed.
+> ▶ Run state: **done**, all 3 pieces landed, none blocked. All 9 Tests passed, including Tests 4/5/7 (the ones the report-back calls out specifically). Fixture built at `/private/tmp/claude-501/-Users-eristoddle-Dropbox-Writing-deep-research-agent/c5cbdd7b-99b6-40ad-8bea-dbbf17214da5/scratchpad/harvest-fixture` (a backup pre-edit copy sits alongside it at `harvest-fixture-backup`, and a second disposable fixture for the 60-URL near-miss cap check at `harvest-fixture-nearmiss-cap`) — re-runnable, see the implementer's report for the exact commands. Nothing left in the queue; see the full report in the session transcript for underspecified points raised (PyYAML's parenthetical justification, and the "named in the summary" vs "one-line summary" wording tension, both resolved by implementation choice rather than blocking).
 
 ---
 
 ## ✅ Done (collapsed — full detail in the planning doc's session log)
+
+### `[source-capture]` D17 capture half: record which sources answered — 2026-09-04
+
+All 4 pieces landed, none blocked, all 6 Tests passed. `results/*.json` may now carry a top-level `sources[]` array — entries of exactly `{source, url, fields}`, where `fields` names the fields that source actually supported. The contract lives in the agent prompt (`agents/web-search-agent.md`) rather than in a `fields.yaml` convention, and is mirrored into `/research-deep`'s hard-constrained template *and* its one-shot example in lockstep. Only sources that contributed to an answer are recorded — a page opened and unused is not provenance, and a page that failed is already `unreachable[]`'s job. `validate_json.py`'s `_SKIP_KEYS` gained both `sources` and `unreachable` (the latter missed when that array shipped the same day). `/research-report` renders sources only when the invoking prompt asks, in natural language — deliberately unlike `unreachable[]`, which renders by default. `PLAN.md` **D17**.
 
 ### `[helper-firecrawl]` The approved package helper and Firecrawl's third fetch rung — 2026-09-04
 
