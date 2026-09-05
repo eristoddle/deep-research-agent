@@ -16,9 +16,47 @@
 
 ---
 
-# ⏭ NEXT ACTIVE TASK — none queued
+# ⏭ NEXT ACTIVE TASK — D17 capture half: record which sources answered
 
-> The queue is empty. The planning thread writes the next one here once a decision in `PLAN.md` is concrete enough to build.
+**Goal:** Every `results/*.json` records the sources that actually answered its fields, so that recurrence across runs becomes measurable later.
+
+**Why:** `PLAN.md` **D17**. Verified 2026-09-04 against a live consumer run: result files record *answers*, not provenance — one URL per item, and only because that project's `fields.yaml` happened to declare a URL field. Nothing accumulates today, so the harvest skill D17 also describes would have nothing to read. Capture must ship first and can only see runs from the day it lands.
+
+**Reversible if:** Nothing open. D17 settled every branch; the harvest half is deliberately not in this task.
+
+**Design:**
+
+1. [x] Add the `sources[]` contract to `agents/web-search-agent.md`, beside the existing `unreachable[]` rules. It is a top-level array, sibling to `uncertain[]` and `unreachable[]`. Each entry has exactly three keys: `source` (the site or publication name), `url`, and `fields` (an array of the field names that source supported). **Record only sources that contributed to an answer** — a page that was opened and did not inform any field is not recorded, and a page that failed is already `unreachable[]`'s job. A source that supported several fields is one entry with several names in `fields`, never repeated entries. Do not add a new tool, permission, fetch, or search to produce this: it is written from what the agent already has in hand at output time.
+
+2. [x] Mirror the same contract into `skills/research-deep/SKILL.md` — both the hard-constrained prompt template **and** its one-shot example, in lockstep. The example must show a populated `sources` array with at least two entries, one of which supports more than one field, so the multi-field shape is demonstrated rather than described. Follow the numbered-output-rules format already used there for `unreachable`.
+
+3. [x] `skills/research/validate_json.py:22` — `_SKIP_KEYS` is `{"_source_file", "uncertain"}`. Add both `"unreachable"` (missed when that array shipped 2026-09-04) and `"sources"`. Without this they are counted as unexpected top-level keys and printed under "Extra fields". Confirmed cosmetic, not a false pass — the walker never descends into these arrays — so do not restructure the walker; this is a one-line set addition.
+
+4. [x] `skills/research-report/SKILL.md` — a generated report **does not render sources by default**. It renders them only when the invoking prompt asks for sources or citations, in natural language; do not add a flag, an option, or a config key. State this explicitly so the default stays quiet and the behavior stays promptable. This is deliberately unlike `unreachable[]`, which does render by default.
+
+**Files:**
+- `agents/web-search-agent.md`
+- `skills/research-deep/SKILL.md`
+- `skills/research/validate_json.py`
+- `skills/research-report/SKILL.md`
+- `TASKS.md` (piece status and run state only)
+
+**Tests:**
+1. `python3 -m py_compile skills/research/validate_json.py`.
+2. Build a throwaway `fields.yaml` + item JSON in the scratchpad containing populated `uncertain`, `unreachable`, and `sources` arrays. Run the validator and confirm none of the three appears under "Extra fields", and that coverage is unchanged from the same file with those arrays removed.
+3. Compare the prompt template and the one-shot example in `skills/research-deep/SKILL.md` after variable substitution. Their output-rules and `sources` instructions must match exactly. This is the regression nothing else here catches.
+4. Confirm the one-shot example's `sources` array is syntactically valid JSON and contains an entry whose `fields` array has more than one name.
+5. `rg -n 'sources' agents/web-search-agent.md skills/research-deep/SKILL.md skills/research-report/SKILL.md` — confirm the report file states the not-by-default rule and that no flag or option was introduced.
+6. `git diff --check`.
+
+**Out of scope:**
+- The `/research-harvest` skill, `CANDIDATES.md`, the promotion threshold, and anything reading across runs. That is D17's harvest half and is deliberately later.
+- Backfilling existing runs; D17 settled that they get nothing.
+- Changing either agent's `tools:` allowlist, the fetch-escalation ladder, the depth/budget table, or `unreachable[]`'s existing render-by-default behavior.
+
+**Report back:** Each piece completed or blocked, files changed, every test result, and whether the template and its one-shot example needed any wording to differ. Update every piece status and the run-state note before stopping.
+
+> ▶ Run state: done 2026-09-04. All 4 pieces landed, none blocked. All 6 Tests passed.
 
 ---
 

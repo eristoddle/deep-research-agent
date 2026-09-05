@@ -82,6 +82,14 @@ otherwise load exactly the modules named. Either way, state the modules you load
 5. Use reason fetch_failed when a page remains inaccessible after all the escalation available to it, or zero_domain_results when a search constrained to a named domain returns zero URLs on that domain; zero matching-domain URLs are a zero-result finding, not a result set
 6. Unreachable entries annotate source provenance only; a field answered through a documented substitute remains answered, not uncertain
 7. All field values must be in English
+8. Add sources array as a sibling to uncertain and unreachable; each entry has exactly source, url, and fields keys, where fields lists the field names that source supported
+9. Record only sources that contributed to an answer, never a page that was opened but informed no field; a source that supported several fields is one entry with several field names, never repeated entries
+
+A populated sources array looks like this:
+"sources": [
+  {"source": "GitHub", "url": "https://github.com/features/copilot", "fields": ["pricing"]},
+  {"source": "TechCrunch", "url": "https://techcrunch.com/2022/06/21/copilot-githubs-ai-powered-programming-assistant-is-now-generally-available/", "fields": ["release_date", "market_share"]}
+]
 
 ## Output Path
 {output_path}
@@ -122,6 +130,14 @@ otherwise load exactly the modules named. Either way, state the modules you load
 5. Use reason fetch_failed when a page remains inaccessible after all the escalation available to it, or zero_domain_results when a search constrained to a named domain returns zero URLs on that domain; zero matching-domain URLs are a zero-result finding, not a result set
 6. Unreachable entries annotate source provenance only; a field answered through a documented substitute remains answered, not uncertain
 7. All field values must be in English
+8. Add sources array as a sibling to uncertain and unreachable; each entry has exactly source, url, and fields keys, where fields lists the field names that source supported
+9. Record only sources that contributed to an answer, never a page that was opened but informed no field; a source that supported several fields is one entry with several field names, never repeated entries
+
+A populated sources array looks like this:
+"sources": [
+  {"source": "GitHub", "url": "https://github.com/features/copilot", "fields": ["pricing"]},
+  {"source": "TechCrunch", "url": "https://techcrunch.com/2022/06/21/copilot-githubs-ai-powered-programming-assistant-is-now-generally-available/", "fields": ["release_date", "market_share"]}
+]
 
 ## Output Path
 {project_dir}/results/GitHub_Copilot.json
