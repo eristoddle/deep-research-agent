@@ -300,7 +300,7 @@ Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-sea
 - **Rewrite `stackoverflow.md`** — 12 lines, two vague source bullets, zero query tactics; a rewrite, not a retrofit — [docs/parking-lot/stackoverflow-rewrite.md](docs/parking-lot/stackoverflow-rewrite.md)
 - **Non-technical families** (health, law and policy, finance) — attach when a project needs one; `competitor-content` is the worked example — [docs/parking-lot/non-technical-families.md](docs/parking-lot/non-technical-families.md)
 - **Wanted modules** (AI writing communities, docs-and-API-reference) — parked under D2 until real demand — [docs/parking-lot/wanted-modules.md](docs/parking-lot/wanted-modules.md)
-- **The AUQ consumer install** — pin bump, `rough/`-level vs per-client scope, and DeepInfra/OCR local modules; one cluster because the scope question gates the other two — [docs/parking-lot/auq-consumer-install.md](docs/parking-lot/auq-consumer-install.md)
+- **AUQ local modules** — DeepInfra and OCR/LlamaIndex source maps via `/research-add-module`; the install level and the update are both settled (2026-09-04) — [docs/parking-lot/auq-consumer-install.md](docs/parking-lot/auq-consumer-install.md)
 - **Verify the `crwl` fetch fallback** — ✅ **tested 2026-08-29**: escalation runs clean and the `head -c` bound holds, but it does *not* recover a JS-shell page. Rule kept; prefer a JSON endpoint beside the HTML page instead — [docs/parking-lot/verify-crwl-fallback.md](docs/parking-lot/verify-crwl-fallback.md)
 
 ## Session log
