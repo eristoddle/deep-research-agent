@@ -32,56 +32,56 @@
 
 ## 1. The skill file
 
-[ ] Create `skills/research-enumerate/SKILL.md`. Frontmatter exactly in the shape of `research-harvest`'s: `name: research-enumerate`, `user-invocable: true`, a one-line `description`, and `allowed-tools: Bash, Read, Write, Glob, AskUserQuestion`. **Target 80-110 lines** — between `research-report` (107) and `research-deep` (170); if it runs longer, the prompt template is carrying prose that belongs in the decision record.
+[x] Create `skills/research-enumerate/SKILL.md`. Frontmatter exactly in the shape of `research-harvest`'s: `name: research-enumerate`, `user-invocable: true`, a one-line `description`, and `allowed-tools: Bash, Read, Write, Glob, AskUserQuestion`. **Target 80-110 lines** — between `research-report` (107) and `research-deep` (170); if it runs longer, the prompt template is carrying prose that belongs in the decision record.
 
-[ ] **Locate step defers to `LAYOUT.md`.** State that the run folder is created new under the root and do not restate the discovery rule — `AGENTS.md` is explicit that layout lives in exactly one file. Ask for the root once, per the existing convention, only if none exists.
+[x] **Locate step defers to `LAYOUT.md`.** State that the run folder is created new under the root and do not restate the discovery rule — `AGENTS.md` is explicit that layout lives in exactly one file. Ask for the root once, per the existing convention, only if none exists.
 
-[ ] **Host selection rule, copied verbatim** from `research-deep/SKILL.md:36`: in GitHub Copilot launch `Web Research Writer`; in Claude Code launch `web-search-agent`. **No new agent is created** (D19) — this is the single most important constraint in the task. If writing the skill seems to require a new agent, stop and report rather than adding one.
+[x] **Host selection rule, copied verbatim** from `research-deep/SKILL.md:36`: in GitHub Copilot launch `Web Research Writer`; in Claude Code launch `web-search-agent`. **No new agent is created** (D19) — this is the single most important constraint in the task. If writing the skill seems to require a new agent, stop and report rather than adding one.
 
 ## 2. Inputs the sweep takes
 
-[ ] **A taxonomy is required, not optional.** The sweep needs an axis of categories to sweep along and to report coverage against; the affiliate run used five. Ask for it via `AskUserQuestion` if the invocation did not supply one, and offer to propose a starting taxonomy the user edits — but the run does not start without one, because without categories "done" is unfalsifiable.
+[x] **A taxonomy is required, not optional.** The sweep needs an axis of categories to sweep along and to report coverage against; the affiliate run used five. Ask for it via `AskUserQuestion` if the invocation did not supply one, and offer to propose a starting taxonomy the user edits — but the run does not start without one, because without categories "done" is unfalsifiable.
 
-[ ] **An exclusion list is a first-class input**, not an ad-hoc paragraph. The caller usually already knows part of the answer, and round 2 of the affiliate run used exactly this to keep output to genuinely new material. Accept it as a list of names, or as a path to an existing `catalog.md` whose entries are all treated as known.
+[x] **An exclusion list is a first-class input**, not an ad-hoc paragraph. The caller usually already knows part of the answer, and round 2 of the affiliate run used exactly this to keep output to genuinely new material. Accept it as a list of names, or as a path to an existing `catalog.md` whose entries are all treated as known.
 
-[ ] **Shallow field set, 3-5 fields.** The point is a link, a one-line description of what the thing is, and whatever terms are public. This is not `fields.yaml` and the sweep does not write one — `/research-add-fields` exists for the descend path.
+[x] **Shallow field set, 3-5 fields.** The point is a link, a one-line description of what the thing is, and whatever terms are public. This is not `fields.yaml` and the sweep does not write one — `/research-add-fields` exists for the descend path.
 
 ## 3. The two-phase sweep, with a coverage-based stopping rule
 
-[ ] **Phase 1 — aggregators. Phase 2 — one-offs.** Before enumerating leaves, look for the thing that lists the leaves: directories, marketplaces, registries, awesome-lists, category pages. One aggregator can yield dozens of items at once, which is why it runs first and why phase 2's much lower yield per search runs second. State this as the sweep's governing tactic, in domain-independent terms — the affiliate case is the example, never the subject.
+[x] **Phase 1 — aggregators. Phase 2 — one-offs.** Before enumerating leaves, look for the thing that lists the leaves: directories, marketplaces, registries, awesome-lists, category pages. One aggregator can yield dozens of items at once, which is why it runs first and why phase 2's much lower yield per search runs second. State this as the sweep's governing tactic, in domain-independent terms — the affiliate case is the example, never the subject.
 
-[ ] **Budget is per-phase, not per-item**, and this is the rule the worked run broke. Do **not** reuse the `quick`/`standard`/`deep` table — it is per-item and duplicated in two files already, and widening it to cover sweeps would make a third duplication. Define the enumeration budget in this skill alone: **20 searches and 20 fetches per phase**, which is what the observed runs actually consumed (17/13 and 20/17) before the one that overran.
+[x] **Budget is per-phase, not per-item**, and this is the rule the worked run broke. Do **not** reuse the `quick`/`standard`/`deep` table — it is per-item and duplicated in two files already, and widening it to cover sweeps would make a third duplication. Define the enumeration budget in this skill alone: **20 searches and 20 fetches per phase**, which is what the observed runs actually consumed (17/13 and 20/17) before the one that overran.
 
-[ ] **The stopping rule is coverage, not exhaustion.** The affiliate run's own disclosure is the evidence: 29 searches against a 20-search ceiling, caught only at compile time, and a round 1 that ran out mid-category. Require the agent to report searches and fetches used **per phase as it goes**, and to stop at the ceiling and declare the gap rather than continuing and disclosing afterward. A phase that hits its ceiling with categories still uncovered is a *successful* run with an honest coverage gap, not a failure.
+[x] **The stopping rule is coverage, not exhaustion.** The affiliate run's own disclosure is the evidence: 29 searches against a 20-search ceiling, caught only at compile time, and a round 1 that ran out mid-category. Require the agent to report searches and fetches used **per phase as it goes**, and to stop at the ceiling and declare the gap rather than continuing and disclosing afterward. A phase that hits its ceiling with categories still uncovered is a *successful* run with an honest coverage gap, not a failure.
 
 ## 4. The output contract
 
-[ ] **`catalog.md`** is the deliverable, in `{run_dir}`. One section per taxonomy category, each with a table of found items carrying the shallow fields. It ends with `## Unreachable`, `## Sources`, and `## Uncertain` — **reuse those three section names exactly** (D11, D17, and the base contract, rendered as markdown because the deliverable is prose rather than `results/*.json`). Do not invent a parallel vocabulary for the same three facts.
+[x] **`catalog.md`** is the deliverable, in `{run_dir}`. One section per taxonomy category, each with a table of found items carrying the shallow fields. It ends with `## Unreachable`, `## Sources`, and `## Uncertain` — **reuse those three section names exactly** (D11, D17, and the base contract, rendered as markdown because the deliverable is prose rather than `results/*.json`). Do not invent a parallel vocabulary for the same three facts.
 
-[ ] **Three negative states, each with its own labelled subsection per category** — this is the load-bearing output rule and it is **D7** applied to enumeration:
+[x] **Three negative states, each with its own labelled subsection per category** — this is the load-bearing output rule and it is **D7** applied to enumeration:
   - *Checked, none found* — searched properly, there is nothing there. A real result.
   - *Checked, inconclusive* — found something, could not confirm it from a source that counts.
   - *Not checked — budget exhausted* — **never silently omitted.** A category the sweep never reached must say so, or its absence reads as a negative result to every later reader.
 
-[ ] **A blank is a result; a guess is damage.** Where a value is not publicly stated, the field reads exactly `not public`. An inferred figure is worse than an empty cell, because a plausible fabricated number is indistinguishable from a real one at review time. The affiliate run held this line and said so in three of its four files — keep the rule that explicit.
+[x] **A blank is a result; a guess is damage.** Where a value is not publicly stated, the field reads exactly `not public`. An inferred figure is worse than an empty cell, because a plausible fabricated number is indistinguishable from a real one at review time. The affiliate run held this line and said so in three of its four files — keep the rule that explicit.
 
-[ ] **`outline.yaml`**, in the same run folder, in the standard shape: `items[]` from what the sweep found, plus an `execution{}` block with the package defaults. This is the whole of D19's no-structural-change claim — the folder contains an `outline.yaml`, so `LAYOUT.md`'s existing glob discovers it, `INDEX.md` lists it, and `/research-deep` can descend on it later with no new wiring. Do not add `catalog.md` to any discovery rule.
+[x] **`outline.yaml`**, in the same run folder, in the standard shape: `items[]` from what the sweep found, plus an `execution{}` block with the package defaults. This is the whole of D19's no-structural-change claim — the folder contains an `outline.yaml`, so `LAYOUT.md`'s existing glob discovers it, `INDEX.md` lists it, and `/research-deep` can descend on it later with no new wiring. Do not add `catalog.md` to any discovery rule.
 
-[ ] **Append the `INDEX.md` stub** exactly as `/research` does — purpose line, `date · N items · depth · status`, status **`outline`**, `Spawned from:` if applicable. Status `outline` is correct and is not a placeholder: items exist and nothing has been deep-researched. Per `LAYOUT.md`, if the run folder has no root above it, **skip this step silently** rather than creating an index beside it.
+[x] **Append the `INDEX.md` stub** exactly as `/research` does — purpose line, `date · N items · depth · status`, status **`outline`**, `Spawned from:` if applicable. Status `outline` is correct and is not a placeholder: items exist and nothing has been deep-researched. Per `LAYOUT.md`, if the run folder has no root above it, **skip this step silently** rather than creating an index beside it.
 
-[ ] **Round 2 is a documented re-invocation, not a separate mode.** Point `/research-enumerate` at an existing run folder plus an exclusion list, and it appends new findings to `catalog.md` and new items to `outline.yaml` with a fresh per-phase budget. One paragraph in the skill; no second code path.
+[x] **Round 2 is a documented re-invocation, not a separate mode.** Point `/research-enumerate` at an existing run folder plus an exclusion list, and it appends new findings to `catalog.md` and new items to `outline.yaml` with a fresh per-phase budget. One paragraph in the skill; no second code path.
 
 ## 5. The prompt template
 
-[ ] The sweep agent's brief is a **`Hard Constraint` prompt template**, in the established form ("strictly reproduce, only replacing `{xxx}`"). The per-phase budget, the three negative states, the `not public` rule, and the tool prohibitions must sit **inside** the template so they survive the handoff — `AGENTS.md` is explicit that restructuring a template drops these silently and the run still completes, just unbounded.
+[x] The sweep agent's brief is a **`Hard Constraint` prompt template**, in the established form ("strictly reproduce, only replacing `{xxx}`"). The per-phase budget, the three negative states, the `not public` rule, and the tool prohibitions must sit **inside** the template so they survive the handoff — `AGENTS.md` is explicit that restructuring a template drops these silently and the run still completes, just unbounded.
 
-[ ] Give the template a **one-shot example directly below it**, per the house rule that every template has one and the two must change in lockstep. Keep the example short — a three-row table with one `not public`, one `Checked, none found`, and one `Not checked` line is enough to teach the format.
+[x] Give the template a **one-shot example directly below it**, per the house rule that every template has one and the two must change in lockstep. Keep the example short — a three-row table with one `not public`, one `Checked, none found`, and one `Not checked` line is enough to teach the format.
 
 ## 6. Documentation
 
-[ ] `README.md`: add `/research-enumerate` to the Usage list, and one **Additions** entry **23**, continuing the numbering. One paragraph: what question it answers, why the per-item pipeline could not, and the coverage-declaration rule as its actual discipline rather than a nicety.
+[x] `README.md`: add `/research-enumerate` to the Usage list, and one **Additions** entry **23**, continuing the numbering. One paragraph: what question it answers, why the per-item pipeline could not, and the coverage-declaration rule as its actual discipline rather than a nicety.
 
-[ ] `ROADMAP.md`: the enumeration pass is no longer an intention. Add a short section in the register of the existing landed sections, naming the worked run as its evidence and the per-phase budget as what replaced the per-item one.
+[x] `ROADMAP.md`: the enumeration pass is no longer an intention. Add a short section in the register of the existing landed sections, naming the worked run as its evidence and the per-phase budget as what replaced the per-item one.
 
 **Files:**
 - `skills/research-enumerate/SKILL.md` (new)
@@ -110,7 +110,13 @@
 
 **Report back:** Each piece completed or blocked; the final line count and what you cut to hit it; the exact per-phase budget numbers you wrote and whether the observed 17/13 and 20/17 figures justified them or you had reason to differ; how you worded the `Not checked — budget exhausted` state, since that is the rule most likely to be softened into something that reads better and says less; whether the template and its one-shot example genuinely teach the same format; and anything in D19 that turned out underspecified when you built against it.
 
-> ▶ Run state: not started.
+> ▶ Run state: done 2026-09-12. All 6 pieces landed, none blocked; all 10 Tests passed as written. Reviewed and amended in the planning thread — three changes, one of them a genuine defect in the task itself:
+>
+> - **`allowed-tools` was wrong in the task, and the agent was right to refuse to guess past it.** Piece 1 told it to copy `research-harvest`'s allowlist, but `research-harvest` runs a *script* and launches nothing; this skill launches a host-selected agent. All four launching skills (`research`, `research-add-items`, `research-add-fields`, `research-deep`) carry the identical `Bash, Read, Write, Glob, WebSearch, Task, AskUserQuestion`. Now matches them. **Test 2 was therefore a test of the wrong string** — it passed by pinning a defect, which is the fourth instance in this repo of a test that can pass by not looking at the right thing.
+> - **The one-shot example did not follow the house convention.** Piece 5's "a three-row table is enough" steered it into a `catalog.md` excerpt; every other template in this repo pairs with a *filled rendering of the prompt itself* (`research-deep:104`, `research/SKILL.md:75`). Replaced with a filled rendering, and the output-format excerpt moved into Step 5 where output format belongs — so both examples survive, each in the right place.
+> - **The emitted negative-state label disagreed with itself** — `Not checked -- budget exhausted` inside the template, `Not checked — budget exhausted` in Step 5, README and ROADMAP. Normalized on the em dash, which is what three of the four places already used. The Step 5 excerpt also had one category labelled both "found items" and "Checked, none found"; the states are now stated to be mutually exclusive and the example shows one category per state.
+>
+> Final: 124 lines, over piece 1's 80-110 target. The stated reason for that cap was "the template is carrying prose that belongs in the decision record," and that is not what happened — it grew by two required examples. Sits between `research-report` (107) and `research-deep` (170), which is right for a skill carrying a hard-constrained template plus both examples.
 
 ---
 

@@ -43,6 +43,10 @@ The rule that came out of it is narrower and more useful than the original synth
 
 Full evidence table: [docs/parking-lot/verify-crwl-fallback.md](docs/parking-lot/verify-crwl-fallback.md). **Not an open item — do not re-raise this as a verification to run.**
 
+## Enumeration pass — landed
+
+`/research-enumerate` sweeps broad and shallow to catalog what exists in a domain, before `/research-deep` investigates any one item in depth. It was built on evidence rather than speculation: a complete worked run in an outside project (`sm-static`'s `_seo/research/ai-affiliate-programs-2026-09-12/`, four files across two phases and two rounds) both succeeded and failed informatively enough to settle every question the earlier parking-lot doc had left open. Its own disclosures are what replaced the per-item `quick`/`standard`/`deep` table with a **per-phase** budget instead — one file recorded 29 `WebSearch` calls against a 20-search `deep` ceiling, caught only at compile time, and another ran out of budget mid-category before three of its five categories got coverage. Enumeration now stops at a **per-phase** ceiling (20 searches, 20 fetches) and declares the gap as `Not checked — budget exhausted` rather than disclosing an overrun afterward. It writes `catalog.md` as the deliverable plus a standard `outline.yaml` beside it in the same run folder, so no layout, routing, or budget rule elsewhere had to move — the folder already has an `outline.yaml`, so it composes with `/research-add-fields` and `/research-deep` unmodified. `PLAN.md` **D19**.
+
 ## Why `chinese-tech` stays
 
 A large share of open-weight model work and evaluation happens on Chinese platforms, and those results are often published there first and sometimes only there. It is a genuine coverage advantage, not dead weight. The mistake to avoid is letting it pull a project's *framing* toward Chinese models when that was not the question — which is why it was demoted to a modifier rather than a topic module, and why that warning is in the module's own `Do not use for` line where the agent actually reads it.
