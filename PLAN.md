@@ -306,6 +306,33 @@ Decided 2026-09-05, implementing D17's harvest half.
 
 **`CANDIDATES.md` is regenerated whole, but dispositions survive.** Fresh candidates land as unticked checkboxes; anything the human has ticked or struck through moves into a `## Dispositioned` section and is excluded from the candidate list on every later harvest. Without that, a source rejected once returns as new every time and the file teaches the user to ignore it. The file carries no module attribution — which module a source serves is the human's call (D17) — only a header noting that only **parameterized** modules (D1) can absorb one.
 
+<!-- D19 — Enumeration pass: breadth-first catalog as a run folder -->
+### D19 — The enumeration pass is a catalog run, and it writes a normal `outline.yaml` 🔨
+
+Decided 2026-09-12, unparking [enumeration-pass](docs/parking-lot/enumeration-pass.md). The trigger is met by evidence rather than by a second project: the affiliate sweep in `sm-static` (`_seo/research/ai-affiliate-programs-2026-09-12/`, four files) is a complete worked run that both succeeded and failed informatively, and it answers the questions the parked doc left open.
+
+**`/research-enumerate` is a skill, not an agent.** The affiliate run used `WebSearch`, `WebFetch`, and both escalation rungs — the existing `web-search-agent` allowlist, unmodified. Nothing about a breadth sweep needs a tool the depth agent lacks, so this costs no new agent, and therefore no Copilot wrapper and no second allowlist to keep in sync (**D6**).
+
+**It writes `catalog.md` *and* `outline.yaml` into a run folder under the root, and no layout rule changes.** The catalog is the deliverable; the `outline.yaml` is the item list the sweep found, in the standard shape. Because the folder then contains an `outline.yaml`, `LAYOUT.md`'s discovery glob finds it unmodified, `INDEX.md` lists it beside every other run, and its status is `outline` — which is *accurate*, not a fudge: items exist and nothing has been deep-researched. The status ladder, the discovery rule, the index format and the `{run_dir}` convention are all untouched.
+
+**This is why no "feeder mode" gets built.** The parked doc proposed a second mode that derives `/research`'s item list from a real sweep instead of model recall. That mode is *desirable* and now costs nothing to reach: a sweep leaves a standard `outline.yaml`, so descending on what it found is `/research-add-fields` then `/research-deep` on the same folder, both of which already exist. The user's framing is the decisive one — *"it's pretty easy to put these pieces together talking to the agent rather than hard-coding certain things into the skill."* Composability comes from writing the artifact in the shape the pipeline already reads, not from a mode flag.
+
+**The per-item depth budget does not fit a sweep, and this is proven rather than predicted.** The affiliate run's own disclosures: `standalone-round2.md` spent **29 WebSearch calls against a 20-search `deep` ceiling** and caught it only at compile time; `providers.md` records "task scope exceeded standard budget"; `standalone.md` was exhausted before three of its five categories got coverage. The parked doc's "stop when it stops paying" never fired — the run stopped when it ran out, mid-category. So enumeration gets a **per-phase** budget and a **coverage-based** stopping rule, not a per-item one.
+
+**Four things the worked run contributed that the parked doc did not have:**
+
+| | |
+|---|---|
+| **A taxonomy is a required input** | `standalone.md` sweeps five numbered categories and tracks coverage per category. Without an axis to sweep along, completeness is unmeasurable and "done" is unfalsifiable. |
+| **Three negative states, not one** | *Checked, none found* · *Checked, inconclusive* · **`Not checked — budget exhausted`**. The third is the load-bearing one: it is the run declaring its own coverage gap, so absence never silently reads as a negative result. This is **D7** applied to enumeration. |
+| **Round 2 is first-class** | Four files = two phases × two rounds. The re-run took an exclusion list ("the **new** ones not already in the catalogue") plus fresh budget. Resumability is what the budget failure demands, and the exclusion list is the mechanism. |
+| **Two phases, dense first** | Aggregators (`providers.md`), then one-offs (`standalone.md`). "Find the thing that lists the leaves before enumerating leaves" is the highest-leverage move and is domain-independent. |
+
+**Output carries the existing contract.** `standalone.md` already ends in `## Unreachable`, `## Sources`, `## Uncertain` — **D11**, **D17**, and the base contract, rendered as markdown because the deliverable is prose rather than `results/*.json`. Keep those three sections; do not invent a parallel vocabulary.
+
+**No module work, and no new module.** Both round-2 files routed to `general-web`, one noting "no sharper topic module fit." Directory-mining may be module-shaped later; nothing here depends on it, and **D2** is untouched.
+
+
 ## Open questions
 
 > Each is a heading (the question) + a link to its discussion in `docs/questions/`. Thread files are append-only — a later grill adds a dated section rather than rewriting.
@@ -341,7 +368,7 @@ Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-sea
 - **Non-technical families** (health, law and policy, finance) — attach when a project needs one; `competitor-content` is the worked example — [docs/parking-lot/non-technical-families.md](docs/parking-lot/non-technical-families.md)
 - **Wanted modules** (AI writing communities, docs-and-API-reference) — parked under D2 until real demand — [docs/parking-lot/wanted-modules.md](docs/parking-lot/wanted-modules.md)
 - **Verify the `crwl` fetch fallback** — ✅ **CLOSED, live-fired 2026-09-02**: 7 escalations across four real runs, 6 recoveries. Reliable against a 403/bot-UA block on a server-rendered page; useless against a 429 or a JS-shell render, where a JSON endpoint beside the HTML page is the better move. Corroborated by months of `fetch-anything` use. Do not re-raise — [docs/parking-lot/verify-crwl-fallback.md](docs/parking-lot/verify-crwl-fallback.md)
-- **Enumeration pass** (breadth-first catalog stage, terminal or as stage 1 feeding `/research-deep`) — the aggregator-then-one-offs sweep, learned on the affiliate task — [docs/parking-lot/enumeration-pass.md](docs/parking-lot/enumeration-pass.md)
+- **Enumeration pass** — ✅ **unparked 2026-09-12 by D19**, on evidence from the completed affiliate sweep in `sm-static`. Ships as `/research-enumerate`; the "feeder mode" half is deliberately not built, because a sweep that writes a standard `outline.yaml` composes with `/research-deep` without one — [docs/parking-lot/enumeration-pass.md](docs/parking-lot/enumeration-pass.md)
 
 ## Session log
 

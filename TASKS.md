@@ -16,108 +16,109 @@
 
 ---
 
-# ⏭ NEXT ACTIVE TASK — `demand-signals`: build the module through discovery
+# ⏭ NEXT ACTIVE TASK — `/research-enumerate`: the breadth-first catalog sweep
 
-**Goal:** A shipped `demand-signals` module in `skills/web-search-modules/`, built by actually running `/research-add-module`'s discovery procedure rather than by writing a plausible source list, registered in `ROUTING.md` as its own family, and verified against `general-web`.
+**Goal:** A new `/research-enumerate` skill that sweeps broad and shallow to find out *what exists*, writes a `catalog.md` deliverable plus a standard `outline.yaml` into a run folder under the research root, and appends its `INDEX.md` stub — changing no existing layout, routing, or budget rule.
 
-**Why:** `PLAN.md` **D9**. D2's trigger is met and the module is approved in shape and family; what has never been done is the discovery pass that turns an approved shape into a tested source list. AGENTS.md is explicit that a hand-written source list is a guess and guessed sources route the agent to plausible sites that turn out to be empty — so the deliverable here is the *discovery*, and the module file is its output.
+**Why:** `PLAN.md` **D19**. The package has exactly one shape of work — depth per item — and it is the wrong tool when the hard part is *finding the items at all* and each needs three shallow facts. The design is not speculative: it is derived from a complete worked run, `_seo/research/ai-affiliate-programs-2026-09-12/` in the `sm-static` project (four files: `providers.md`, `standalone.md`, and a round 2 of each), which both succeeded and failed in ways that settled the open questions.
 
-**Reversible if:** Step 7's comparison fails. If the module does not beat `general-web` on its own probe questions, say so and discard it rather than shipping it — a module that loses is negative value, since it consumes a routing slot and costs context on every task it matches. That outcome is a legitimate result of this task, not a failure of it.
+**Reversible if:** — (D19 closes every question this rested on; the parked doc's "feeder mode" is decided-against, not deferred-pending-an-answer.)
 
-**Read first:** `skills/research-add-module/SKILL.md` (you are executing its Steps 3-7 by hand — you have no `Skill` tool and no `AskUserQuestion`, so its two ask-the-user points are pre-answered below), `skills/web-search-modules/SKILL.md` (module shape, the three-kind access-method taxonomy, the fourth directive form), `PLAN.md` **D9** and **D1**, and `skills/web-search-modules/ACCESS.md`.
+**Read first:** `PLAN.md` **D19** (the whole decision — it carries the evidence and the four contributed rules), `docs/parking-lot/enumeration-pass.md` (the tactics, which remain correct), `skills/research/LAYOUT.md` (discovery, `{run_dir}`, `INDEX.md`, who-writes-what), `skills/research-harvest/SKILL.md` (the most recent skill, and the shape to match), and `skills/research-deep/SKILL.md` **lines 30-60** for the host-selection rule and the hard-constrained prompt-template convention.
 
-**Pre-answered (do not re-decide these):**
-- **Step 2 destination — the package**, `skills/web-search-modules/demand-signals.md`. D9 approves it as general enough to ship. Not a local module.
-- **Step 3.1 probe questions** — pinned below; do not redraft them.
-- **Step 1** is already satisfied by D9; do not re-litigate whether the module is warranted.
-- **Family** — its own row, question resolved by D9: *Is the question which problems, desires, or frustrations recur in people's own words across independent venues?*
-- **Discovery budget — 12 searches, 14 fetches**, deliberately wider than the skill's stated 6/8. Every other module built this way covered one domain; this one spans five venue *classes* (niche forums, People-Also-Ask, search suggestions, review sites, Amazon Q&A), and 6 searches cannot probe five classes. Report usage as you go and stop at the ceiling.
+**Read the four sm-static files before writing anything.** They are the specification's evidence and they are outside this repo at `/Users/eristoddle/Dropbox/xampp/htdocs/sm-static/_seo/research/ai-affiliate-programs-2026-09-12/`. Read them bounded (`sed -n`, `head`) — they total ~550 lines. Do not edit anything in that project; it is a consumer repo and out of scope per `AGENTS.md`.
 
 **Design:**
 
-## 1. Discovery pass — Steps 3 and 4 of `/research-add-module`
+## 1. The skill file
 
-[x] **The trap to avoid, stated first: the module is domain-general, not about any of the probe topics.** The seven questions below are *probes* — instruments for watching which kinds of venue surface people describing problems in their own words. A module full of espresso forums and 3D-printing subreddits would be a failed run even if every link works. What you are cataloguing is **venue classes and how to query them**, transferable to a topic none of the probes mention.
+[ ] Create `skills/research-enumerate/SKILL.md`. Frontmatter exactly in the shape of `research-harvest`'s: `name: research-enumerate`, `user-invocable: true`, a one-line `description`, and `allowed-tools: Bash, Read, Write, Glob, AskUserQuestion`. **Target 80-110 lines** — between `research-report` (107) and `research-deep` (170); if it runs longer, the prompt template is carrying prose that belongs in the decision record.
 
-Run these seven as ordinary `WebSearch` queries, the way `general-web` would, and watch what surfaces:
+[ ] **Locate step defers to `LAYOUT.md`.** State that the run folder is created new under the root and do not restate the discovery rule — `AGENTS.md` is explicit that layout lives in exactly one file. Ask for the root once, per the existing convention, only if none exists.
 
-1. What do people repeatedly complain about when using note-taking apps for long-form writing?
-2. What recurring problems do freelance writers describe about getting paid on time?
-3. What do buyers keep complaining about in reviews of standing desks?
-4. What questions do beginners keep asking when they start 3D printing?
-5. What do people say is missing from personal budgeting apps?
-6. What frustrations do small landlords repeatedly describe about managing rental properties?
-7. What do home espresso owners keep saying goes wrong in their first year?
+[ ] **Host selection rule, copied verbatim** from `research-deep/SKILL.md:36`: in GitHub Copilot launch `Web Research Writer`; in Claude Code launch `web-search-agent`. **No new agent is created** (D19) — this is the single most important constraint in the task. If writing the skill seems to require a new agent, stop and report rather than adding one.
 
-Then, per Step 3: tally the venue classes that keep producing *useful* results rather than merely frequent ones, and drop aggregators and SEO farms that repackage a source you already have — keep the source they repackage. **Target 4-8 sources.**
+## 2. Inputs the sweep takes
 
-[x] Per Step 4, work out and **actually test** the access method for each surviving source, recording it in the form its kind calls for (D1's taxonomy: fixed-site → a literal `site:` query; parameterized → a URL pattern plus a verified seed list; open-query → an explicit "none by design" note; unreachable → a directive naming the block **and** the substitute, never a passive note that it blocks). Two things already in the record, so do not spend budget rediscovering them:
-  - **Discourse forums expose JSON** — `search.json?q=` was confirmed on the Obsidian forum (`PLAN.md` D9, ROADMAP's fetch-fallback section). Confirm the pattern generalizes to at least one *other* Discourse forum and record a seed list; XenForo is untested and worth one probe.
-  - **`skills/web-search-modules/sites/` already holds eight site files.** Read the relevant ones instead of rediscovering their methods, and cite them from your bullets — while keeping each bullet self-sufficient, because the agent may never open the citation.
-  - **Reddit** is available through `skills/research/reddit_feed.py` and gets **at most one bullet**. D9 is explicit: it may contribute one listing-level signal alongside unrelated venues, and must never define the module or be its only evidence. `sites/reddit.md` has the method.
+[ ] **A taxonomy is required, not optional.** The sweep needs an axis of categories to sweep along and to report coverage against; the affiliate run used five. Ask for it via `AskUserQuestion` if the invocation did not supply one, and offer to propose a starting taxonomy the user edits — but the run does not start without one, because without categories "done" is unfalsifiable.
 
-[x] Write your discovery notes — probe-by-probe, which venues surfaced, what each access-method test returned — to a scratchpad file, and give its path in the report. This is the evidence that discovery actually ran; the module file is too short to carry it.
+[ ] **An exclusion list is a first-class input**, not an ad-hoc paragraph. The caller usually already knows part of the answer, and round 2 of the affiliate run used exactly this to keep output to genuinely new material. Accept it as a list of names, or as a path to an existing `catalog.md` whose entries are all treated as known.
 
-## 2. Write the module
+[ ] **Shallow field set, 3-5 fields.** The point is a link, a one-line description of what the thing is, and whatever terms are public. This is not `fields.yaml` and the sweep does not write one — `/research-add-fields` exists for the descend path.
 
-[x] `skills/web-search-modules/demand-signals.md`, **under 40 lines**, in **English** (the Chinese section headers are an upstream-module legacy, not the house style). Shape per `skills/web-search-modules/SKILL.md`:
-  - Routing header — `**Family:**`, `**Use when:**`, `**Do not use for:**`, `**Siblings:**`. Write the anti-trigger honestly. The nearest neighbour is `competitor-content`, which is this module's mirror image — what has already been *published* about a topic versus what is being *asked* about it — so `Do not use for` must draw that line sharply enough that a mis-route corrects itself at read time.
-  - Sources in priority order, each with what it is good for **and** its tested access method.
-  - Query tactics specific to this domain. **One of them is load-bearing and comes from D9: full threads are the wrong unit.** Recurrence across venues is a listing- and title-level signal — many titles, cheaply. Full bodies matter only for verbatim vocabulary, as a narrower second pass. At `standard`'s 12 fetches, spending them on whole threads buys depth where this module needs breadth. Say that in the module, in the agent's own operational terms.
+## 3. The two-phase sweep, with a coverage-based stopping rule
 
-[x] Only write a `sites/<slug>.md` if one is genuinely earned — a second module now names the site, **or** what you learned overflows the bullet — and only once that content exists. A site file restating its bullet is an empty container; two were built and deleted the same day for exactly that. If nothing earns one, write none and say so.
+[ ] **Phase 1 — aggregators. Phase 2 — one-offs.** Before enumerating leaves, look for the thing that lists the leaves: directories, marketplaces, registries, awesome-lists, category pages. One aggregator can yield dozens of items at once, which is why it runs first and why phase 2's much lower yield per search runs second. State this as the sweep's governing tactic, in domain-independent terms — the affiliate case is the example, never the subject.
 
-## 3. Register it
+[ ] **Budget is per-phase, not per-item**, and this is the rule the worked run broke. Do **not** reuse the `quick`/`standard`/`deep` table — it is per-item and duplicated in two files already, and widening it to cover sweeps would make a third duplication. Define the enumeration budget in this skill alone: **20 searches and 20 fetches per phase**, which is what the observed runs actually consumed (17/13 and 20/17) before the one that overran.
 
-[x] Add one family row to `skills/web-search-modules/ROUTING.md`'s step-2 table, using D9's question verbatim. Place it **after** Published-content landscape and **before** General — General is the default and must stay last. Change nothing else in the table: no existing family's question, no existing module's row.
+[ ] **The stopping rule is coverage, not exhaustion.** The affiliate run's own disclosure is the evidence: 29 searches against a 20-search ceiling, caught only at compile time, and a round 1 that ran out mid-category. Require the agent to report searches and fetches used **per phase as it goes**, and to stop at the ceiling and declare the gap rather than continuing and disclosing afterward. A phase that hits its ceiling with categories still uncovered is a *successful* run with an honest coverage gap, not a failure.
 
-[x] If the new family's boundary against `competitor-content` needs a sentence of disambiguation, add it in the same prose style as the existing "Between tooling & platform and AI ecosystem & market" and "Within software & debugging" notes below the table. One sentence, only if the routing genuinely needs it.
+## 4. The output contract
 
-## 4. Verify it beats `general-web` — Step 7
+[ ] **`catalog.md`** is the deliverable, in `{run_dir}`. One section per taxonomy category, each with a table of found items carrying the shallow fields. It ends with `## Unreachable`, `## Sources`, and `## Uncertain` — **reuse those three section names exactly** (D11, D17, and the base contract, rendered as markdown because the deliverable is prose rather than `results/*.json`). Do not invent a parallel vocabulary for the same three facts.
 
-[x] Re-run **two** of the seven probe questions, this time following the new module. Compare honestly against what plain search returned for those same questions in piece 1, and report the comparison with specifics — which venues the module reached that plain search did not, and whether the answers were actually better rather than merely different. Budget: 4 searches, 4 fetches, on top of piece 1's.
+[ ] **Three negative states, each with its own labelled subsection per category** — this is the load-bearing output rule and it is **D7** applied to enumeration:
+  - *Checked, none found* — searched properly, there is nothing there. A real result.
+  - *Checked, inconclusive* — found something, could not confirm it from a source that counts.
+  - *Not checked — budget exhausted* — **never silently omitted.** A category the sweep never reached must say so, or its absence reads as a negative result to every later reader.
 
-[x] **If it does not beat `general-web`, do not ship it.** It does beat it (see report) — module kept. Leave the module file and the ROUTING.md row out (or revert them), report the comparison, and say plainly that the module lost. Do not soften a losing result into a marginal win.
+[ ] **A blank is a result; a guess is damage.** Where a value is not publicly stated, the field reads exactly `not public`. An inferred figure is worse than an empty cell, because a plausible fabricated number is indistinguishable from a real one at review time. The affiliate run held this line and said so in three of its four files — keep the rule that explicit.
 
-## 5. Documentation — only if piece 4 passes
+[ ] **`outline.yaml`**, in the same run folder, in the standard shape: `items[]` from what the sweep found, plus an `execution{}` block with the package defaults. This is the whole of D19's no-structural-change claim — the folder contains an `outline.yaml`, so `LAYOUT.md`'s existing glob discovers it, `INDEX.md` lists it, and `/research-deep` can descend on it later with no new wiring. Do not add `catalog.md` to any discovery rule.
 
-[x] `ROADMAP.md`: one row in the "Modules added since the fork" table (`demand-signals` | its family | what it is), in the register of the existing rows. If the module opened a family by a route worth recording — the way `agent-tooling` is noted as the first to carve a family out of an existing one — add it to the prose below the table rather than the row.
+[ ] **Append the `INDEX.md` stub** exactly as `/research` does — purpose line, `date · N items · depth · status`, status **`outline`**, `Spawned from:` if applicable. Status `outline` is correct and is not a placeholder: items exist and nothing has been deep-researched. Per `LAYOUT.md`, if the run folder has no root above it, **skip this step silently** rather than creating an index beside it.
 
-[x] `README.md`: Additions entry **22**, continuing the numbering, one paragraph, in the register of 12 and 16 (which are the other module-family entries). It should say what question the module answers, why upstream's five modules could not, and name the breadth-over-depth constraint as the module's actual rule rather than a nicety.
+[ ] **Round 2 is a documented re-invocation, not a separate mode.** Point `/research-enumerate` at an existing run folder plus an exclusion list, and it appends new findings to `catalog.md` and new items to `outline.yaml` with a fresh per-phase budget. One paragraph in the skill; no second code path.
+
+## 5. The prompt template
+
+[ ] The sweep agent's brief is a **`Hard Constraint` prompt template**, in the established form ("strictly reproduce, only replacing `{xxx}`"). The per-phase budget, the three negative states, the `not public` rule, and the tool prohibitions must sit **inside** the template so they survive the handoff — `AGENTS.md` is explicit that restructuring a template drops these silently and the run still completes, just unbounded.
+
+[ ] Give the template a **one-shot example directly below it**, per the house rule that every template has one and the two must change in lockstep. Keep the example short — a three-row table with one `not public`, one `Checked, none found`, and one `Not checked` line is enough to teach the format.
+
+## 6. Documentation
+
+[ ] `README.md`: add `/research-enumerate` to the Usage list, and one **Additions** entry **23**, continuing the numbering. One paragraph: what question it answers, why the per-item pipeline could not, and the coverage-declaration rule as its actual discipline rather than a nicety.
+
+[ ] `ROADMAP.md`: the enumeration pass is no longer an intention. Add a short section in the register of the existing landed sections, naming the worked run as its evidence and the per-phase budget as what replaced the per-item one.
 
 **Files:**
-- `skills/web-search-modules/demand-signals.md` (new)
-- `skills/web-search-modules/ROUTING.md`
-- `skills/web-search-modules/sites/<slug>.md` (new, only if genuinely earned)
-- `ROADMAP.md`, `README.md`
+- `skills/research-enumerate/SKILL.md` (new)
+- `README.md`, `ROADMAP.md`
 - `TASKS.md` (piece status and run state only)
 
 **Tests:**
-1. `wc -l skills/web-search-modules/demand-signals.md` — under 40.
-2. The module carries all four routing-header fields, and `Do not use for` explicitly distinguishes it from `competitor-content`.
-3. Every source bullet carries an access method. `rg -n 'site:|https?://|search\.json|reddit_feed' skills/web-search-modules/demand-signals.md` — no bullet is a bare site name. Read the output rather than trusting the exit code: a grep can pass by not looking, which has now happened twice in this repo (`[access-methods]`, `[helper-firecrawl]`).
-4. Every URL pattern in the module was actually fetched during piece 1. List them in the report with what each returned. An untested pattern in a module is worse than no pattern, because it will be trusted.
-5. `ROUTING.md` — the new family row sits before General, the table is otherwise byte-identical to its previous state, and `general-web` is still described as the default. Confirm with `git diff skills/web-search-modules/ROUTING.md` and read it.
-6. Reddit appears in at most one bullet, and the module does not depend on it.
-7. The breadth-over-depth rule (listings and titles, not full threads) appears in the module's query tactics.
-8. Piece 4's comparison is reported with specifics, not asserted.
-9. README Additions numbering runs 1-22 with no gaps or repeats; ROADMAP's module table gained exactly one row.
+1. `wc -l skills/research-enumerate/SKILL.md` — within 80-110.
+2. Frontmatter matches `research-harvest`'s shape; `allowed-tools` is exactly `Bash, Read, Write, Glob, AskUserQuestion`.
+3. **No new agent file exists.** `git status --porcelain agents/ .claude/agents/` is empty, and the skill names `web-search-agent` / `Web Research Writer` per the host-selection rule. Read the output, do not trust the exit code — a grep that passes by not looking has happened three times in this repo.
+4. The skill does **not** restate `LAYOUT.md`'s discovery rule. `rg -n 'outline\.yaml' skills/research-enumerate/SKILL.md` — read every hit; the only legitimate ones are *writing* the file and the sentence explaining why writing it keeps discovery unchanged.
+5. `git diff skills/research/LAYOUT.md` is **empty**. Same for `skills/web-search-modules/ROUTING.md` and the depth/budget tables in `agents/web-search-agent.md` and `skills/research-deep/SKILL.md`. D19's entire claim is that none of these move.
+6. The three negative-state labels and the exact string `not public` all appear inside the hard-constrained prompt template, not only in surrounding prose. Verify by reading the template block itself.
+7. `catalog.md`'s contract names `## Unreachable`, `## Sources`, `## Uncertain` — the existing spellings, no synonyms.
+8. The template and its one-shot example teach the same format: same columns, same negative-state labels, same `not public` spelling.
+9. README Additions numbering runs 1-23 with no gaps or repeats.
 10. `git diff --check`.
 
 **Out of scope:**
-- Any other module, the existing family questions, `chinese-tech`'s modifier status, or the depth/budget table.
-- The two Wanted modules in ROADMAP (AI writing communities, docs-and-API-reference) — different domains, parked under D2.
-- `PLAN.md` (the planning thread owns it), `AGENTS.md`, and any consumer-project pin bump.
-- Building a local module, or writing anything into an installed `.agents/skills/` or `.claude/skills/` directory.
-- Rewriting `competitor-content` to make room. D9 settled that the two are distinct families; nothing existing changes to admit this one.
+- **Any new agent**, any change to either agent's `tools:` allowlist, and any change to the `quick`/`standard`/`deep` table.
+- **Feeder mode** — deriving `/research`'s Step 1 item list from a sweep. D19 decides against building it; the composition path is `/research-add-fields` then `/research-deep` on the folder the sweep already wrote.
+- Any change to `LAYOUT.md`, `ROUTING.md`, `INDEX.md`'s format, or the status ladder.
+- Any new module, and any edit to `skills/web-search-modules/`. Both round-2 files routed to `general-web`; directory-mining may be module-shaped later and nothing here depends on it.
+- Editing anything in `sm-static` or any other consumer project — read-only evidence.
+- `PLAN.md` (the planning thread owns it) and `AGENTS.md`.
 
-**Report back:** Each piece completed or blocked; the scratchpad path for the discovery notes; the venue classes that survived the tally and the ones you dropped, with why; every access-method test and what it returned, including the failures; piece 4's honest comparison; whether anything earned a `sites/` file; and anything in D9 that turned out underspecified when you tried to build against it. If the module lost to `general-web`, that is the report — say so plainly.
+**Report back:** Each piece completed or blocked; the final line count and what you cut to hit it; the exact per-phase budget numbers you wrote and whether the observed 17/13 and 20/17 figures justified them or you had reason to differ; how you worded the `Not checked — budget exhausted` state, since that is the rule most likely to be softened into something that reads better and says less; whether the template and its one-shot example genuinely teach the same format; and anything in D19 that turned out underspecified when you built against it.
 
-> ▶ Run state: done 2026-09-05. All 5 pieces landed, none blocked; all 10 Tests passed. The module beat `general-web` in piece 4 and shipped. Reviewed in the planning thread — both live endpoints re-verified independently (autocomplete returns frustration-shaped completions as claimed; Trustpilot fetches on a second unrelated brand, so the pattern generalizes). One clause added there: **Trustpilot's low-star reviews skew hard toward billing, refunds, and support**, not product gaps, and the bullet now says so and points at the forum bullet for "what the product cannot do." Without it the module answers "what's missing from budgeting apps" with a page of refund complaints. Discovery notes at `<scratchpad>/demand-signals-discovery-notes.md`.
+> ▶ Run state: not started.
 
 ---
 
 ## ✅ Done (collapsed — full detail in the planning doc's session log)
+
+### `[demand-signals]` D9: build the module through discovery — 2026-09-05
+
+All 5 pieces landed, none blocked, all 10 Tests passed. `demand-signals` shipped as its own family after beating `general-web` in the piece-4 comparison, built by actually running `/research-add-module`'s discovery pass across five venue classes rather than from a guessed source list. Reviewed in the planning thread — both live endpoints re-verified independently, and one clause added there: **Trustpilot's low-star reviews skew hard toward billing, refunds, and support** rather than product gaps, so the bullet now says so and points at the forum bullet for "what the product cannot do." Without it the module answers "what's missing from budgeting apps" with a page of refund complaints. `PLAN.md` **D9**.
 
 ### `[harvest]` D17 harvest half: `/research-harvest` — 2026-09-05
 
