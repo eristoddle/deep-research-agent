@@ -35,9 +35,13 @@ All ten pre-`/research-add-module` modules now carry an access method, keyed to 
 
 Extend the AI ecosystem & market family rather than adding near-duplicates beside it — unless the discriminating question is genuinely different, which is the `agent-tooling` case and the reason it got a row instead of a fifth slot in that family. Non-technical families (health, law and policy, finance, history) attach the same way: one new family row in `ROUTING.md` with its own yes/no question. `competitor-content` is the worked example — its family question is not about technology at all.
 
-## The fetch fallback, tested 2026-08-29
+## The fetch fallback, live-fired 2026-09-02 — closed
 
-The escalation runs clean and the `head -c` bound holds, verified on a genuine JS-shell page: `forum.obsidian.md/search?q=` renders a placeholder to any fetch. It did **not** exercise `crwl` in that case, because that site's Discourse `search.json` endpoint answered directly and better — so what was actually confirmed is that the rule does not blindly escalate when a JSON endpoint beside the HTML page will do. Observed while building a project-local module outside this repo. It has still not recovered a page from a real 403 or bot challenge in a live run; the transferable lesson meanwhile is to check for a JSON endpoint beside the HTML page before escalating at all.
+The escalation is **proven against the block it exists for**. Four `/research-deep` runs for an outside project fired it seven times across three of the four runs: six recoveries, one failure. Every 403 was recovered, including `ropesgray.com`, which became the highest-yield source in its run; the single miss was a Hacker News **429**, where the rate limit applies to `crwl` too. Every clause of the carve-out held — already-failed URL, one retry, same fetch slot, bounded output — and no agent talked itself out of the exception, which was the last open behavioural unknown.
+
+The rule that came out of it is narrower and more useful than the original synthetic verdict: `crwl` is reliable against a server-rendered page refusing a bot user-agent, and useless in the two cases where the content is not in the HTML at all (JS-shell async render) or is rate-gated (429). So **check for a JSON endpoint beside the HTML page first** — that is the better move for exactly the JS-shell sites where `crwl` fails, a complement rather than a replacement. Independently corroborated by months of `fetch-anything` use outside this package, where crawl4ai has recovered pages plain fetch could not, many times over.
+
+Full evidence table: [docs/parking-lot/verify-crwl-fallback.md](docs/parking-lot/verify-crwl-fallback.md). **Not an open item — do not re-raise this as a verification to run.**
 
 ## Why `chinese-tech` stays
 

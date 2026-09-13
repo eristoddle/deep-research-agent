@@ -340,7 +340,8 @@ Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-sea
 
 - **Non-technical families** (health, law and policy, finance) — attach when a project needs one; `competitor-content` is the worked example — [docs/parking-lot/non-technical-families.md](docs/parking-lot/non-technical-families.md)
 - **Wanted modules** (AI writing communities, docs-and-API-reference) — parked under D2 until real demand — [docs/parking-lot/wanted-modules.md](docs/parking-lot/wanted-modules.md)
-- **Verify the `crwl` fetch fallback** — ✅ **tested 2026-08-29**: escalation runs clean and the `head -c` bound holds, but it does *not* recover a JS-shell page. Rule kept; prefer a JSON endpoint beside the HTML page instead — [docs/parking-lot/verify-crwl-fallback.md](docs/parking-lot/verify-crwl-fallback.md)
+- **Verify the `crwl` fetch fallback** — ✅ **CLOSED, live-fired 2026-09-02**: 7 escalations across four real runs, 6 recoveries. Reliable against a 403/bot-UA block on a server-rendered page; useless against a 429 or a JS-shell render, where a JSON endpoint beside the HTML page is the better move. Corroborated by months of `fetch-anything` use. Do not re-raise — [docs/parking-lot/verify-crwl-fallback.md](docs/parking-lot/verify-crwl-fallback.md)
+- **Enumeration pass** (breadth-first catalog stage, terminal or as stage 1 feeding `/research-deep`) — the aggregator-then-one-offs sweep, learned on the affiliate task — [docs/parking-lot/enumeration-pass.md](docs/parking-lot/enumeration-pass.md)
 
 ## Session log
 

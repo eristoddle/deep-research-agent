@@ -1,6 +1,9 @@
 # Verify the `crwl` fetch fallback against a real block
 
-**Tested 2026-08-29 synthetically. Fired for the first time in live runs 2026-09-02: 7 retries, 6 recoveries.**
+> **CLOSED 2026-09-02. Not an open item — kept as the evidence behind the fetch-ladder rule.**
+> Tested 2026-08-29 synthetically, then fired for real in live runs 2026-09-02: **7 retries, 6 recoveries**. Every question this page was parked to answer is answered — it triggers on a genuine block, it recovers server-rendered 403s, the `head -c` bound holds, and the agent does not talk itself out of its own exception. The remaining limits (429, JS-shell) are *characterized*, not open. Do not re-raise this as a verification to run.
+
+**Corroborated independently, 2026-09-12.** Months of `fetch-anything` use outside this package: crawl4ai has recovered pages plain fetch could not, repeatedly. Different harness, same binary doing the same job — so the six-of-seven figure below is not a small-sample fluke. Nothing in this package's rule depends on that corroboration; it just removes the last reason to re-test.
 
 ## Live-fire evidence, 2026-09-02
 
