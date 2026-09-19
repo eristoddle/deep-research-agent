@@ -196,6 +196,10 @@ Capability upstream never had, added here.
 
 Everything else — the pipeline design, the five original modules, the outline/fields/results/report flow — is upstream's, substantially verbatim.
 
+## Alternatives
+
+[`ALTERNATIVES.md`](ALTERNATIVES.md) maps eleven other agent-driven research tools, what each is uniquely good at, and where this one fits among them. This repo produces a matrix (items by fields); if what you want is a long narrative report, a wiki that grows, or social and forum signal, that page points at the projects that do those things better.
+
 ## Roadmap
 
 [`ROADMAP.md`](ROADMAP.md) tracks which search modules have been added since the fork, which ones are wanted next, and what still needs retrofitting. It lives at the repo root rather than inside the skill payload on purpose: a roadmap shipped inside a skill deploys into every install, goes stale there, and gets read as instruction by whatever loads it.
