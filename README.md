@@ -2,7 +2,7 @@
 
 A structured, human-in-the-loop deep-research pipeline for Claude Code and GitHub Copilot, packaged as a single APM-installable bundle.
 
-Contains six `/research*` skills, runtime-native research-agent entry points, and ten search-strategy modules used before searching.
+Contains eight `/research*` skills, runtime-native research-agent entry points, and twelve search-strategy modules used before searching.
 
 ## Credit
 

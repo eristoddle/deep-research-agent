@@ -19,7 +19,7 @@ Two secondary axes worth checking:
 
 ## The landscape
 
-Stars and last-push months verified against the GitHub API on 2026-09-18.
+Stars and last-push months verified against the GitHub API on 2026-09-18 (BMAD deep-recon on 2026-09-25).
 
 | Tool | Form | Answer shape | Persistence | Stars | Last push |
 |---|---|---|---|---|---|
@@ -34,6 +34,9 @@ Stars and last-push months verified against the GitHub API on 2026-09-18.
 | [hoolulu/deep-research](https://github.com/hoolulu/deep-research) | Cross-platform skill | Narrative, chaptered | Folder of dated reports | 580 | 2026-08 |
 | [reddit-research-mcp](https://github.com/dialog-tools/reddit-research-mcp) | MCP server | Cited findings | Saved feeds | 245 | 2026-09 |
 | [RivalSearchMCP](https://github.com/damionrashford/RivalSearchMCP) | MCP server | Structured JSON | None | 128 | 2026-09 |
+| [BMAD deep-recon](https://github.com/bmad-code-org/BMAD-METHOD/tree/main/skills/bmad-deep-recon) | Skill in the BMAD Method | Decision brief; weighted matrix when choosing | Run folder + claims ledger, refreshable | 53.5k\* | 2026-09 |
+
+\* Stars are for the whole BMAD-METHOD repository, of which deep-recon is one skill.
 
 ## What each one is uniquely good at
 
@@ -58,6 +61,8 @@ Stars and last-push months verified against the GitHub API on 2026-09-18.
 **[reddit-research-mcp](https://github.com/dialog-tools/reddit-research-mcp)** — semantic search across Reddit with every finding citing a real post or comment, upvotes included. Demand signals and pain points in people's own words, which generic web search flattens into blog posts about the topic.
 
 **[RivalSearchMCP](https://github.com/damionrashford/RivalSearchMCP)** — no LLM inside the server. It returns per-URL trust scores and detects conflicts between sources, flagging numeric, date and polarity disagreements with confidence weights. An auditing layer rather than a research tool, and it composes with any of the others.
+
+**[BMAD deep-recon](https://github.com/bmad-code-org/BMAD-METHOD/tree/main/skills/bmad-deep-recon)** — research framed around a *decision* rather than a topic, with the strongest evidence discipline of anything on this page. Every claim carries a publisher, publication date and access date; load-bearing claims are checked against an independent publisher (syndication and the same vendor twice do not count); disagreements are reported with both sides rather than averaged; and each research type sets how old a claim of each kind may be before it is stale, so the report ends with a dated re-check list. It can also skip running the search itself: draft a prompt for a deep-research product you already pay for, then process the report that comes back into the same cited summary. When the decision is "pick one of these", it produces a weighted matrix you can re-weight, plus a named runner-up and the conditions under which it wins. It is the closest neighbor to this repo in answer shape, but built for a handful of finalists rather than dozens of items. It expects the BMAD Method's setup and scripts to be installed, so it is not a drop-in standalone skill. Reach for it when research feeds a concrete choice and you need to defend every number in it.
 
 Also worth knowing about, though it did not make the table: **[STORM](https://github.com/stanford-oval/storm)** (Stanford) is the only project in this space whose output shape is genuinely a wiki article, built by simulating multi-perspective interviews. Last pushed 2025-09, so treat it as a reference design rather than something to depend on.
 
