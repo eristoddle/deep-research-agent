@@ -61,6 +61,64 @@ def extract_json_fields(data, category_mapping=None):
     return fields
 
 
+def _collect_field_values(data, category_mapping):
+    """Same traversal shape as extract_json_fields, but keeps each field's value
+    (needed to tell an empty answer from a real one) instead of only its name."""
+    nested_keys = {k for keys in category_mapping.values() for k in keys}
+    values = {}
+    stack = [(data, True)]
+    while stack:
+        obj, is_category_level = stack.pop()
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                if k in _SKIP_KEYS:
+                    continue
+                if is_category_level and k in nested_keys:
+                    if isinstance(v, dict):
+                        stack.append((v, True))
+                    continue
+                values[k] = v
+        elif isinstance(obj, list):
+            stack.extend((item, is_category_level) for item in obj if isinstance(item, dict))
+    return values
+
+
+def _is_answered(value):
+    # The item template marks uncertainty both inline ("[uncertain]" in the value)
+    # and in the uncertain[] array; honor either, so a missed array entry does not
+    # turn an uncertain field into a false "unsourced" warning.
+    if isinstance(value, str) and "[uncertain]" in value:
+        return False
+    return value is not None and value != "" and value != [] and value != {}
+
+
+def check_source_trace(data, category_mapping):
+    """Flag answered fields with no backing sources[] entry.
+
+    Returns (has_sources, unsourced_fields). has_sources is False only when the
+    file has no top-level 'sources' key at all -- a result that predates D17
+    capture, not one that failed the trace. Malformed sources entries (not a
+    list, no 'fields', 'fields' not a list) are skipped rather than raising.
+    """
+    if "sources" not in data:
+        return False, []
+    uncertain_raw = data.get("uncertain")
+    uncertain_names = set(uncertain_raw) if isinstance(uncertain_raw, list) else set()
+    values = _collect_field_values(data, category_mapping)
+    answered = {k for k, v in values.items() if k not in uncertain_names and _is_answered(v)}
+    sourced = set()
+    sources_raw = data.get("sources")
+    if isinstance(sources_raw, list):
+        for entry in sources_raw:
+            if not isinstance(entry, dict):
+                continue
+            entry_fields = entry.get("fields")
+            if not isinstance(entry_fields, list):
+                continue
+            sourced.update(f for f in entry_fields if isinstance(f, str))
+    return True, sorted(answered - sourced)
+
+
 def validate_json(json_path, all_fields, required_fields, field_categories, category_mapping=None):
     with json_path.open(encoding="utf-8") as f:
         data = json.load(f)
@@ -77,6 +135,7 @@ def validate_json(json_path, all_fields, required_fields, field_categories, cate
     missing_by_category = defaultdict(list)
     for field in missing:
         missing_by_category[field_categories.get(field, "Unknown")].append(field)
+    has_sources, unsourced_fields = check_source_trace(data, merged)
     return {
         "file": json_path.name,
         "total_defined": len(all_fields),
@@ -88,6 +147,10 @@ def validate_json(json_path, all_fields, required_fields, field_categories, cate
         "missing_optional": sorted(missing - required_fields),
         "missing_by_category": {k: sorted(v) for k, v in missing_by_category.items()},
         "extra_fields": sorted(extra),
+        "has_sources": has_sources,
+        "unsourced_fields": unsourced_fields,
+        # Advisory only -- neither key feeds "valid", so a missing source trail
+        # never flips PASS/FAIL. /research-deep gates completion on the exit code.
         "valid": len(missing_required) == 0,
     }
 
@@ -109,6 +172,13 @@ def print_result(result, verbose=True):
             optional = [f for f in result["missing_by_category"][cat] if f not in missing_required]
             if optional:
                 print(f"  [{cat}]: {', '.join(optional)}")
+    if verbose:
+        if result["has_sources"]:
+            unsourced = result["unsourced_fields"]
+            if unsourced:
+                print(f"\n[WARN] Answered fields with no source ({len(unsourced)}): {', '.join(unsourced)}")
+        else:
+            print("\n[INFO] No sources[] recorded -- source trace skipped")
     if verbose and result["extra_fields"]:
         extra = result["extra_fields"]
         print(f"\n[INFO] Extra fields ({len(extra)}):")

@@ -125,6 +125,12 @@ For JSON output, also add a `sources` array as a sibling to `uncertain` and `unr
    - Check for updated solutions or superseded approaches
    - Verify if issues have been resolved in newer versions
 
+   **Source Quality**:
+   - Downgrade on sight: speculative language presented as findings, marketing register, unnamed sources, unsourced numbers
+   - Many domains repeating one upstream report count as one publisher, not independent corroboration
+   - Answer engines (Perplexity and kin) are aggregators — chase and cite the pages they cite, never the engine itself
+   - Resolve conflicts by recency, consistency with established facts, and publisher quality — never by averaging; report both values and mark the field `[uncertain]`
+
 4. **Compilation Standards**: When presenting findings, you will:
    - **Caller's requested format takes priority** - satisfy their requirements first
    - Start with key findings summary (2-3 sentences)

@@ -2,7 +2,7 @@
 
 **Parked** 2026-09-25, from a read of [bmad-code-org/BMAD-METHOD `skills/bmad-deep-recon`](https://github.com/bmad-code-org/BMAD-METHOD/tree/5e33d3c03ba53187a40ab679d5479cdd4b6ac2fb/skills/bmad-deep-recon) (pinned commit `5e33d3c`), after Stephan used it for a plugin-API teardown of VS Code and Obsidian and found it good. It is listed in `ALTERNATIVES.md`.
 
-Items 1–6 came from reading the skill, and are about trust: proving each answer is true and current. Items 7–11 came from reading the actual Veneer run output, and are about what made that run *good* — they matter more. None is decided — each still has to ripen through a grill into a decision before it becomes a task.
+Items 1–6 came from reading the skill, and are about trust: proving each answer is true and current. Items 7–11 came from reading the actual Veneer run output, and are about what made that run *good* — they matter more. Items 1 and 5 shipped 2026-09-26 (the credit rule is now satisfied; later items only add to the Additions entry). The rest are undecided — each still has to ripen through a grill into a decision before it becomes a task.
 
 ## Flexibility rule — applies to every item below
 
@@ -13,6 +13,8 @@ The package's standard pipeline is one shape among several uses. It has also bee
 **When any of these ships, credit BMAD deep-recon in `README.md` in the same change.** The pipeline itself originates in Weizhena/Deep-Research-skills and the Credit section says so; ideas taken from a second repo get the same treatment. Add a line to the Credit section naming BMAD Method (bmad-code-org) and linking the skill, and name the specific idea in the README's **Additions** entry for the feature. Once the first item ships, later items only add to the Additions entry.
 
 ## 1. Every answered field must trace to a source — checked by script
+
+**✅ Shipped 2026-09-26 as a warning only** — exit code and PASS/FAIL untouched; whether it should ever fail runs is still open. README Additions 24.
 
 Deep-recon's first rule is "never conclude from training data alone": prior knowledge proposes queries, only evidence retrieved this run concludes. This is a real risk for a field matrix — an agent filling "VS Code extension API: activation events" already knows a plausible answer and may never search for it.
 
@@ -33,6 +35,8 @@ Here a field already *is* a claim class, so the window belongs in `fields.yaml` 
 Deep-recon can skip searching entirely: draft a prompt for a deep-research product the user already pays for (ChatGPT, Gemini, Perplexity), then process the returned report into its own cited format. For this package: a skill that turns a pasted external report into `results/<item>.json` against the run's `fields.yaml`, or that drafts the per-item prompt from `outline.yaml` + `fields.yaml`. Saves heavy token spend on large runs. The largest item here — a new skill. Note deep-recon's rule for imports: an imported report counts as one publisher however many sources it cites internally.
 
 ## 5. A source-quality card in the agent prompt
+
+**✅ Shipped 2026-09-26** — `agents/web-search-agent.md` step 3, **Source Quality**. README Additions 24.
 
 About five lines for `agents/web-search-agent.md`. Prefer primary sources. Downgrade on sight: speculative language presented as findings, marketing register, unnamed sources, unsourced numbers, and many domains recycling one upstream report (that is one publisher). Answer engines (Perplexity and kin) are aggregators — chase and cite their citations, never the engine. Conflicts resolve by recency, consistency with established facts, and publisher quality, never by averaging.
 
