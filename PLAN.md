@@ -332,6 +332,18 @@ Decided 2026-09-12, unparking [enumeration-pass](docs/parking-lot/enumeration-pa
 
 **No module work, and no new module.** Both round-2 files routed to `general-web`, one noting "no sharper topic module fit." Directory-mining may be module-shaped later; nothing here depends on it, and **D2** is untouched.
 
+### D20 — Question-major runs are a new skill that writes one comparison digest per question 🔨
+
+Decided 2026-10-01, grill round 1 on BMAD lesson **#8** ([bmad-deep-recon-lessons.md](docs/parking-lot/bmad-deep-recon-lessons.md)). In the Veneer run each agent owned one *question* and answered it for every subject at once (VS Code and Obsidian), so the comparison and the design lessons came from an agent holding both sides. The item×field grid cannot produce that, because no agent ever sees two subjects.
+
+**The deliverable is a prose digest per question, not grid cells.** Turning the grid sideways (one agent per field category filling that category's cells for every item) was considered and rejected: it keeps the validator and report working, but leaves nowhere for the comparison and lessons, which were the whole value. Each digest ends in the same `## Unreachable` / `## Sources` / `## Uncertain` sections `catalog.md` uses (**D19**) — no parallel vocabulary.
+
+**It is a new skill (working name `/research-compare`), not a switch on `/research-deep`.** It reuses `web-search-agent` unmodified, so no allowlist or Copilot wrapper change (**D6**). A switch would put two output contracts inside one hard-constrained template, the most fragile file in the repo.
+
+**Inputs are the existing `outline.yaml` + `fields.yaml`; no new input file.** Items are the subjects being compared; each field category is one question, and its fields are the sub-points the digest must cover. Same composability move as D19: one run folder can be run item-major, question-major, or both. Opt-in by construction — a run that never invokes the skill is unchanged (the flexibility rule).
+
+Still open, not decided here: a soft ceiling on subjects per agent, the budget formula, what goes in a digest (where #7, #9, #11 may be absorbed for this shape), whether `/research-report` reads digests, and per-question module routing — [Q7](docs/questions/Q7-question-major-details.md).
+
 
 ## Open questions
 
@@ -361,6 +373,10 @@ Modules are organized by topic. Sites recur across them and each one has its own
 
 Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-search-agent` is a separate and larger question, because it is paid and the carve-out is deliberately narrow. See [docs/questions/Q6-firecrawl-rung.md](docs/questions/Q6-firecrawl-rung.md).
 
+### Q7 — The details of a question-major run (D20) — open
+
+Subject ceiling and budget are answered but await confirmation (the question said "products" where it meant subjects); digest contents, report support, per-question routing, location and naming not yet asked. See [docs/questions/Q7-question-major-details.md](docs/questions/Q7-question-major-details.md).
+
 ## Parking lot
 
 > Deferred ideas. Each is a one-line hook + a link to `docs/parking-lot/`.
@@ -368,12 +384,17 @@ Needed *now* as a maintainer tool to answer Q3. Whether it ships inside `web-sea
 - **Non-technical families** (health, law and policy, finance) — attach when a project needs one; `competitor-content` is the worked example — [docs/parking-lot/non-technical-families.md](docs/parking-lot/non-technical-families.md)
 - **Wanted modules** (AI writing communities, docs-and-API-reference) — parked under D2 until real demand — [docs/parking-lot/wanted-modules.md](docs/parking-lot/wanted-modules.md)
 - **Verify the `crwl` fetch fallback** — ✅ **CLOSED, live-fired 2026-09-02**: 7 escalations across four real runs, 6 recoveries. Reliable against a 403/bot-UA block on a server-rendered page; useless against a 429 or a JS-shell render, where a JSON endpoint beside the HTML page is the better move. Corroborated by months of `fetch-anything` use. Do not re-raise — [docs/parking-lot/verify-crwl-fallback.md](docs/parking-lot/verify-crwl-fallback.md)
-- **Lessons from BMAD deep-recon** — what made its VS Code/Obsidian plugin-API run good (a decision line every agent gets, one agent per question across all subjects, open inventory fields, reconciling against the project's own spec afterward, leads and gaps), plus trust features (source-backed fields checked by script, per-field freshness, a `disputed` marker, draft-then-process, a source-quality card, a "pick one" report mode). **#1 (as a warning) and #5 shipped 2026-09-26; the other nine still need a grill, #8 first.** **Everything opt-in; the default run and task-driven runs with no report stay unchanged. Whichever ships, credit BMAD in `README.md` in the same change** — [docs/parking-lot/bmad-deep-recon-lessons.md](docs/parking-lot/bmad-deep-recon-lessons.md)
+- **Lessons from BMAD deep-recon** — what made its VS Code/Obsidian plugin-API run good (a decision line every agent gets, one agent per question across all subjects, open inventory fields, reconciling against the project's own spec afterward, leads and gaps), plus trust features (source-backed fields checked by script, per-field freshness, a `disputed` marker, draft-then-process, a source-quality card, a "pick one" report mode). **#1 (as a warning) and #5 shipped 2026-09-26. #8 grilled one round 2026-10-01 → D20 + Q7; the other eight still need a grill.** **Everything opt-in; the default run and task-driven runs with no report stay unchanged. Whichever ships, credit BMAD in `README.md` in the same change** — [docs/parking-lot/bmad-deep-recon-lessons.md](docs/parking-lot/bmad-deep-recon-lessons.md)
 - **Enumeration pass** — ✅ **unparked 2026-09-12 by D19**, on evidence from the completed affiliate sweep in `sm-static`. Ships as `/research-enumerate`; the "feeder mode" half is deliberately not built, because a sweep that writes a standard `outline.yaml` composes with `/research-deep` without one — [docs/parking-lot/enumeration-pass.md](docs/parking-lot/enumeration-pass.md)
 
 ## Session log
 
 > Most recent sessions inline; older sessions archived → see `docs/sessions/`.
+
+### Session 9 — 2026-10-01
+
+- **Grill on BMAD #8, one round.** Decided **D20**: question-major runs are a new skill (working name `/research-compare`) that writes one comparison digest per question, reusing `web-search-agent` and the existing `outline.yaml` + `fields.yaml`. Opened **Q7** for the rest: the subject ceiling and budget were answered through a picker that said "products" for subjects, so they wait on confirmation; five round-2 questions are written there, not yet asked.
+- Session opened on a false alarm that the previous session's notes were lost. They were not: everything from Sep 25–26 is in the lessons file and commit `7b08ec8`.
 
 ### Session 8 — 2026-09-26
 

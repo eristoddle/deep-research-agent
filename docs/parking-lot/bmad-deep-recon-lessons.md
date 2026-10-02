@@ -56,6 +56,8 @@ The run's first log line is the decision: "which plugin mechanics/APIs Veneer bo
 
 ## 8. Question-major runs: one agent per question, across all subjects
 
+**Grill round 1 2026-10-01 → `PLAN.md` D20** (a new skill writing one digest per question, inputs reused from the existing outline). Remaining details in [Q7](../questions/Q7-question-major-details.md).
+
 The biggest driver. Each of the 8 agents owned a *question* (lifecycle, actions, UI surfaces, editor, files/events, theming, security, AI APIs) and researched it for **both** VS Code and Obsidian, so every comparison and lesson came from an agent holding both sides. This package's unit is one agent per *item*: with VS Code and Obsidian as items, two agents each research one product and nothing compares them. For a compare-then-decide task the item×field grid is the wrong shape. Shape here: a new run shape, probably its own stage alongside `/research-enumerate` rather than a flag on `/research-deep`. A real design change — grill it, do not quick-edit it.
 
 ## 9. An open inventory field instead of predeclared fields only

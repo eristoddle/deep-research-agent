@@ -18,7 +18,7 @@
 
 # ⏭ NEXT ACTIVE TASK — none queued
 
-Nothing is ready to hand off. The next work is the remaining nine BMAD deep-recon items (`docs/parking-lot/bmad-deep-recon-lessons.md`), and every one needs a grill first — start with **#8** (one agent per question across all subjects). See `PLAN.md` Session 8.
+Nothing is ready to hand off. The next work is the remaining nine BMAD deep-recon items (`docs/parking-lot/bmad-deep-recon-lessons.md`), and every one needs a grill first — **#8** (one agent per question across all subjects) is one round in: `PLAN.md` **D20** is decided and **Q7** holds the rest — finish Q7 before queueing it. See `PLAN.md` Session 9.
 
 ---
 

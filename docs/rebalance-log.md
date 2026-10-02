@@ -72,3 +72,9 @@ Mode B, continuing. Entry: reviewing an implementer's returned diff surfaced tha
 - **A reference is already a tag.** The agent invented an `[ACCESS:reddit]` marker to sit *beside* a file citation that would have served the same purpose. Watch for inventing a second mechanism when an existing one already carries the information.
 
 **One self-inflicted finding worth remembering:** the `grep` written into the previous task's own Tests section was case-sensitive and skipped a file that used a different capitalization. A verification step that passes by not looking is worse than no verification step, because it is *reported* as a pass.
+
+### 2026-10-01 — grill (BMAD #8, question-major runs)
+
+One round, five questions. **Decided:** D20 (new skill, one digest per question, reuses existing outline + fields). **Opened:** Q7 — subject ceiling and budget answered but held for confirmation, plus five round-2 questions written but not asked. **Promoted / parked:** none.
+
+- **A picker answer is not a clean answer.** The questions went out through a multiple-choice picker whose label said "products" for what was really "subjects." Stephan checked every box and said in the same reply that he didn't know what the word meant. Those two answers were held as open instead of recorded. Pickers are now off for this user (memory).
