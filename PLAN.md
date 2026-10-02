@@ -394,6 +394,7 @@ Subject ceiling and budget are answered but await confirmation (the question sai
 ### Session 9 — 2026-10-01
 
 - **Grill on BMAD #8, one round.** Decided **D20**: question-major runs are a new skill (working name `/research-compare`) that writes one comparison digest per question, reusing `web-search-agent` and the existing `outline.yaml` + `fields.yaml`. Opened **Q7** for the rest: the subject ceiling and budget were answered through a picker that said "products" for subjects, so they wait on confirmation; five round-2 questions are written there, not yet asked.
+- **Prep pass for the remaining grills** → [docs/parking-lot/bmad-grill-prep.md](docs/parking-lot/bmad-grill-prep.md): how BMAD actually does each item, what it touches here, draft questions, and a suggested order (#8/Q7 first). Headline: the Veneer run's lessons, inventory and leads sections came from that run's own unsaved brief, not from BMAD's skill.
 - Session opened on a false alarm that the previous session's notes were lost. They were not: everything from Sep 25–26 is in the lessons file and commit `7b08ec8`.
 
 ### Session 8 — 2026-09-26
